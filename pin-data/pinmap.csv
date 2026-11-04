@@ -1,0 +1,38 @@
+signal,pin,mode,function,firmware_symbol,net,notes
+BRIDGE_A_IN1,PA8,af,TIM1_CH1,leftInput1,DRV_AIN1,left motor (bridge A); pull-down keeps the bridge tri-stated while the MCU is in reset
+BRIDGE_A_IN2,PA9,af,TIM1_CH2,leftInput2,DRV_AIN2,pull-down
+BRIDGE_B_IN1,PA10,af,TIM1_CH3,rightInput1,DRV_BIN1,right motor (bridge B); pull-down
+BRIDGE_B_IN2,PA11,af,TIM1_CH4,rightInput2,DRV_BIN2,pull-down; PA11 is also USB_DM so the board has no USB (D-009)
+DRV_FAULT_BREAK,PA6,af,TIM1_BKIN,faultBreak,DRV_NFAULT,same net as DRV_FAULT_IRQ; open-drain with 10k pull-up to 3V3
+DRV_FAULT_IRQ,PC4,exti,EXTI4,faultInterrupt,DRV_NFAULT,same net as DRV_FAULT_BREAK
+SPI1_SCK,PB3,af,SPI1_SCK,spiClock,SPI1_SCK,shared: DRV8711 + W25Q16 flash; SWO unavailable as a result
+SPI1_MISO,PB4,af,SPI1_MISO,spiMiso,SPI1_MISO,shared
+SPI1_MOSI,PB5,af,SPI1_MOSI,spiMosi,SPI1_MOSI,shared
+DRV_CS,PA4,gpio_out,GPIO,spiSelect,DRV_SCS,active-high; DRV8711 internal pull-down holds it deselected in reset
+DRV_SLEEPN,PB8,gpio_out,GPIO,sleepPin,DRV_NSLEEP,active-low; external pull-down keeps the driver asleep while the MCU is in reset
+DRV_RESET,PB9,gpio_out,GPIO,resetPin,DRV_RESET,active-high
+IMU_SCK,PB13,af,SPI2_SCK,clock,IMU_SCK,
+IMU_MISO,PB14,af,SPI2_MISO,miso,IMU_MISO,
+IMU_MOSI,PB15,af,SPI2_MOSI,mosi,IMU_MOSI,
+IMU_CS,PB12,gpio_out,GPIO,chipSelect,IMU_NCS,10k pull-up
+IMU_DRDY,PC6,exti,EXTI6,dataReady,IMU_INT,push-pull active-high from the MPU-6500
+ENC_L_A,PC0,af,LPTIM1_IN1,leftPhaseA,ENC_L_A,via SN74LVC3G17 buffer
+ENC_L_B,PC2,af,LPTIM1_IN2,leftPhaseB,ENC_L_B,via SN74LVC3G17 buffer
+ENC_L_Z,PC5,exti,EXTI5,leftIndex,ENC_L_Z,index; firmware reads a level today and can latch on EXTI5 (REQ-ODOM-005)
+ENC_R_A,PA0,af,TIM2_CH1,rightPhaseA,ENC_R_A,via SN74LVC3G17 buffer
+ENC_R_B,PA1,af,TIM2_CH2,rightPhaseB,ENC_R_B,via SN74LVC3G17 buffer
+ENC_R_Z,PC3,exti,EXTI3,rightIndex,ENC_R_Z,index
+CONSOLE_TX,PB6,af,USART1_TX,consoleTx,VCP_TX,to STDC14 T_VCP_RX
+CONSOLE_RX,PB7,af,USART1_RX,consoleRx,VCP_RX,from STDC14 T_VCP_TX
+LED_STATUS,PB0,gpio_out,GPIO,statusLed,LED_GREEN,green
+SWDIO,PA13,af,SYS_JTMS-SWDIO,,SWDIO,STDC14
+SWCLK,PA14,af,SYS_JTCK-SWCLK,,SWCLK,STDC14
+FLASH_CS,PA15,gpio_out,GPIO,,FLASH_NCS,new; 10k pull-up; JTDI must be released (SWD-only debug)
+VBAT_SENSE,PC1,adc,ADC1_IN2,,VBAT_SENSE,new; 100k/27k divider with charge-bucket capacitor
+BUZZER,PA7,af,TIM17_CH1,,BUZZER_PWM,new; NPN driver
+LED_FAULT,PB1,gpio_out,GPIO,,LED_RED,new
+USER_BUTTON,PD0,exti,EXTI0,,BTN_USER,new; same pin as NUCLEO SW2
+I2C3_SCL,PB10,af,I2C3_SCL,,QWIIC_SCL,new; Qwiic expansion
+I2C3_SDA,PB11,af,I2C3_SDA,,QWIIC_SDA,new; Qwiic expansion
+DRV_STALLN,PB2,gpio_in,GPIO,,DRV_NSTALL,new; optional; open-drain with 10k pull-up
+BOOT0,PH3,boot,BOOT0,,BOOT0,10k pull-down + test pad

@@ -1,0 +1,16 @@
+# KiCad
+*.kicad_prl
+*-backups/
+_autosave-*
+*.lck
+fp-info-cache
+~*.kicad_*
+# Simulation raw output
+simulation/work/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+# Generated fab outputs are produced by scripts/export_fab.sh in CI
+fab/
+.claude/plans/

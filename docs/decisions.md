@@ -1,0 +1,27 @@
+# Design decisions
+
+Each entry: the decision, the alternatives rejected, and why. Entries D-001 to D-010 were agreed
+with the project owner on 2026-11-04 and are recorded in `docs/plan.md`.
+
+| ID | Decision | Rejected | Rationale |
+|---|---|---|---|
+| D-001 | MCU **STM32WB55RGV6** (VFQFPN68, LCSC C401505) | STM32WB55CGU6 (UFQFPN48) | The firmware pin map (`targets/platform_implementations/st/`) targets the NUCLEO-WB55RG. UFQFPN48 does not bond PB10–PB15 or PC0–PC6 (DS11929 Rev 11, Table 16), so SPI2, the LPTIM1 encoder pins and the IMU data-ready pin don't exist. Every one of its 27 GPIOs would be used. JLC stock: CG 27, RG 225. |
+| D-002 | Two 25 mm 12 V brushed gearmotors (JGA25-370 class) with **ABZ encoders** | Steppers; Hall A/B-only encoders | The firmware drives two brushed motors from the DRV8711 bridges in PWM mode (`motion-actuation.md` Part A, REQ-DRIVE-002). The index (Z) is needed for REQ-ODOM-005. |
+| D-003 | **3S LiPo**, 9.0–12.6 V, XT30, external balance charger | 2S (below the DRV8711's 8 V VM minimum), 4S, on-board 18650 | Matches 12 V motors. No on-board charger or BMS. |
+| D-004 | IMU **MPU-6500** (C50278) | MPU9250 (EOL, not stocked at JLC), ICM-42688-P, LSM6DSV16X | It is the MPU9250's accel/gyro die: same register map, WHO_AM_I 0x70 instead of 0x71. The existing driver is reused. |
+| D-005 | **SPI NOR flash W25Q16JVSSIQ** (C131025) on SPI1, shared with the DRV8711 | Flash on SPI2 (shared with the IMU), QUADSPI | QUADSPI pins collide with the firmware map (PB8/PB9). Sharing SPI2 would add latency to the 1 kHz IMU burst (REQ-RT-004). The DRV8711 uses SPI1 only for configuration and status. |
+| D-006 | PCB is a **single vertical plate**: motors on L-brackets at the bottom edge, battery strapped to the back, antenna at the top edge | Deck + side plates; horizontal deck + mast | One board design. The plate is the pendulum body. |
+| D-007 | **Chip-down radio**: MLPF-WB55-01E3 IPD + printed IFA + DNP pi tuning network + DNP U.FL; no certification | Chip antenna; FCC/CE programme | No antenna part cost. VNA tuning in the final assembly. Hobby/open-source use. |
+| D-008 | **JLCPCB 4-layer 1.6 mm (JLC04161H-7628)**, 1 oz outer / 0.5 oz inner, top-side PCBA | 2.0 mm (antenna retune), 2-layer | Solid L2 GND under the RF path and the motor hot loops. |
+| D-009 | **STDC14** debug connector (SWD + NRST + USART1 VCP); **no USB** | USB-C; Tag-Connect | TIM1_CH4 (bridge B2 input) exists only on PA11 = USB_DM (DS11929 Table 18). The firmware's single-timer bridge design and its hardware break need all four channels on TIM1. |
+| D-010 | Toolchain **KiCad 9** + **ngspice** + Python | KiCad 7/8 | `kicad-cli sch erc` and `pcb drc --schematic-parity` need KiCad 8+. KiCad 9 is installed from the official PPA. |
+| D-011 | Power path: **back-to-back P-MOSFETs** (AO4805) switched by a slide switch, with soft-start | Ideal-diode controller; series Schottky | Gives reverse-polarity protection and on/off, and stays **bidirectional** when on, so regenerated motor energy returns to the battery instead of pumping the bus. |
+| D-012 | ABZ encoder inputs pass through **SN74LVC3G17** Schmitt buffers powered from 3V3 | Direct connection to FT pins | 5V0 comes up before 3V3, and FT pins accept ≤ 3.6 V while VDD = 0 (ST AN4899). The buffer's I_off and 5 V-tolerant inputs remove that back-powering path and clean up edges from long motor cables. |
+
+## Proposed at the Phase 0 gate (awaiting owner sign-off)
+
+| ID | Proposal | Evidence |
+|---|---|---|
+| D-013 | Motor **JGA25-370, 12 V, 6000 rpm winding, 1:9.6 (~620 rpm output)**, with ABZ encoder. Fallback: 1:4.4 if only the 4300 rpm winding is available. | S0 (`simulation/REPORT.md` finding 1): recovers 10° in < 1 s at every corner, ≥ 29° recoverable, 58 % duty at 1.0 m/s on 9.9 V. Ratios of 1:20.4 and above can't reach 1.0 m/s. |
+| D-014 | DRV8711 trip **1.3 A** (Rsense 50 mΩ 1206, ISGAIN 40, TORQUE 242); the motor's continuous rating is enforced by a firmware I²t model, not by the trip. Needs REQ-DRIVE-005 reworded in the firmware repo. | S0 finding 2: a trip at the continuous rating can't recover 10° at 1:20.4 and above, and only about 11° at 1:9.6. |
+| D-015 | Motors and brackets on the PCB **bottom** side; all components and the battery (in a keep-out zone) on the **top** side. | JLC single-side PCBA; static lean about 7° (`docs/mechanical.md`). |
