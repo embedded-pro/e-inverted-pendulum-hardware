@@ -1,0 +1,126 @@
+(footprint "MountingHole_M3_NPTH_KeepOut7mm"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "M3 NPTH hole, 3.2 mm drill, copper keep-out on every layer to 7 mm (M3 washer); docs/mechanical.md")
+	(property "Reference" "REF**"
+		(at 0 -4.75 0)
+		(layer "F.SilkS")
+		(uuid "c82f51c0-290b-5f66-87d2-9df43c55ff91")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Value" "MountingHole_M3_NPTH_KeepOut7mm"
+		(at 0 4.75 0)
+		(layer "F.Fab")
+		(uuid "92e9f5bd-1193-553d-b576-c7de0831bcef")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "8a4e41ca-89ee-5b62-8604-66c1e423e65b")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "8100c2dd-db67-5dce-8017-b525b02f006a")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr board_only exclude_from_pos_files exclude_from_bom)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -3.75 -3.75)
+		(end 3.75 3.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "c7b7fc3f-438c-531b-9760-02f2907aaacf")
+	)
+	(fp_rect
+		(start -1.6 -1.6)
+		(end 1.6 1.6)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "8acc8e88-74ab-5fc7-80ed-458895cc4f92")
+	)
+	(pad "" np_thru_hole circle
+		(at 0 0)
+		(size 3.2 3.2)
+		(drill 3.2)
+		(layers "*.Cu" "*.Mask")
+		(uuid "76f8ce33-1dc9-5148-a435-063849895360")
+	)
+	(zone
+		(layers "F.Cu" "B.Cu" "In1.Cu" "In2.Cu" "In3.Cu" "In4.Cu" "In5.Cu" "In6.Cu"
+			"In7.Cu" "In8.Cu" "In9.Cu" "In10.Cu" "In11.Cu" "In12.Cu" "In13.Cu" "In14.Cu"
+			"In15.Cu" "In16.Cu" "In17.Cu" "In18.Cu" "In19.Cu" "In20.Cu" "In21.Cu"
+			"In22.Cu" "In23.Cu" "In24.Cu" "In25.Cu" "In26.Cu" "In27.Cu" "In28.Cu"
+			"In29.Cu" "In30.Cu"
+		)
+		(uuid "e19e1ef6-35d0-5b08-a802-13f355374723")
+		(name "mechanical keep-out")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 0 -3.5) (xy 0.9059 -3.3807) (xy 1.75 -3.0311) (xy 2.4749 -2.4749) (xy 3.0311 -1.75) (xy 3.3807 -0.9059)
+				(xy 3.5 0) (xy 3.3807 0.9059) (xy 3.0311 1.75) (xy 2.4749 2.4749) (xy 1.75 3.0311) (xy 0.9059 3.3807)
+				(xy 0 3.5) (xy -0.9059 3.3807) (xy -1.75 3.0311) (xy -2.4749 2.4749) (xy -3.0311 1.75) (xy -3.3807 0.9059)
+				(xy -3.5 0) (xy -3.3807 -0.9059) (xy -3.0311 -1.75) (xy -2.4749 -2.4749) (xy -1.75 -3.0311) (xy -0.9059 -3.3807)
+			)
+		)
+	)
+	(embedded_fonts no)
+)

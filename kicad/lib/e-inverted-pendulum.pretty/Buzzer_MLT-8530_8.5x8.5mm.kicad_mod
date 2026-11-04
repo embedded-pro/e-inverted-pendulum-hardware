@@ -28,23 +28,27 @@
 	)
 	(property "Datasheet" ""
 		(at 0 0 0)
+		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "daab7a79-a365-4e02-a71a-ed473c778cb7")
+		(uuid "e040b230-5bdc-5348-90ad-be6b75c3f853")
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
 	(property "Description" ""
 		(at 0 0 0)
+		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "912a0253-1e5e-4fd1-b7d3-a65587087a82")
+		(uuid "035509b0-6c0d-57b1-a402-b58b55f9211a")
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)

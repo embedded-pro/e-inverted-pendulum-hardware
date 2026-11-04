@@ -57,5 +57,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/design_calcs.py`: values -> `kicad/gen/values.json`, `docs/design-calcs.md`.
 - `python3 kicad/gen/build.py`: regenerate the schematic (until the Phase 1 gate, D-020).
 - `python3 scripts/check_netlist.py` / `check_library.py`: netlist and symbol/footprint checks.
+- `python3 kicad/gen/board.py --rules <pcb_rules.py>`: update the PCB from the schematic (outline, holes, keep-outs,
+  footprints, nets, net classes from `docs/power-map.md`, JLC rules). Keeps positions; never moves locked parts.
+- `python3 scripts/render_board.py`: per-layer, side and 3D renders into `kicad/renders/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.
