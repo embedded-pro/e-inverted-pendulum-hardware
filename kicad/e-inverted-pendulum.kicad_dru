@@ -27,3 +27,7 @@
 (rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
   (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
   (constraint annular_width (min 0.1mm)))
+
+(rule "NPTH to copper: screw threads touch the hole wall; washers and brackets are kept off by the footprint keep-out"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_clearance (min 0.5mm)))

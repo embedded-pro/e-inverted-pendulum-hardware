@@ -94,7 +94,7 @@ def stadium(length, width, segments=12):
 
 
 def keepout(points, name):
-    return [Sym("zone"), [Sym("net"), 0], [Sym("net_name"), Str("")], [Sym("layers"), Str("*.Cu")],
+    return [Sym("zone"), [Sym("net"), 0], [Sym("net_name"), Str("")], [Sym("layers"), Str("F.Cu"), Str("B.Cu")],
             [Sym("uuid"), uid(name, "keepout")], [Sym("name"), Str("mechanical keep-out")],
             [Sym("hatch"), Sym("edge"), 0.5], [Sym("connect_pads"), [Sym("clearance"), 0]],
             [Sym("min_thickness"), 0.25], [Sym("filled_areas_thickness"), Sym("no")],
@@ -150,10 +150,11 @@ FOOTPRINTS = {
         [smd("1", -3.0, -1.875, 1.0, 0.75, n), smd("1", 3.0, -1.875, 1.0, 0.75, n),
          smd("2", -3.0, 1.875, 1.0, 0.75, n), smd("2", 3.0, 1.875, 1.0, 0.75, n)], silk=False),
     "MountingHole_M3_NPTH_KeepOut7mm": lambda n: mechanical(
-        n, "M3 NPTH hole, 3.2 mm drill, copper keep-out on every layer to 7 mm (M3 washer); docs/mechanical.md",
+        n, "M3 NPTH hole, 3.2 mm drill, outer-layer copper keep-out to 7 mm (M3 washer); inner layers 0.5 mm hole clearance (project rule); docs/mechanical.md",
         3.2, 3.2, 7.0),
     "MountingSlot_M3_10mm_NPTH_KeepOut7mm": lambda n: mechanical(
-        n, "M3 NPTH slot, 3.2 mm wide with 10 mm travel (13.2 mm long), copper keep-out on every layer 7 mm wide; "
+        n, "M3 NPTH slot, 3.2 mm wide with 10 mm travel (13.2 mm long), outer-layer copper keep-out 7 mm wide, inner layers "
+           "0.5 mm hole clearance (project rule); "
            "adjustable motor-mount default, docs/mechanical.md",
         13.2, 3.2, 7.0),
 }

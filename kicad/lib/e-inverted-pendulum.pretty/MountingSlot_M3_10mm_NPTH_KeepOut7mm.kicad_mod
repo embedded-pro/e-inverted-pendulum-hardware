@@ -3,7 +3,7 @@
 	(generator "pcbnew")
 	(generator_version "10.0")
 	(layer "F.Cu")
-	(descr "M3 NPTH slot, 3.2 mm wide with 10 mm travel (13.2 mm long), copper keep-out on every layer 7 mm wide; adjustable motor-mount default, docs/mechanical.md")
+	(descr "M3 NPTH slot, 3.2 mm wide with 10 mm travel (13.2 mm long), outer-layer copper keep-out 7 mm wide, inner layers 0.5 mm hole clearance (project rule); adjustable motor-mount default, docs/mechanical.md")
 	(property "Reference" "REF**"
 		(at 0 -4.75 0)
 		(layer "F.SilkS")
@@ -84,12 +84,7 @@
 		(uuid "81770a82-5bac-5f5e-91ee-219ed62f2823")
 	)
 	(zone
-		(layers "F.Cu" "B.Cu" "In1.Cu" "In2.Cu" "In3.Cu" "In4.Cu" "In5.Cu" "In6.Cu"
-			"In7.Cu" "In8.Cu" "In9.Cu" "In10.Cu" "In11.Cu" "In12.Cu" "In13.Cu" "In14.Cu"
-			"In15.Cu" "In16.Cu" "In17.Cu" "In18.Cu" "In19.Cu" "In20.Cu" "In21.Cu"
-			"In22.Cu" "In23.Cu" "In24.Cu" "In25.Cu" "In26.Cu" "In27.Cu" "In28.Cu"
-			"In29.Cu" "In30.Cu"
-		)
+		(layers "F.Cu" "B.Cu")
 		(uuid "5dd75f1e-e328-521c-9f44-920150d90663")
 		(name "mechanical keep-out")
 		(hatch edge 0.5)

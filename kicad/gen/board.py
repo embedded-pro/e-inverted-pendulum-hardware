@@ -96,6 +96,12 @@ CUSTOM_RULES = """
   (constraint annular_width (min 0.1mm)))
 """
 
+CUSTOM_RULES += """
+(rule "NPTH to copper: screw threads touch the hole wall; washers and brackets are kept off by the footprint keep-out"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_clearance (min 0.5mm)))
+"""
+
 MASK_BRIDGES_ALLOWED = {
     "J401": "Hirose U.FL-R-SMT land pattern: one solder-mask opening over the signal and ground pads",
 }
@@ -290,9 +296,43 @@ def ensure_rule_areas(board):
         zone.SetDoNotAllowFootprints("footprints" in area["deny"])
 
 
+def fingerprint(fp):
+    pads = sorted((p.GetNumber(), p.GetSize(pcbnew.F_Cu).x, p.GetSize(pcbnew.F_Cu).y, p.GetDrillSize().x,
+                   p.GetDrillSize().y, int(p.GetAttribute()), p.GetLayerSet().Seq().size(),
+                   p.GetFPRelativePosition().x, p.GetFPRelativePosition().y) for p in fp.Pads())
+    zones = sorted(z.GetLayerSet().Seq().size() for z in fp.Zones())
+    return fp.GetLibDescription(), tuple(pads), tuple(zones)
+
+
+_LIBRARY_CACHE = {}
+
+
+def library_fingerprint(board, lib_id):
+    if lib_id not in _LIBRARY_CACHE:
+        _LIBRARY_CACHE[lib_id] = fingerprint(load_footprint(board, lib_id))
+    return _LIBRARY_CACHE[lib_id]
+
+
+def replace_footprint(board, fp, lib_id):
+    position, orientation, locked = fp.GetPosition(), fp.GetOrientationDegrees(), fp.IsLocked()
+    board.Delete(fp)
+    fresh = load_footprint(board, lib_id)
+    fresh.SetPosition(position)
+    fresh.SetOrientationDegrees(orientation)
+    fresh.SetLocked(locked)
+    board.Add(fresh)
+    return fresh
+
+
 def ensure_mechanical(board, existing):
     for item in placement.MECHANICAL:
         fp = existing.get(item["ref"])
+        lib_id = f"{PROJECT_LIBRARY}:{item['footprint']}"
+        if fp is not None and fingerprint(fp) != library_fingerprint(board, lib_id):
+            fp = replace_footprint(board, fp, lib_id)
+            fp.SetReference(item["ref"])
+            fp.SetValue(item["value"])
+            existing[item["ref"]] = fp
         if fp is None:
             fp = load_footprint(board, f"{PROJECT_LIBRARY}:{item['footprint']}")
             fp.SetReference(item["ref"])
@@ -327,14 +367,9 @@ def sync_footprints(board, components, nets, pins):
         if comp["exclude_from_board"] or not comp["footprint"]:
             continue
         fp = existing.get(ref)
-        if fp is not None and fp.GetFPIDAsString() != comp["footprint"]:
-            position, orientation, locked = fp.GetPosition(), fp.GetOrientationDegrees(), fp.IsLocked()
-            board.Delete(fp)
-            fp = load_footprint(board, comp["footprint"])
-            fp.SetPosition(position)
-            fp.SetOrientationDegrees(orientation)
-            fp.SetLocked(locked)
-            board.Add(fp)
+        if fp is not None and (fp.GetFPIDAsString() != comp["footprint"]
+                               or fingerprint(fp) != library_fingerprint(board, comp["footprint"])):
+            fp = replace_footprint(board, fp, comp["footprint"])
         elif fp is None:
             fp = load_footprint(board, comp["footprint"])
             column, row = divmod(staged, 14)
@@ -440,6 +475,23 @@ def build_board():
           f"{len(placement.MECHANICAL)} mechanical, {anchored} anchors")
 
 
+LAYOUT_DOC = ROOT / "docs" / "layout.md"
+
+
+def write_anchor_table():
+    if not LAYOUT_DOC.exists():
+        return
+    rows = ["| Ref | x | z | Rot | Why |", "|---|---|---|---|---|"]
+    rows += [f"| {ref} | {x:+.2f} | {z:+.2f} | {rot} | {why} |" for ref, (x, z, rot, why) in placement.ANCHORS.items()]
+    rows += [f"| {m['ref']} | {m['x']:+.2f} | {m['z']:+.2f} | {m.get('rot', 0)} | {m['value']} ({m['footprint']}) |"
+             for m in placement.MECHANICAL]
+    text = LAYOUT_DOC.read_text(encoding="utf-8")
+    begin, end = "<!-- BEGIN anchors (kicad/gen/board.py) -->", "<!-- END anchors -->"
+    head, rest = text.split(begin, 1)
+    tail = rest.split(end, 1)[1]
+    LAYOUT_DOC.write_text(head + begin + "\n" + "\n".join(rows) + "\n" + end + tail, encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--rules", type=pathlib.Path, help="pcb_rules.py from the pcb-design-rules skill")
@@ -458,6 +510,7 @@ def main():
     project = PROJECT.read_bytes()
     subprocess.run(["kicad-cli", "pcb", "upgrade", "--force", str(BOARD)], check=True, capture_output=True)
     PROJECT.write_bytes(project)
+    write_anchor_table()
 
 
 if __name__ == "__main__":
