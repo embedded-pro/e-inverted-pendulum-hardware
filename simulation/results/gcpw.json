@@ -1,0 +1,53 @@
+{
+  "model": "Model: conformal mapping for coplanar waveguide with a lower ground plane (Wadell, Transmission Line Design Handbook, 1991, s3.4; Simons, Coplanar Waveguide Circuits, 2001, s2.4), with the conductor-thickness correction of Gupta et al. (Microstrip Lines and Slotlines, 2nd ed., s7.3): the strip widens and the gap narrows by delta = (1.25 t / pi) (1 + ln(4 pi w / t)), and the air part of the field grows with t / gap. Solder mask is ignored (it lowers Z0 by about 1-2 ohm).",
+  "stack": {
+    "name": "JLC04161H-7628 L1 over L2",
+    "h_mm": 0.2104,
+    "t_mm": 0.035,
+    "er": 4.4,
+    "source": "JLCPCB stack-up JLC04161H-7628: 7628 prepreg 0.2104 mm, Dk 4.4; 1 oz outer copper (D-008)"
+  },
+  "self_check": {
+    "st_out_450_106": 47.86797507745448,
+    "st_in_200_104": 58.550689033724,
+    "st_in_200_104_on_jlc": 52.12860670366334,
+    "pass": 1.0
+  },
+  "table": [
+    {
+      "gap_mm": 0.127,
+      "width_mm": 0.24886055772316104,
+      "e_eff": 2.8335111531281862,
+      "lambda_g_mm": 72.69292685885888
+    },
+    {
+      "gap_mm": 0.15,
+      "width_mm": 0.2677428465867149,
+      "e_eff": 2.899490847396965,
+      "lambda_g_mm": 71.8610812482815
+    },
+    {
+      "gap_mm": 0.175,
+      "width_mm": 0.2827348180454373,
+      "e_eff": 2.9593704320742438,
+      "lambda_g_mm": 71.13035126607996
+    },
+    {
+      "gap_mm": 0.2,
+      "width_mm": 0.2939435917834587,
+      "e_eff": 3.010112867850715,
+      "lambda_g_mm": 70.52826956505889
+    }
+  ],
+  "chosen": {
+    "gap_mm": 0.15,
+    "width_mm": 0.27,
+    "z0": 49.81136854432084,
+    "e_eff": 2.901635791225308,
+    "corners": "width +/-0.03 mm, gap -/+0.03 mm, h -/+10 %, er +/-5 % (ASSUMPTION fab tolerances)",
+    "z0_low_corner": 42.71378716621476,
+    "z0_high_corner": 57.31162787926109,
+    "microstrip_limit_width_mm": 0.4022552102549852,
+    "worst_return_loss_db": 22.092849368537635
+  }
+}
