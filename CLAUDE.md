@@ -53,4 +53,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - ngspice, plus Python 3 with numpy, scipy, matplotlib and spicelib.
 - `python3 simulation/sizing.py`: motor/drive sizing (S0).
 - `python3 scripts/check_pinmap.py`: pin map validation.
-- `python3 scripts/jlc_stock.py bom/parts.csv --qty 5`: stock check.
+- `python3 scripts/design_calcs.py`: values -> `kicad/gen/values.json`, `docs/design-calcs.md`.
+- `python3 kicad/gen/build.py`: regenerate the schematic (until the Phase 1 gate, D-020).
+- `python3 scripts/check_netlist.py` / `check_library.py`: netlist and symbol/footprint checks.
+- `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
+- `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

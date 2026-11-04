@@ -3392,6 +3392,18 @@
 				(justify left)
 			)
 		)
+		(pin "1"
+			(uuid "1c16f9d6-427a-58d9-8383-13fd87bc98c4")
+		)
+		(pin "2"
+			(uuid "bfcc4fc8-ffd6-524a-a58c-f0f7b9e3e631")
+		)
+		(pin "7"
+			(uuid "990e4b79-c5d5-5764-9f29-595d6e769a13")
+		)
+		(pin "8"
+			(uuid "c6f667b9-3299-5749-9d5e-821ac4b4e43f")
+		)
 		(pin "3"
 			(uuid "5a7ead51-a31d-556f-a0fc-b82bb58fcb0d")
 		)
@@ -3403,18 +3415,6 @@
 		)
 		(pin "6"
 			(uuid "fb17e88b-1de1-58b4-89f5-b169df73faeb")
-		)
-		(pin "1"
-			(uuid "e4e41254-9339-4986-acd2-eb1b9c8f3b64")
-		)
-		(pin "2"
-			(uuid "8a90cc98-9be6-4b34-80ce-c080450832a8")
-		)
-		(pin "7"
-			(uuid "a46b60bc-1874-48ea-a53e-9cdcb3b2e305")
-		)
-		(pin "8"
-			(uuid "aa4911b5-1016-4a95-828f-cc632c3d255b")
 		)
 		(instances
 			(project "e-inverted-pendulum"
@@ -4679,16 +4679,16 @@
 			(uuid "f7a1df76-4f8c-51a6-aeba-61c38143dd99")
 		)
 		(pin "3"
-			(uuid "d90d1b0b-e81d-45b7-9f1d-5383fc40012e")
+			(uuid "75151409-9250-5a0e-a0b3-2421afbec955")
 		)
 		(pin "4"
-			(uuid "50d42cca-be66-4255-95e3-36023004b2d6")
+			(uuid "021fa6b4-4c01-53e7-bffd-12c5a74392c6")
 		)
 		(pin "5"
-			(uuid "77f44d94-0d75-4ef3-ad7e-a2ed0798feae")
+			(uuid "e7821ad8-5524-5552-a4e9-c8a4b1be195a")
 		)
 		(pin "6"
-			(uuid "0660ffc0-c3da-46ec-b42a-10e8476e4e50")
+			(uuid "d812ffbc-1a76-5476-9c6d-ce76ab5ae225")
 		)
 		(instances
 			(project "e-inverted-pendulum"

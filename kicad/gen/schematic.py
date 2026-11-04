@@ -160,8 +160,8 @@ class Builder:
                     [Sym("effects"), FONT] + ([] if centred else [[Sym("justify"), Sym("left")]])
                     + ([[Sym("hide"), True]] if hide else [])]
             node.append(prop)
-        for pin in symbol.unit_pins(unit):
-            node.append([Sym("pin"), Str(pin.number), [Sym("uuid"), uid(key, ref, "pin", pin.number, unit)]])
+        for number in dict.fromkeys(pin.number for pin in symbol.pins):
+            node.append([Sym("pin"), Str(number), [Sym("uuid"), uid(key, ref, "pin", number, unit)]])
         node.append([Sym("instances"), [Sym("project"), Str(PROJECT),
                      [Sym("path"), Str(f"/{self.root_uuid}/{sheet_uuid}"), [Sym("reference"), Str(ref)],
                       [Sym("unit"), unit]]]])
