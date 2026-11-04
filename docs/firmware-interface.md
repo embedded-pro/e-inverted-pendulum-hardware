@@ -20,4 +20,4 @@ apply these settings. Every existing pin is unchanged (`docs/pinmap.md`).
 | Encoders | A/B/Z unchanged; index on EXTI5 (left) / EXTI3 (right) for REQ-ODOM-005; gear 9.6; CPR = 4 × lines × 9.6; LPTIM1 clocked from PCLK/HSI16 | S0; D-013 |
 | UI | Green LED PB0, red LED PB1 (active high); buzzer PA7 TIM17_CH1 at about 2.7 kHz; user button PD0 (active low, EXTI0) | `docs/pinmap.md`; MLT-8530 |
 | Expansion | Qwiic on I2C3 (PB10 SCL, PB11 SDA), 3V3 | `docs/pinmap.md` |
-| Model | Pitch setpoint about 7°; track width about 0.19 m; include reflected rotor inertia; J about the CoM | `docs/mechanical.md`; S0 |
+| Model | m 0.392 kg, ℓ 26.3 mm, J 4.85e-4 kg·m² about the CoM, τ 86 ms; pitch setpoint about 21° toward the top side (about 10° if the battery moves to the bottom side); fall limit measured from the setpoint; track width about 0.19 m; include reflected rotor inertia | `docs/mechanical.md`; S0 |

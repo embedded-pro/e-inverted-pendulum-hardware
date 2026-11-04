@@ -70,32 +70,56 @@ CONTROL = {"period": 0.002, "theta_max": math.radians(2.0), "rate_max": 0.5,
            "x_max": 0.5, "v_max": 0.5, "voltage_fraction": 0.3}
 
 
-def body_parameters(path=ROOT / "mechanical" / "mass_budget.csv"):
+def read_mass_budget(path=ROOT / "mechanical" / "mass_budget.csv"):
+    with open(path, encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def body_parameters(rows=None):
+    rows = read_mass_budget() if rows is None else rows
+    axle = next(row for row in rows if row["shape"] == "axle")
+    axle_z, axle_y = float(axle["z_mm"]) / 1000.0, float(axle["y_mm"]) / 1000.0
     mass = moment_z = moment_y = inertia = 0.0
     wheel_mass = wheel_inertia = wheel_radius = 0.0
-    with open(path, encoding="utf-8") as handle:
-        for row in csv.DictReader(handle):
-            qty, m = int(row["qty"]), float(row["mass_g"]) / 1000.0
-            z, y = float(row["z_mm"]) / 1000.0, float(row["y_mm"]) / 1000.0
-            h, d = float(row["height_mm"]) / 1000.0, float(row["depth_mm"]) / 1000.0
-            if row["shape"] == "wheel":
-                wheel_radius = h / 2.0
-                wheel_mass += qty * m
-                wheel_inertia = 0.6 * m * wheel_radius ** 2
-                continue
-            own = {"plate": m * h ** 2 / 12.0, "box": m * (h ** 2 + d ** 2) / 12.0,
-                   "cylinder": 0.5 * m * (h / 2.0) ** 2}.get(row["shape"], 0.0)
-            mass += qty * m
-            moment_z += qty * m * z
-            moment_y += qty * m * y
-            inertia += qty * (own + m * (z ** 2 + y ** 2))
+    for row in rows:
+        if row["shape"] == "axle":
+            continue
+        qty, m = int(row["qty"]), float(row["mass_g"]) / 1000.0
+        z = float(row["z_mm"]) / 1000.0 - axle_z
+        y = float(row["y_mm"]) / 1000.0 - axle_y
+        h, d = float(row["height_mm"]) / 1000.0, float(row["depth_mm"]) / 1000.0
+        if row["shape"] == "wheel":
+            wheel_radius = h / 2.0
+            wheel_mass += qty * m
+            wheel_inertia = 0.6 * m * wheel_radius ** 2
+            continue
+        own = {"plate": m * h ** 2 / 12.0, "box": m * (h ** 2 + d ** 2) / 12.0,
+               "cylinder": 0.5 * m * (h / 2.0) ** 2}.get(row["shape"], 0.0)
+        mass += qty * m
+        moment_z += qty * m * z
+        moment_y += qty * m * y
+        inertia += qty * (own + m * (z ** 2 + y ** 2))
     com_z, com_y = moment_z / mass, moment_y / mass
     length = math.hypot(com_z, com_y)
     return {
         "m": mass, "l": length, "J": inertia - mass * length ** 2,
         "M": wheel_mass, "Jw": wheel_inertia, "r": wheel_radius,
+        "com_y_mm": com_y * 1000.0,
         "lean_deg": math.degrees(math.atan2(com_y, com_z)),
     }
+
+
+def battery_side_variants(battery_item="battery_3s_1000mah", plate_half=0.8):
+    rows = read_mass_budget()
+    battery = next(row for row in rows if row["item"] == battery_item)
+    depth = float(battery["depth_mm"])
+    variants = {}
+    for side, y in (("top_side", -(plate_half + depth / 2.0)), ("bottom_side", plate_half + depth / 2.0)):
+        moved = [dict(row, y_mm=str(y)) if row is battery else row for row in rows]
+        body = body_parameters(moved)
+        variants[side] = {"battery_y_mm": y, "l_mm": body["l"] * 1000.0,
+                          "com_y_mm": body["com_y_mm"], "lean_deg": body["lean_deg"]}
+    return variants
 
 
 def motor_constants(motor):
@@ -277,14 +301,19 @@ def main():
                 w["pass"] = passes(w)
                 summary["per_config"][f"{motor}_1:{gear}_{limit}"] = w
                 if w["pass"] and limit == "stall":
-                    candidates.append((motor, gear, w["min_recoverable_deg"]))
+                    rated = summary["per_config"][f"{motor}_1:{gear}_rated"]["min_recoverable_deg"]
+                    candidates.append((motor, gear, w["min_recoverable_deg"], rated))
                 print(f"{motor:>8} {gear:5.1f} {limit:>6} {str(w['all_recover_10deg']):>8} {w['min_recoverable_deg']:8.1f}° "
                       f"{w['max_duty_1p0_at_arm_min']:8.2f} {w['max_duty_1p5_at_arm_min']:8.2f} {w['max_peak_current']:5.2f} {w['pass']}")
 
-    chosen = max(candidates, key=lambda c: c[2]) if candidates else None
+    chosen = max(candidates, key=lambda c: (round(c[2]), c[3])) if candidates else None
     summary["criteria"] = ("per motor winding, worst case over gear efficiency 0.35-0.45 and VBAT 9.9-12.6 V: "
-                           "recover 10 deg within 1 s; >= 20 deg recoverable; duty at 1.0 m/s <= 0.70 at 9.9 V")
-    summary["candidates"] = [{"motor": m, "gear": g, "min_recoverable_deg": d} for m, g, d in candidates]
+                           "recover 10 deg within 1 s; >= 20 deg recoverable; duty at 1.0 m/s <= 0.70 at 9.9 V; "
+                           "rank by recoverable angle at the stall trip, then at the rated-current limit "
+                           "(the search stops at 34 deg, so several configurations can tie at the ceiling)")
+    summary["candidates"] = [{"motor": m, "gear": g, "min_recoverable_deg": d, "min_recoverable_rated_deg": r}
+                             for m, g, d, r in candidates]
+    summary["lean_by_battery_side"] = battery_side_variants()
     summary["chosen"] = {"motor": chosen[0], "gear": chosen[1]} if chosen else None
 
     i_trip = max(m["i_stall"] for m in MOTORS.values())
@@ -305,6 +334,7 @@ def main():
     with open(RESULTS / "sizing_summary.json", "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, default=float)
     print(f"\ncandidates {summary['candidates']} -> chosen {summary['chosen']}")
+    print(f"lean by battery side: {summary['lean_by_battery_side']}")
     print(f"DRV8711: {summary['drv8711']}")
     print(f"PWM ripple: {summary['pwm_ripple_pp_a']}")
     print(f"encoder channel frequency: {summary['encoder']}")

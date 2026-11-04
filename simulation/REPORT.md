@@ -40,22 +40,24 @@ fetched by `fetch_models.py` (TI copyright, no redistribution grant). Assumption
 - Motor data comes from JGA25-370 seller listings: the 6000 rpm winding (1:21.3 → 280 rpm, 1:35 → 170 rpm, stall 1.3 A at 12 V) and the 4300 rpm JGA25-371 encoder variant (1:34 → 126 rpm, stall 1.0 A).
 - Gear efficiency is derived from the listed stall torques.
 - Rotor inertia (1.5e-6 kg·m²) and inductance (1–3 mH) are **ASSUMPTIONS**; measure them at bring-up.
-- Body parameters come from `mechanical/mass_budget.csv`.
+- Body parameters come from `mechanical/mass_budget.csv`: the 85 × 130 mm plate (D-024), with the CoM measured from the **wheel axle** (its own `axle` row).
 
 **Hand cross-checks.**
-- τ = √((J + mℓ²)/(m·g·ℓ)) = √(1.76e-3 / 0.170) = 101.7 ms; the script prints 102 ms.
+- τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.85e-4 + 0.392·0.0263²) / (0.392·9.81·0.0263)) = √(7.56e-4 / 0.1011) = 86.5 ms; the script prints 86 ms.
+- CoM offset from the axle, toward the top side: (0.033·14 + 0.025·16 + 0.024·5 + 0.085·25.8 + 0.035·14) / 0.392 = 9.35 mm; lean = atan(9.35 / 24.6) = 20.8°; the script prints 20.8°.
 - Duty at 1.0 m/s, 1:9.6, 9.9 V = (0.01833·282 + 9.2·0.06)/9.9 = 0.58; the script prints 0.58.
 - TORQUE = 256·40·0.05·1.3/2.75 = 242; the script prints 242.
 
 ### Findings
 
 1. **Gear ratio: 1:9.6 (about 620 rpm output at 12 V) on the 6000 rpm winding.**
-   - It recovers from 10° within 1 s at every corner and recovers from up to 29.4° worst case.
+   - It recovers from 10° within 1 s at every corner. At the stall trip it recovers from anything up to the 34° search limit (the 35° fall limit) worst case; so do 1:4.4 and the 4300 rpm 1:4.4.
+   - The tie is broken by recovery at the rated-current limit: 17.0° at 1:9.6 against 14.0° at 1:4.4. 1:9.6 has the most torque margin while the I²t model limits the current.
    - Cruising at 1.0 m/s needs 58 % duty at 9.9 V, leaving headroom to balance.
    - Ratios of 1:20.4 and above can't reach the firmware's 1.0 m/s command limit at all: duty would exceed 100 % at 9.9 V.
-   - Fallback if only the 4300 rpm winding is available: 1:4.4 (27.7° recoverable, 39 % duty).
+   - Fallback if only the 4300 rpm winding is available: 1:4.4 (≥ 34° recoverable, 39 % duty).
 2. **REQ-DRIVE-005 as written makes the robot fail.**
-   - With the hardware trip set to the motor's continuous rating (0.35–0.45 A), it can't recover 10° at 1:20.4 and above, and only recovers about 11° at 1:9.6.
+   - With the hardware trip set to the motor's continuous rating (0.35–0.45 A), it can't recover 10° at 1:34 and above, and recovers only 17.0° at 1:9.6, short of the 2 × 10° target.
    - Recommendation for the firmware: set the DRV8711 trip at about stall (1.3 A), a peak and protective limit, and enforce the continuous rating in firmware with an I²t / RMS thermal model.
 3. **DRV8711 setting for Rsense = 50 mΩ** (the firmware default, kept): I_trip 1.30 A → ISGAIN 40, TORQUE 242, about 5 mA resolution. Rsense dissipates 85 mW, so a 1206 part is enough; the 2512 in the plan is oversized.
 4. **PWM ripple** at 25 kHz, D = 0.5, 12.6 V: 63–84 mA p-p for L = 2.0–1.5 mH, under 7 % of I_trip (REQ-DRIVE-007 satisfied). Recheck after measuring L.
@@ -64,8 +66,12 @@ fetched by `fetch_models.py` (TI copyright, no redistribution grant). Assumption
    - ×4 for the count rate.
    - The input RC corner and buffer must pass ≥ 2× this (S5).
    - If LPTIM1 is clocked from a low-frequency source, it can't count this fast; the firmware must clock it from PCLK or HSI16.
-6. **Reflected rotor inertia matters.** At 1:9.6 it is equivalent to 0.24 kg on the axle, against a 0.42 kg body. The firmware's pendulum model (and its LQR) should include it.
-7. **Fall time constant τ = 102 ms** (the firmware doc's example is 130 ms). A 500 Hz loop gives about 50 updates per τ, which is still comfortable.
+6. **Reflected rotor inertia matters.** At 1:9.6 it is equivalent to 0.24 kg on the axle, against a 0.39 kg body. The firmware's pendulum model (and its LQR) should include it.
+7. **Fall time constant τ = 86 ms** on the 85 × 130 mm plate (the firmware doc's example is 130 ms). A 500 Hz loop gives about 43 updates per τ, which is still comfortable.
+8. **Static lean is about 21° toward the top side, not 7°.**
+   - Phase 0 measured the CoM from the plate plane. The pivot is the wheel axle, which is the motor axis, about 14 mm from the plate on the bottom side. Measured from the axle, the plate, the parts and the battery all sit on the top side of it, and the motors add nothing.
+   - The battery is the main term (0.085 kg at 25.8 mm). Strapping it on the bottom side, over the motors, halves the lean to **9.8°** (`lean_by_battery_side` in `results/sizing_summary.json`).
+   - The dynamics (ℓ, J, τ) barely change. The cost is a pitch setpoint far from vertical, and a tilt-based fall cut-off that must be measured from that setpoint, not from vertical.
 
 ### Proposed changes
 
@@ -78,7 +84,7 @@ fetched by `fetch_models.py` (TI copyright, no redistribution grant). Assumption
 ### Firmware constraints from S0
 
 - `Drv8711DriverConfiguration`: Rsense 0.05 Ω, I_trip 1.3 A → ISGAIN 40, TORQUE 242.
-- Pitch setpoint offset of about 7° (static lean; `docs/mechanical.md`).
+- Pitch setpoint offset of about 21° toward the top side, or about 10° with the battery on the bottom side (finding 8; `docs/mechanical.md`). Measure the fall limit (REQ-SAFE-002) from the setpoint.
 - Gear ratio 9.6. The encoder CPR at the wheel is 4 × lines × 9.6.
 - LPTIM1 kernel clock fast enough for the encoder rate (finding 5).
 - Add reflected inertia to the plant model; fix the J definition (`docs/mechanical.md`).
