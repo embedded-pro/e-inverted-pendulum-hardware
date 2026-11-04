@@ -3,7 +3,7 @@
 - **Source of truth:** `pin-data/pinmap.csv`.
 - **Validation:** `scripts/check_pinmap.py --firmware ../e-inverted-pendulum`.
 - **Package data:** `pin-data/stm32wb55rgvx_vfqfpn68.csv`, extracted by
-  `scripts/extract_pin_data.py` from KiCad 9's `MCU_ST_STM32WB:STM32WB55RGVx` symbol, which is
+  `scripts/extract_pin_data.py` from KiCad 10's `MCU_ST_STM32WB:STM32WB55RGVx` symbol (identical to KiCad 9's), which is
   generated from ST's STM32_open_pin_data. Spot-checked against DS11929 Rev 11 Tables 16 and 18.
 
 The plan called for a CubeMX `.ioc`. STM32CubeMX can't run in this environment, so the script

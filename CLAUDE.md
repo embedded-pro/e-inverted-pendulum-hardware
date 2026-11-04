@@ -48,7 +48,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 
 ## 4. Tooling
 
-- KiCad 9 (`kicad-cli`): ERC, DRC, exports.
+- KiCad 10 (`kicad-cli`, 10.0.8 from `ppa:kicad/kicad-10.0-releases`): ERC, DRC, exports.
+  `pcbnew` SWIG still imports in 10.0.x.
 - ngspice, plus Python 3 with numpy, scipy, matplotlib and spicelib.
 - `python3 simulation/sizing.py`: motor/drive sizing (S0).
 - `python3 scripts/check_pinmap.py`: pin map validation.

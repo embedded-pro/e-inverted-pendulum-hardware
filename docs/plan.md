@@ -98,7 +98,7 @@ scripts/ jlc_stock.py, export_fab.sh, render_layers.py, route_metrics.py
 fab/                             # generated Gerbers, drill, BOM/CPL in JLC format
 .github/workflows/hardware.yml   # kicad-cli ERC/DRC, simulation run, fab artifact
 ```
-Tooling to install in the container: KiCad 9 (`kicad-cli`), ngspice-47, Python with numpy/scipy/matplotlib/spicelib. None of these are present yet.
+Tooling: KiCad 10 (`kicad-cli`, 10.0.8), ngspice (42 from Ubuntu; 47 if available), Python with numpy/scipy/matplotlib/spicelib.
 
 ## Phase 0: requirements, sizing, mechanics (gate: user review)
 1. Bootstrap the repo as above. Commit this plan as `docs/plan.md` and the decision table as `docs/decisions.md`.

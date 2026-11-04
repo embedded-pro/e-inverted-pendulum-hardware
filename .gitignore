@@ -14,3 +14,6 @@ __pycache__/
 # Generated fab outputs are produced by scripts/export_fab.sh in CI
 fab/
 .claude/plans/
+
+# Vendor datasheets (copyrighted), fetched by scripts/fetch_datasheet.py
+datasheets/
