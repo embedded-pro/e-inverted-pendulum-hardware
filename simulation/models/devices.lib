@@ -1,0 +1,33 @@
+* Project device models derived from datasheet values (not vendor models).
+* Each model lists its source. ngspice VDMOS: Rds(on) = Rd + Rs + 1/(Kp*(|Vgs|-|Vto|)).
+* Keep the form VDMOS (pchan ...): 'VDMOS pchan (' with a long list hangs the ngspice-42 parser.
+
+* AO4805 (TECH PUBLIC), one P-channel half of the dual. Datasheet p.1-2:
+* Vth -1..-3 V, Rds(on) <= 22 mOhm @ -10 V (15 mOhm typ from Fig. 3), Ciss 950 pF, Crss 160 pF,
+* Qg ~26 nC @ -10 V, body diode VSD <= 1.2 V, trr 25 ns, BVDSS 30 V.
+.model AO4805 VDMOS (pchan Vto=-1.8 Kp=21 Rd=4m Rs=4m Rg=1.5 Cgdmax=600p Cgdmin=160p a=0.6 Cgs=790p Cjo=500p m=0.5 Vj=0.7 Is=1e-12 N=1.05 Rb=15m Tt=12n BV=30)
+
+* CSD88537ND (TI ZHCSCQ9A), one N-channel of the dual. p.1, p.4:
+* Vth 2.6-3.6 V (3.0 typ), Rds(on) 12.5 mOhm typ @ 10 V, Ciss 1080 pF, Crss 4 pF @ 30 V,
+* Qgd 2.3 nC, Qrr 50 nC, trr 30 ns, BVDSS 60 V, RG 5.5 Ohm typ.
+.model CSD88537 VDMOS (nchan Vto=3.0 Kp=22 Rd=3m Rs=3m Rg=5.5 Cgdmax=250p Cgdmin=4p a=0.5 Cgs=1070p Cjo=600p m=0.5 Vj=0.7 Is=1e-12 N=1.0 Rb=10m Tt=6n BV=60)
+
+* SMBJ15A (Littelfuse rev JC.07/04/25 p.2): VBR 16.7-18.5 V @ 1 mA, VC 24.4 V @ 24.6 A.
+* Breakdown at the nominal 17.6 V; series R fitted so V = 24.4 V at 24.6 A.
+.model SMBJ15A D (Is=1e-12 N=1 Rs=0.27 BV=17.6 IBV=1m Cjo=1.5n)
+
+* BZT52C15 (JSCJ Rev 2.1): Vz 13.8/15/15.6 V @ 5 mA, ZZT <= 30 Ohm.
+.model BZT52C15 D (Is=1e-14 N=1 Rs=5 BV=14.8 IBV=5m Cjo=40p)
+
+* Generic small-signal diode for body-diode-like paths and 1N4148WS.
+.model DSIG D (Is=2.5n N=1.75 Rs=0.6 Cjo=2p Tt=4n BV=75)
+
+* Panasonic EEEFK1V221P: 220 uF 35 V, |Z| 0.16 Ohm @ 100 kHz (treated as ESR), ESL assumed 10 nH.
+.subckt ELCAP220U p n
+C1 p 1 220u
+R1 1 2 0.16
+L1 2 n 10n
+.ends
+
+* SS34 Schottky, 40 V 3 A, SMA (MDD datasheet via C8678): VF <= 0.55 V @ 3 A (typ ~0.46 V), ~0.37 V @ 1.3 A.
+.model SS34 D (Is=2e-5 N=1.1 Rs=0.04 Cjo=200p M=0.5 Vj=0.4 BV=40 IBV=0.5m)

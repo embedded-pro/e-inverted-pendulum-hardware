@@ -40,6 +40,10 @@ def build(values):
                "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", "Q",
                purpose=f"half-bridge {name}: FET1 high side, FET2 low side")
 
+    for out in ("MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N"):
+        active(sheet, "SS34", "Device:D_Schottky", {"1": out, "2": "GND"}, "Diode_SMD:D_SMA", "D",
+               purpose="clamps the dead-time freewheel to -0.36 V (DRV8711 phase pin abs max -0.6 V, S2)")
+
     for bridge in ("A", "B"):
         active(sheet, "HoLR1206-1W-50mR-1%-75ppm", "Device:R", {"1": f"SENSE_{bridge}", "2": "GND"},
                "Resistor_SMD:R_1206_3216Metric", "R", value="50m",

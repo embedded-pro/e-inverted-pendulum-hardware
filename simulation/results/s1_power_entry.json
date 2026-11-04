@@ -1,0 +1,272 @@
+{
+  "phase1_values": {
+    "values": {
+      "R102": 10000.0,
+      "C101": 2.2e-07
+    },
+    "note": "no C102 gate-source cap",
+    "results": {
+      "switch_on_new": {
+        "i_peak_A": 1.2349331,
+        "vbat_end_V": 12.584992,
+        "vbat_peak_V": 12.584992,
+        "rise_10_90_ms": 2.2300000000000004,
+        "vgs_min_V": -11.442350399999999,
+        "vgs_max_V": -0.001233999999998403,
+        "fet2_peak_power_W": 11.51812762791505,
+        "fet2_energy_mJ": 18.15681187778719,
+        "i2t_A2s": 0.005205483608832234,
+        "tvs_peak_A": 4.6039765e-06
+      },
+      "switch_on_aged": {
+        "i_peak_A": 1.2204989,
+        "vbat_end_V": 12.573792,
+        "vbat_peak_V": 12.573792,
+        "rise_10_90_ms": 2.256,
+        "vgs_min_V": -11.4321704,
+        "vgs_max_V": -0.0012340000000001794,
+        "fet2_peak_power_W": 11.11693373210353,
+        "fet2_energy_mJ": 17.87883739405122,
+        "i2t_A2s": 0.005148804189716913,
+        "tvs_peak_A": 4.4100391e-06
+      },
+      "hot_plug_switch_on": {
+        "i_peak_A": 44.592982,
+        "vbat_end_V": 12.584992,
+        "vbat_peak_V": 12.584992,
+        "rise_10_90_ms": 0.2141469,
+        "vgs_min_V": -11.4423506,
+        "vgs_max_V": -1.0658612999999998e-13,
+        "fet2_peak_power_W": 188.72232198991432,
+        "fet2_energy_mJ": 6.306637647656892,
+        "i2t_A2s": 0.052058325531530385,
+        "tvs_peak_A": 0.0013723352
+      },
+      "hot_plug_switch_off": {
+        "i_peak_A": 43.483561,
+        "vbat_end_V": 8.9437052,
+        "vbat_peak_V": 10.517548,
+        "rise_10_90_ms": 0.07262560000000019,
+        "vgs_min_V": -4.0092584,
+        "vgs_max_V": 4.528999999997803e-12,
+        "fet2_peak_power_W": 192.35389965746282,
+        "fet2_energy_mJ": 15.092406590636655,
+        "i2t_A2s": 0.04210763775626037,
+        "tvs_peak_A": 0.0013390538
+      },
+      "reverse_switch_on": {
+        "i_peak_A": 0.0097662712,
+        "vbat_end_V": -1.2379463e-05,
+        "vbat_peak_V": -3.0930273e-12,
+        "rise_10_90_ms": null,
+        "vgs_min_V": -0.6527143599999999,
+        "vgs_max_V": 8.303040000000013e-05,
+        "fet2_peak_power_W": 0.005970406398619994,
+        "fet2_energy_mJ": 3.0564008069195307e-06,
+        "i2t_A2s": 2.8234991235246012e-11,
+        "tvs_peak_A": 7.0674356e-07,
+        "vbat_min_V": -0.00020596107
+      },
+      "reverse_switch_off": {
+        "i_peak_A": 0.0096219273,
+        "vbat_end_V": -2.1766178e-05,
+        "vbat_peak_V": 2.8756822e-12,
+        "rise_10_90_ms": null,
+        "vgs_min_V": -0.68535054,
+        "vgs_max_V": 4.5699999999995744e-05,
+        "fet2_peak_power_W": 0.005888688229665929,
+        "fet2_energy_mJ": 3.066947861687393e-06,
+        "i2t_A2s": 2.817781800431154e-11,
+        "tvs_peak_A": 7.016644e-07,
+        "vbat_min_V": -0.00020971065
+      },
+      "regen_stall_dump": {
+        "i_peak_A": 2.7376578,
+        "vbat_end_V": 8.8607612,
+        "vbat_peak_V": 12.662204,
+        "rise_10_90_ms": 0.0,
+        "vgs_min_V": -11.185623,
+        "vgs_max_V": -0.017247999999998598,
+        "fet2_peak_power_W": 0.48958140679494705,
+        "fet2_energy_mJ": 24.473796512639257,
+        "i2t_A2s": 1.1254884576474684,
+        "tvs_peak_A": 0.00010455891,
+        "emf_V": 0.0,
+        "vbat_peak_after_off_V": 12.662204,
+        "fet2_energy_after_off_mJ": 9.765633032383603
+      },
+      "regen_pushed_20V_emf": {
+        "i_peak_A": 1.1475132,
+        "vbat_end_V": 17.753717,
+        "vbat_peak_V": 17.753717,
+        "rise_10_90_ms": 189.84241,
+        "vgs_min_V": -11.567083,
+        "vgs_max_V": -0.007654999999999745,
+        "fet2_peak_power_W": 0.13816579935600104,
+        "fet2_energy_mJ": 4.268507249442088,
+        "i2t_A2s": 0.2465234794026649,
+        "tvs_peak_A": 0.11487765,
+        "emf_V": 20.0,
+        "vbat_peak_after_off_V": 17.753717,
+        "fet2_energy_after_off_mJ": 1.7258537050243914
+      }
+    },
+    "checks": {
+      "inrush_switch_on_below_4A": true,
+      "hot_plug_switch_on_below_10A": false,
+      "hot_plug_switch_off_vbat_stays_below_1V": false,
+      "inrush_i2t_below_fuse_melt": true,
+      "vgs_within_20V": true,
+      "reverse_load_current_below_1mA": true,
+      "regen_vbat_below_24V": true
+    }
+  },
+  "current": {
+    "results": {
+      "switch_on_new": {
+        "i_peak_A": 0.53887981,
+        "vbat_end_V": 12.583062,
+        "vbat_peak_V": 12.583062,
+        "rise_10_90_ms": 6.792,
+        "vgs_min_V": -5.5425386,
+        "vgs_max_V": -0.0012329999999991514,
+        "fet2_peak_power_W": 3.1744002403876403,
+        "fet2_energy_mJ": 19.29979230363553,
+        "i2t_A2s": 0.0027309061956721633,
+        "tvs_peak_A": 1.0475595e-06
+      },
+      "switch_on_aged": {
+        "i_peak_A": 0.53583136,
+        "vbat_end_V": 12.571859,
+        "vbat_peak_V": 12.571859,
+        "rise_10_90_ms": 6.827,
+        "vgs_min_V": -5.537436799999999,
+        "vgs_max_V": -0.0012329999999991514,
+        "fet2_peak_power_W": 3.1464532957820825,
+        "fet2_energy_mJ": 19.190907907385434,
+        "i2t_A2s": 0.0027235755398138184,
+        "tvs_peak_A": 1.0417293e-06
+      },
+      "hot_plug_switch_on": {
+        "i_peak_A": 0.5388793,
+        "vbat_end_V": 12.583119,
+        "vbat_peak_V": 12.583119,
+        "rise_10_90_ms": 6.792,
+        "vgs_min_V": -5.6111778999999995,
+        "vgs_max_V": -4.822812499999999e-12,
+        "fet2_peak_power_W": 3.173566879408302,
+        "fet2_energy_mJ": 19.29572002544326,
+        "i2t_A2s": 0.0028082842844004887,
+        "tvs_peak_A": 1.0472338e-06
+      },
+      "hot_plug_switch_off": {
+        "i_peak_A": 0.015659019,
+        "vbat_end_V": 0.0023426113,
+        "vbat_peak_V": 0.0023426113,
+        "rise_10_90_ms": null,
+        "vgs_min_V": -0.5448850000000007,
+        "vgs_max_V": 4.529000000004421e-12,
+        "fet2_peak_power_W": 0.18472259318542433,
+        "fet2_energy_mJ": 0.011678951972056508,
+        "i2t_A2s": 3.4129356470083175e-09,
+        "tvs_peak_A": 9.6828663e-07
+      },
+      "reverse_switch_on": {
+        "i_peak_A": 0.010375486,
+        "vbat_end_V": -1.6256022e-05,
+        "vbat_peak_V": -3.0930062e-12,
+        "rise_10_90_ms": null,
+        "vgs_min_V": -0.0019390999999999714,
+        "vgs_max_V": 8.499999999689312e-08,
+        "fet2_peak_power_W": 0.00635935232612897,
+        "fet2_energy_mJ": 3.1978443884637855e-06,
+        "i2t_A2s": 2.9307276994403954e-11,
+        "tvs_peak_A": 7.5237204e-07,
+        "vbat_min_V": -0.00021462805
+      },
+      "reverse_switch_off": {
+        "i_peak_A": 0.010372084,
+        "vbat_end_V": -2.1740054e-05,
+        "vbat_peak_V": 2.8756772e-12,
+        "rise_10_90_ms": null,
+        "vgs_min_V": -0.0019448199999999582,
+        "vgs_max_V": 8.300000000488472e-08,
+        "fet2_peak_power_W": 0.00636299263559695,
+        "fet2_energy_mJ": 3.199667440522652e-06,
+        "i2t_A2s": 2.9311691383250976e-11,
+        "tvs_peak_A": 7.5320828e-07,
+        "vbat_min_V": -0.00021487548
+      },
+      "regen_stall_dump": {
+        "i_peak_A": 2.7312815,
+        "vbat_end_V": 8.885898,
+        "vbat_peak_V": 12.649275,
+        "rise_10_90_ms": 0.0,
+        "vgs_min_V": -6.144457699999999,
+        "vgs_max_V": -0.6139770000000002,
+        "fet2_peak_power_W": 0.21519526251625629,
+        "fet2_energy_mJ": 23.36917026306706,
+        "i2t_A2s": 1.1209729110472666,
+        "tvs_peak_A": 0.0001044143,
+        "emf_V": 0.0,
+        "vbat_peak_after_off_V": 12.649275,
+        "fet2_energy_after_off_mJ": 2.0797734833141557
+      },
+      "regen_pushed_20V_emf": {
+        "i_peak_A": 1.145045,
+        "vbat_end_V": 17.753717,
+        "vbat_peak_V": 17.753717,
+        "rise_10_90_ms": 272.42928,
+        "vgs_min_V": -6.3649501,
+        "vgs_max_V": -0.5809630000000006,
+        "fet2_peak_power_W": 0.1447998585255982,
+        "fet2_energy_mJ": 10.637852018130099,
+        "i2t_A2s": 0.34864808688974014,
+        "tvs_peak_A": 0.11487766,
+        "emf_V": 20.0,
+        "vbat_peak_after_off_V": 17.753717,
+        "fet2_energy_after_off_mJ": 7.017672652742179
+      }
+    },
+    "checks": {
+      "inrush_switch_on_below_4A": true,
+      "hot_plug_switch_on_below_10A": true,
+      "hot_plug_switch_off_vbat_stays_below_1V": true,
+      "inrush_i2t_below_fuse_melt": true,
+      "vgs_within_20V": true,
+      "reverse_load_current_below_1mA": true,
+      "regen_vbat_below_24V": true
+    }
+  },
+  "assumptions": {
+    "battery_r_int": {
+      "nominal": 0.06,
+      "worst": 0.15,
+      "source": "ASSUMPTION 3S 1000 mAh LiPo pack: 60 mOhm new, 150 mOhm cold/aged"
+    },
+    "battery_loop_l": {
+      "value": 1.5e-07,
+      "source": "ASSUMPTION ~15 cm XT30 lead pair"
+    },
+    "fuse_r": {
+      "value": 0.035,
+      "source": "1206FA-4A cold resistance 0.035 Ohm typ"
+    },
+    "mlcc_10u_25v_at_12v": {
+      "value": 5e-06,
+      "source": "ASSUMPTION Samsung CL21A106KAYNNNE DC-bias ~-50 % at 12 V"
+    },
+    "logic_power": {
+      "value": 1.56,
+      "source": "docs/architecture.md: 5 V x 0.265 A / 0.85"
+    },
+    "motor_r": {
+      "value": 9.2,
+      "source": "S0: 12 V / 1.3 A stall (JGA25-370 6000 rpm winding)"
+    },
+    "motor_l": {
+      "value": 0.0015,
+      "source": "ASSUMPTION 1-3 mH (S0); measure at bring-up"
+    }
+  }
+}

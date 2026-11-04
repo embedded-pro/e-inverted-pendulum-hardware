@@ -1,0 +1,51 @@
+{
+  "buck_equations": {
+    "vin_12.6V": {
+      "vin_V": 12.6,
+      "vout_V": 4.984000000000001,
+      "inductor_ripple_pp_A": 0.5341402679275021,
+      "output_ripple_pp_mV": 2.94119544967772,
+      "soft_start_ms": 6.836363636363638,
+      "uvlo_start_V": 9.108666666666666,
+      "uvlo_stop_V": 8.466,
+      "ccm_above_load_A": 0.26707013396375107
+    },
+    "vin_9.3V": {
+      "vin_V": 9.3,
+      "vout_V": 4.984000000000001,
+      "inductor_ripple_pp_A": 0.4101072218409213,
+      "output_ripple_pp_mV": 2.2582186125727652,
+      "soft_start_ms": 6.836363636363638,
+      "uvlo_start_V": 9.108666666666666,
+      "uvlo_stop_V": 8.466,
+      "ccm_above_load_A": 0.20505361092046065
+    }
+  },
+  "ldo_simulation": {
+    "v3_mean_V": 3.3124288500000003,
+    "v3_ripple_pp_mV": 0.0013000000000928935,
+    "v3_startup_overshoot_mV": 0.28094999999961345,
+    "v3_in_regulation_ms": 4.5754075,
+    "v3_dip_on_5v0_dip_mV": 1.5546500000001018,
+    "v3_step_dip_mV": 6.070850000000405,
+    "v3_ripple_with_25kHz_line_pp_mV": 0.595499999999749,
+    "v5_line_ripple_pp_mV": 52.880599999999944
+  },
+  "checks": {
+    "v5_setpoint_within_2pct": true,
+    "v5_switching_ripple_below_10mVpp": true,
+    "buck_uvlo_hysteresis_ge_0V5": true,
+    "v3_within_1p5pct": true,
+    "v3_ripple_below_5mVpp": true,
+    "v3_startup_overshoot_below_3pct": true,
+    "v3_step_dip_below_3pct": true
+  },
+  "assumptions": {
+    "5v0_line_ripple": "25 kHz, 50 mV p-p (ASSUMPTION)",
+    "5v0_step_dip": "150 mV on the +96 mA buzzer step (ASSUMPTION)",
+    "c_out": {
+      "value": 1.3e-05,
+      "source": "ASSUMPTION CL21A226MAQNNNE DC-bias ~-40 % at 5 V"
+    }
+  }
+}

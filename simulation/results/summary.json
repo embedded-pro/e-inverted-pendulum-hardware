@@ -1,0 +1,44 @@
+{
+  "scripts": {
+    "sizing.py": "pass",
+    "power_entry.py": "pass",
+    "bridge.py": "pass",
+    "bus.py": "pass",
+    "rails.py": "pass",
+    "analog.py": "pass"
+  },
+  "checks": {
+    "s1_power_entry": {},
+    "s2_bridge": {
+      "no_shoot_through": true,
+      "phase_node_plateau_above_minus_0V6_recommended": true,
+      "phase_node_spike_below_20ns_at_5nH_recommended": true,
+      "switch_node_overshoot_below_20pct_recommended": true,
+      "vds_below_80pct_rating": true,
+      "fet_tj_below_100C": true,
+      "ripple_below_150mA_pp": true
+    },
+    "s3_bus": {
+      "c507_ripple_within_rating_at_continuous_current": true,
+      "vbat_ripple_below_500mV": true,
+      "logic_stays_up_at_9V9_aged": true,
+      "drv8711_above_uvlo_at_9V0_aged": true,
+      "logic_cuts_off_at_empty_pack_under_load": true
+    },
+    "s4_rails": {
+      "v5_setpoint_within_2pct": true,
+      "v5_switching_ripple_below_10mVpp": true,
+      "buck_uvlo_hysteresis_ge_0V5": true,
+      "v3_within_1p5pct": true,
+      "v3_ripple_below_5mVpp": true,
+      "v3_startup_overshoot_below_3pct": true,
+      "v3_step_dip_below_3pct": true
+    },
+    "s5_analog": {
+      "adc_sampling_error_below_half_lsb_at_100Hz": true,
+      "vbat_3sigma_below_50mV_per_cell_with_calibration": true,
+      "encoder_push_pull_1000_lines_phase_error_below_25pct": true,
+      "encoder_open_collector_500_lines_phase_error_below_25pct": true
+    }
+  }
+}

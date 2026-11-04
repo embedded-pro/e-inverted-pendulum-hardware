@@ -21,3 +21,7 @@ datasheets/
 # KiCad local state
 kicad/*.kicad_prl
 kicad/fp-info-cache
+
+# Vendor simulation models (TI copyright), fetched by simulation/fetch_models.py
+simulation/models/ti/
+simulation/models/ti-zips/

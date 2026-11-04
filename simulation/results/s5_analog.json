@@ -1,0 +1,90 @@
+{
+  "results": {
+    "adc_1kHz": {
+      "ideal_V": 2.678740157480315,
+      "sampled_V": 2.67837224,
+      "error_LSB": -0.4566636361728756
+    },
+    "adc_100Hz": {
+      "ideal_V": 2.678740157480315,
+      "sampled_V": 2.6785896,
+      "error_LSB": -0.18687376950600249
+    },
+    "monte_carlo": {
+      "raw": {
+        "sigma_mV_per_cell": 36.243361782248634,
+        "three_sigma_mV_per_cell": 108.73008534674591,
+        "worst_mV_per_cell": 105.14665537328227
+      },
+      "vrefint": {
+        "sigma_mV_per_cell": 24.930484527938543,
+        "three_sigma_mV_per_cell": 74.79145358381562,
+        "worst_mV_per_cell": 75.38418269011042
+      },
+      "per_board_calibrated": {
+        "sigma_mV_per_cell": 12.70430009241954,
+        "three_sigma_mV_per_cell": 38.11290027725862,
+        "worst_mV_per_cell": 31.959093496422973
+      }
+    },
+    "encoder_push_pull_500_lines": {
+      "rise_delay_ns": [
+        70.3469047619128,
+        88.3469047619116
+      ],
+      "fall_delay_ns": [
+        237.0003809523883,
+        283.0003809523875
+      ],
+      "worst_edge_skew_ns": 212.65347619047472,
+      "quarter_period_ns": 4761.9047619047615,
+      "phase_error_pct_of_quarter": 4.4657229999999695
+    },
+    "encoder_push_pull_1000_lines": {
+      "rise_delay_ns": [
+        70.99995238095272,
+        86.99995238095393
+      ],
+      "fall_delay_ns": [
+        237.0001904761931,
+        283.0001904761923
+      ],
+      "worst_edge_skew_ns": 212.0002380952396,
+      "quarter_period_ns": 2380.9523809523807,
+      "phase_error_pct_of_quarter": 8.904010000000063
+    },
+    "encoder_open_collector_500_lines": {
+      "rise_delay_ns": [
+        908.9999047619135,
+        1190.9999047619085
+      ],
+      "fall_delay_ns": [
+        173.00038095239026,
+        205.0003809523859
+      ],
+      "worst_edge_skew_ns": 1017.9995238095182,
+      "quarter_period_ns": 4761.9047619047615,
+      "phase_error_pct_of_quarter": 21.377989999999883
+    },
+    "encoder_open_collector_1000_lines": {
+      "rise_delay_ns": [
+        906.9999523809529,
+        1188.9999523809545
+      ],
+      "fall_delay_ns": [
+        157.00019047619386,
+        189.00019047619287
+      ],
+      "worst_edge_skew_ns": 1031.9997619047606,
+      "quarter_period_ns": 2380.9523809523807,
+      "phase_error_pct_of_quarter": 43.343989999999955
+    }
+  },
+  "checks": {
+    "adc_sampling_error_below_half_lsb_at_100Hz": true,
+    "vbat_3sigma_below_50mV_per_cell_with_calibration": true,
+    "encoder_push_pull_1000_lines_phase_error_below_25pct": true,
+    "encoder_open_collector_500_lines_phase_error_below_25pct": true
+  },
+  "seed": 20261104
+}

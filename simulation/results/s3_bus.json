@@ -1,0 +1,42 @@
+{
+  "results": {
+    "ripple_D0.5_I1.3": {
+      "vbat_ripple_pp_mV": 210.88199999999978,
+      "c507_rms_A": 0.570432621246385,
+      "c502_rms_A": 0.14406861076768285,
+      "c201_rms_A": 0.14406861076768285
+    },
+    "ripple_D0.9_I1.3": {
+      "vbat_ripple_pp_mV": 203.98899999999998,
+      "c507_rms_A": 0.3191727906960243,
+      "c502_rms_A": 0.14506705630886216,
+      "c201_rms_A": 0.14506705630886216
+    },
+    "ripple_D0.5_I0.45": {
+      "vbat_ripple_pp_mV": 72.99600000000162,
+      "c507_rms_A": 0.19745489061943858,
+      "c502_rms_A": 0.04986954148836342,
+      "c201_rms_A": 0.04986954148836342
+    },
+    "sag_ocv_9.9V_aged": {
+      "vbat_min_V": 9.2771652,
+      "hand_V": 9.279545454545454
+    },
+    "sag_ocv_9.0V_aged": {
+      "vbat_min_V": 8.4113531,
+      "hand_V": 8.376
+    }
+  },
+  "checks": {
+    "c507_ripple_within_rating_at_continuous_current": true,
+    "vbat_ripple_below_500mV": true,
+    "logic_stays_up_at_9V9_aged": true,
+    "drv8711_above_uvlo_at_9V0_aged": true,
+    "logic_cuts_off_at_empty_pack_under_load": true
+  },
+  "notes": {
+    "c507_limit_A": 0.57,
+    "uvlo_logic_stop_V": 8.47,
+    "drv8711_uvlo_rising_max_V": 8.0
+  }
+}

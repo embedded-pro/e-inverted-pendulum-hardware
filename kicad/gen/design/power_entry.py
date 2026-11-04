@@ -21,11 +21,12 @@ def build(values):
     R(sheet, "100k", "PP_G", "PP_S", purpose="gate off when the switch is open")
     active(sheet, "BZT52C15", "Device:D_Zener", {"1": "PP_S", "2": "PP_G"}, "Diode_SMD:D_SOD-123", "D",
            purpose="V_GS clamp 13.8-15.6 V < 20 V")
-    R(sheet, "10k", "PP_G", "SW_ON", purpose="switch on: V_GS = -VBAT x 100k/110k")
+    R(sheet, "100k", "PP_G", "SW_ON", purpose="switch on: V_GS = -VBAT/2 (-4.5 V at 9 V); 0.08 mA Miller current (S1)")
     active(sheet, "SS-12D10L5", "Switch:SW_SPDT", {"1": "GND", "2": "SW_ON", "3": None},
            "e-inverted-pendulum:SW_Slide_SPDT_SS-12D10L5_P4.70mm", "SW", purpose="power switch (gate current only)")
     R(sheet, "1k", "PP_G", "PP_SS", purpose="Miller soft start series R")
-    C(sheet, "220n_0603_25V_X7R", "PP_SS", "VBAT", purpose="Miller soft start: ~4.4 V/ms, ~1.2 A inrush")
+    C(sheet, "47n_0603_50V_X7R", "PP_SS", "VBAT", purpose="Miller soft start: ~1.7 V/ms, ~0.5 A inrush (S1)")
+    C(sheet, "1u_0603_50V_X5R", "PP_G", "PP_S", purpose="holds V_GS ~ -0.5 V on hot plug with the switch off (S1)")
     active(sheet, "SMBJ15A", "Device:D_Zener", {"1": "VBAT", "2": "GND"}, "Diode_SMD:D_SMB", "D",
            value="SMBJ15A", purpose="TVS after the FETs: V_RWM 15 V, V_C 24.4 V")
     R(sheet, "100k", "VBAT", "VBAT_SENSE", purpose="VBAT divider top (ratio 0.2126)")

@@ -113,17 +113,23 @@ def vbat_divider():
 
 
 def power_path():
+    r_pullup, r_switch, c_miller, c_gs = 100e3, 100e3, 47e-9, 1e-6
     for vbat in (9.0, 13.5):
-        vgs = vbat * 100e3 / (100e3 + 10e3)
-        record("Power path", f"V_GS at {vbat} V", f"-{vgs:.1f} V (BZT52C15 clamps 13.8-15.6 V; AO4805 limit +/-20 V)",
-               "100k gate-source / 10k to GND through the switch")
-    i_gate = (12.6 - 3.0) / 10e3
-    c_miller = 220e-9
+        vgs = vbat * r_pullup / (r_pullup + r_switch)
+        record("Power path", f"V_GS at {vbat} V", f"-{vgs:.1f} V (AO4805 R_DS(on) <= 26 mOhm at -4.5 V; limit +/-20 V; "
+               "BZT52C15 clamps transients)", "100k gate-source / 100k to GND through the switch (S1)")
+    plateau = 2.3
+    i_gate = (12.6 - plateau) / r_switch - plateau / r_pullup
     slew = i_gate / c_miller
     c_load = 220e-6 + 6 * 10e-6
-    record("Power path", "soft start", f"220 nF + 1k gate-to-VBAT (Miller): dV/dt ~{slew / 1e3:.1f} V/ms, "
-           f"inrush ~{c_load * slew:.1f} A into ~{c_load * 1e6:.0f} uF for {12.6 / slew * 1e3:.1f} ms",
-           "estimate; fuse melt I2t 1.745 A2s >> inrush I2t; verified in S1")
+    record("Power path", "soft start", f"47 nF + 1k gate-to-VBAT (Miller): I_G ~{i_gate * 1e3:.2f} mA -> ~{slew / 1e3:.1f} V/ms, "
+           f"inrush ~{c_load * slew:.2f} A for ~{12.6 / slew * 1e3:.0f} ms",
+           "S1: 0.54 A peak, 6.8 ms 10-90 % rise (was 44.6 A on hot plug with the Phase 1 values)")
+    record("Power path", "hot plug, switch off", f"1 uF gate-source cap: V_GS step = -12.6 x 47n/(47n+1u) = "
+           f"{-12.6 * c_miller / (c_miller + c_gs):.2f} V (< |V_th,min| 1.0 V), FET stays off",
+           "S1: VBAT stays at 0.002 V (was 10.5 V with the Phase 1 values)")
+    record("Power path", "turn-off", f"tau = 100k x (1 uF + 47 nF) = {r_pullup * (c_gs + c_miller) * 1e3:.0f} ms; "
+           "don't switch off while the motors are driven", "S1 regen cases: FET energy <= 7 mJ")
     record("Power path", "TVS", "SMBJ15A after the FETs: V_RWM 15 V > 13.5 V, V_C 24.4 V < 30 V (AO4805), 32 V (TPS62933)",
            "Littelfuse SMBJ p.2; must not sit before the reverse-polarity FETs")
 
@@ -138,11 +144,14 @@ def drive():
            "SLVSC40 p.3; SPI <= 4 MHz (p.8)")
     record("DRV8711", "SLEEPn", "10k pull-down: no internal pull, keeps the driver asleep while the MCU is in reset",
            "SLVSC40 p.3; AINx/BINx/RESET/SCS have internal pull-downs")
+    record("DRV8711", "low-side clamps", "SS34 Schottky from GND to each phase node: freewheel at -0.36 V instead of the "
+           "-0.73 V body diode", "S2; DRV8711 phase pins abs max -0.6 V (SLVSC40 Abs Max)")
     record("DRV8711", "Rsense", "50 mOhm 1206 1 W 75 ppm/C; 1.3 A trip -> 85 mW; ISGAIN 40, TORQUE 242",
            "S0 (simulation/REPORT.md); Eq. 1 p.11")
     record("DRV8711", "ISENSE filter", "0 Ohm fitted in each leg, 1 nF DNP across (fit 27-33 Ohm + 1 nF if noisy: RC 50-60 ns)",
            "SLVSC40 p.16 Fig. 6 (symmetric, <= 500 Ohm, matched 1 %)")
-    record("DRV8711", "firmware", "TBLANK >= 1.2 us (sense amp settling at gain 40); SCLK <= 4 MHz; SCS active-high GPIO",
+    record("DRV8711", "firmware", "IDRIVE 00 (50/100 mA, default); TBLANK >= 1.2 us (sense amp settling at gain 40); "
+           "SCLK <= 4 MHz; SCS active-high GPIO",
            "SLVSC40 p.7-8")
 
 

@@ -2,7 +2,7 @@
 
 Hardware for the [e-inverted-pendulum](https://github.com/embedded-pro/e-inverted-pendulum) self-balancing robot: a single 4-layer PCB that is also the robot's chassis. It carries an STM32WB55RG (BLE), a DRV8711 driving two brushed DC gearmotors with ABZ encoders, an MPU-6500 IMU, SPI flash and a 3S LiPo power path. Built and assembled at JLCPCB.
 
-Status: **Phase 1 (schematic) complete, awaiting the gate review**. Phase 0 was signed off on 2026-11-04. (see [docs/plan.md](docs/plan.md) for every phase).
+Status: **Phase 2 (simulation) complete, awaiting the gate review**. Phases 0 and 1 were signed off on 2026-11-04. (see [docs/plan.md](docs/plan.md) for every phase).
 
 | Phase 0 output | Where | Reproduce |
 |---|---|---|
@@ -24,5 +24,10 @@ Status: **Phase 1 (schematic) complete, awaiting the gate review**. Phase 0 was 
 | Assembly BOM (64 lines, all in stock for 5 boards) | `bom/bom.csv`, `bom/bom_jlc.csv`, `bom/stock_check.json` | `python3 scripts/export_bom.py` then `jlc_stock.py bom/bom.csv --boards 5` |
 | Gate checklist and open items | [docs/checklists/phase1.md](docs/checklists/phase1.md) | |
 | Settings the firmware must apply | [docs/firmware-interface.md](docs/firmware-interface.md) | |
+
+| Phase 2 output | Where | Reproduce |
+|---|---|---|
+| Simulation report: S0–S5 findings, schematic changes, firmware constraints, model limits | [simulation/REPORT.md](simulation/REPORT.md) | `python3 simulation/fetch_models.py` then `python3 simulation/run_all.py` |
+| Results and plots | `simulation/results/`, `simulation/plots/` | |
 
 Design rules come from the `hardware-design` skills in [claude-hardware-skills](https://github.com/gabrielfrasantos/claude-hardware-skills).
