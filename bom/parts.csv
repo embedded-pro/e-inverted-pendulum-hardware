@@ -1,6 +1,6 @@
 group,function,mpn,lcsc,qty,notes
 mcu,MCU,STM32WB55RGV6,C401505,1,D-001; stock is thin, reserve before ordering
-mcu,HSE 32 MHz crystal,NX2016SA-32M-EXS00A-CS06465,C1986260,1,ST-recommended for STM32WB; no external load caps (HSETUNE)
+mcu,HSE 32 MHz crystal,NX2016SA-32MHZ-EXS00A-CS06654,C5441424,1,DS11929 Table 5 note 1 reference part (C_L 8 pF); no external load caps (HSETUNE)
 mcu,LSE 32.768 kHz crystal 6 pF,NX3215SA-32.768K-STD-MUA-14,C156244,1,C_L 6 pF per AN2867 low-C_L guidance; load caps from the C_L formula
 mcu,SMPS inductor 10 uH,LQM21FN100M80L,C162582,1,DS11929 Table 6 (4 MHz option; datasheet example LQM21FN100M70L)
 mcu,SMPS series inductor 10 nH,LQG15HS10NJ02D,C77103,1,DS11929 Table 6 note 2
@@ -13,9 +13,12 @@ drive,Sense resistor 50 mOhm 1206 1 W 75 ppm,HoLR1206-1W-50mR-1%-75ppm,C601102,2
 drive,Bulk capacitor 220 uF 35 V,EEEFK1V221P,C178562,1,size confirmed in S1/S2
 sensing,IMU,MPU-6500,C50278,1,D-004
 sensing,Encoder Schmitt buffer x3,SN74LVC3G17DCTR,C18213,2,D-012
-sensing,Encoder connector ESD,TPD4E05U06DQAR,C138714,2,one per encoder connector
+sensing,Connector ESD (encoders + Qwiic),TPD4E05U06DQAR,C138714,3,one per encoder connector and one for Qwiic
 memory,SPI NOR flash 2 MB,W25Q16JVSSIQ,C131025,1,D-005
-power,Buck 5 V,TPS62933DRLR,C3200405,1,
+power,Buck 5 V (forced PWM),TPS62933FDRLR,C5219272,1,F = FCCM: fixed frequency near the radio
+power,Buck inductor 4.7 uH,SWPA4030S4R7MT,C57269,1,design-calcs TPS62933F L
+mcu,VDDA ferrite,BLM18PG221SN1D,C80165,1,mcu-circuit-design s2
+sensing,Encoder supply PTC 100 mA,SMD0805P010TF,C20975,1,shorted encoder cable cannot drop +5V
 power,LDO 3.3 V,TLV75533PDBVR,C404027,1,
 power,Dual P-MOSFET power path,AO4805,C3040596,1,D-011
 power,TVS 15 V,SMBJ15A,C83846,1,HW-PWR-004

@@ -17,3 +17,7 @@ fab/
 
 # Vendor datasheets (copyrighted), fetched by scripts/fetch_datasheet.py
 datasheets/
+
+# KiCad local state
+kicad/*.kicad_prl
+kicad/fp-info-cache
