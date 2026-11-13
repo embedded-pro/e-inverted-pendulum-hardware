@@ -5,7 +5,7 @@
 SVGs come from `kicad-cli pcb export svg` (board area only, no drawing sheet) and are rasterised with cairosvg on a
 white background. The 3D view uses `kicad-cli pcb render`; parts without installed 3D models show as bare pads.
 
-Run: python3 scripts/render_board.py [--out kicad/renders] [--dpi 300] [--no-3d]
+Run: python3 scripts/pcb/render.py [--out docs/images] [--dpi 300] [--no-3d]
 """
 
 import argparse
@@ -16,7 +16,7 @@ import tempfile
 import cairosvg
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-BOARD = ROOT / "kicad" / "e-inverted-pendulum.kicad_pcb"
+BOARD = ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.kicad_pcb"
 
 VIEWS = {
     "top": "F.Cu,F.SilkS,F.Mask,F.CrtYd,F.Fab,User.Drawings,User.Comments,Edge.Cuts",
@@ -55,7 +55,7 @@ def render_3d(out):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--out", type=pathlib.Path, default=ROOT / "kicad" / "renders")
+    parser.add_argument("--out", type=pathlib.Path, default=ROOT / "docs" / "images")
     parser.add_argument("--dpi", type=int, default=300)
     parser.add_argument("--no-3d", action="store_true")
     args = parser.parse_args()

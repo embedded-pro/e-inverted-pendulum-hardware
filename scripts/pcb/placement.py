@@ -1,4 +1,4 @@
-"""Board geometry for kicad/gen/board.py, in mechanical coordinates (docs/mechanical.md).
+"""Board geometry for scripts/pcb/board.py, in mechanical coordinates (docs/mechanical.md).
 
 x: across the plate, 0 on the vertical centreline. z: up the plate, 0 on the wheel axle at the centre of the 25 mm
 bracket strip (D-026). mm, front (component side) view.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build the hierarchical KiCad 10 schematic from kicad/gen/design/*.py into kicad/.
+"""Build the hierarchical KiCad 10 schematic from scripts/schgen/design/*.py into hardware/e-inverted-pendulum/.
 
-Usage: python3 kicad/gen/build.py
+Usage: python3 scripts/schgen/build.py
 """
 
 import json
@@ -16,7 +16,7 @@ sys.path.insert(0, str(HERE / "design"))
 from schematic import Builder  # noqa: E402
 import drive, imu_flash, logic_power, mcu, motors_encoders, power_entry, rf, ui  # noqa: E402,E401
 
-OUT = HERE.parent
+OUT = HERE.parents[1] / "hardware" / "e-inverted-pendulum"
 TITLE = "e-inverted-pendulum chassis PCB"
 
 

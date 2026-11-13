@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create or update kicad/e-inverted-pendulum.kicad_pcb from the schematic: a scripted "Update PCB from Schematic".
+"""Create or update hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb from the schematic: a scripted "Update PCB from Schematic".
 
 Placement belongs to the owner (D-032): the .kicad_pcb is the source of truth for where parts are and for the
 board geometry. This script never moves, reshapes or deletes anything that already exists on the board. It:
@@ -17,7 +17,7 @@ one column per schematic sheet, packed by courtyard so nothing overlaps, with th
 Coordinates in placement.py are mechanical (docs/mechanical.md): x across the plate, z up from the wheel axle,
 both in mm, viewed from the front (component side).
 
-Run: python3 kicad/gen/board.py [--rules path/to/pcb_rules.py] [--stage-all]
+Run: python3 scripts/pcb/board.py [--rules path/to/pcb_rules.py] [--stage-all]
 """
 
 import argparse
@@ -31,13 +31,14 @@ import tempfile
 
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "schgen"))
 if "--pcbnew-stage" in sys.argv:
     import pcbnew  # noqa: E402
 import placement  # noqa: E402
 from sexpr import Str, Sym, dump, parse  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-KICAD = ROOT / "kicad"
+KICAD = ROOT / "hardware" / "e-inverted-pendulum"
 SCHEMATIC = KICAD / "e-inverted-pendulum.kicad_sch"
 BOARD = KICAD / "e-inverted-pendulum.kicad_pcb"
 PROJECT = KICAD / "e-inverted-pendulum.kicad_pro"
@@ -88,7 +89,7 @@ NET_CLASSES = {
 DEFAULT_CLASS = {"track_width": 0.2, "clearance": 0.15}
 
 CUSTOM_RULES = """
-# Project rules (kicad/gen/board.py). They follow the pcb_rules block, so they win where both match.
+# Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
 
 (rule "RF1 matching trace: DS12804 Fig. 13 copies a 104 um gap (docs/rf.md)"
   (condition "A.NetName == 'RF1'")
@@ -166,7 +167,7 @@ def read_netlist():
 
 def library_path(nickname):
     if nickname == PROJECT_LIBRARY:
-        return KICAD / "lib" / f"{PROJECT_LIBRARY}.pretty"
+        return KICAD / f"{PROJECT_LIBRARY}.pretty"
     return SYSTEM_FOOTPRINTS / f"{nickname}.pretty"
 
 
@@ -431,7 +432,7 @@ def write_net_classes():
 def apply_rules(script):
     subprocess.run([sys.executable, str(script), "apply", str(PROJECT), "--fab", "jlcpcb", "--netclasses"], check=True)
     text = RULES.read_text(encoding="utf-8")
-    marker = "# Project rules (kicad/gen/board.py)"
+    marker = "# Project rules ("
     if marker in text:
         text = text[:text.index(marker)].rstrip() + "\n"
     RULES.write_text(text + CUSTOM_RULES, encoding="utf-8")

@@ -107,7 +107,7 @@
     "trim_cap_to_13p56_pF": 2.9201125126167806,
     "f0_with_trim_MHz": 13.56
   },
-  "footprint": "kicad/lib/e-inverted-pendulum.pretty/NFC_Coil_25x21mm.kicad_mod",
+  "footprint": "hardware/e-inverted-pendulum/e-inverted-pendulum.pretty/NFC_Coil_25x21mm.kicad_mod",
   "sources": {
     "c_tun": "DS13519 Rev 6, RF characteristics: CTUN 28.5 pF typ at 13.56 MHz",
     "c_parasitic": "ASSUMPTION 1 pF coil + pad capacitance",

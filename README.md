@@ -16,10 +16,10 @@ Status: **Phase 2 (simulation) complete, awaiting the gate review**. Phases 0 an
 
 | Phase 1 output | Where | Reproduce |
 |---|---|---|
-| Schematic (KiCad 10, 8 sheets, 171 parts) | `kicad/`, [docs/schematic.pdf](docs/schematic.pdf) | `python3 kicad/gen/build.py` |
+| Schematic (KiCad 10, 8 sheets, 171 parts) | `hardware/e-inverted-pendulum/`, [docs/schematic.pdf](docs/schematic.pdf) | `python3 scripts/schgen/build.py` |
 | Component values and their sources | [docs/design-calcs.md](docs/design-calcs.md) | `python3 scripts/design_calcs.py` |
-| Custom symbols and footprints | `kicad/lib/` | `python3 kicad/gen/make_library.py`, `make_footprints.py` |
-| ERC (0 errors, 0 warnings) | CI | `kicad-cli sch erc --severity-all kicad/e-inverted-pendulum.kicad_sch` |
+| Custom symbols and footprints | `hardware/e-inverted-pendulum/` (`.kicad_sym`, `.pretty`) | `python3 scripts/schgen/make_library.py`, `make_footprints.py` |
+| ERC (0 errors, 0 warnings) | CI | `kicad-cli sch erc --severity-all hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sch` |
 | Netlist, pin map and symbol/footprint checks | CI | `python3 scripts/check_netlist.py`, `check_library.py`, `check_pinmap.py` |
 | Assembly BOM (64 lines, all in stock for 5 boards) | `bom/bom.csv`, `bom/bom_jlc.csv`, `bom/stock_check.json` | `python3 scripts/export_bom.py` then `jlc_stock.py bom/bom.csv --boards 5` |
 | Gate checklist and open items | [docs/checklists/phase1.md](docs/checklists/phase1.md) | |

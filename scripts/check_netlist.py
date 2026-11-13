@@ -8,7 +8,7 @@ Checks:
   4. every BOM part (in_bom, not DNP) has a footprint, an LCSC number and an MPN;
   5. every footprint referenced exists in the KiCad or project libraries.
 
-Usage: check_netlist.py [kicad/e-inverted-pendulum.kicad_sch]
+Usage: check_netlist.py [hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sch]
 """
 
 import csv
@@ -18,11 +18,11 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "kicad" / "gen"))
+sys.path.insert(0, str(ROOT / "scripts" / "schgen"))
 from sexpr import find, find_all, parse  # noqa: E402
 
 SYSTEM_FP = pathlib.Path("/usr/share/kicad/footprints")
-PROJECT_FP = ROOT / "kicad" / "lib" / "e-inverted-pendulum.pretty"
+PROJECT_FP = ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.pretty"
 MCU = "U301"
 RAILS = {
     MCU: {"1": "+3V3", "13": "VDDA", "14": "VDDA", "30": "+3V3", "33": "+3V3", "44": "+3V3", "45": "+3V3",
@@ -43,7 +43,7 @@ def netlist(schematic):
 
 
 def main():
-    schematic = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "kicad" / "e-inverted-pendulum.kicad_sch"
+    schematic = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.kicad_sch"
     tree = netlist(schematic)
     errors = []
     pin_net, net_nodes = {}, {}

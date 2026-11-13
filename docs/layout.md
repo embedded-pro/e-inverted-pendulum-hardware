@@ -3,9 +3,9 @@
 Status: **hand-off (2026-11-13, D-032).** The owner places the components in KiCad. The board starts as a clean
 slate:
 - **on the board:** the outline, the keep-out rule areas, the reference drawings and the WHEELTEC bracket holes;
-- **staging area right of the board:** every other part, grouped by schematic sheet (`kicad/renders/overview.png`).
+- **staging area right of the board:** every other part, grouped by schematic sheet (`docs/images/overview.png`).
 
-From now on the `.kicad_pcb` is the source of truth for placement. `kicad/gen/board.py` never moves, reshapes or deletes
+From now on the `.kicad_pcb` is the source of truth for placement. `scripts/pcb/board.py` never moves, reshapes or deletes
 anything on the board.
 
 **Sources:**
@@ -29,7 +29,7 @@ anything on the board.
 
 ## What DRC enforces (rule areas and project rules)
 
-These are on the board as rule areas (they can be moved or edited in KiCad) and in `kicad/e-inverted-pendulum.kicad_dru`:
+These are on the board as rule areas (they can be moved or edited in KiCad) and in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_dru`:
 
 | Name | Where | Rule | Why |
 |---|---|---|---|
@@ -73,15 +73,15 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 2. Re-sync and check. This keeps every position:
 
    ```bash
-   python3 kicad/gen/board.py --rules <path to pcb_rules.py>
+   python3 scripts/pcb/board.py --rules <path to pcb_rules.py>
    ```
 
    ```bash
-   kicad-cli pcb drc --schematic-parity --severity-all kicad/e-inverted-pendulum.kicad_pcb
+   kicad-cli pcb drc --schematic-parity --severity-all hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb
    ```
 
    ```bash
-   python3 scripts/render_board.py
+   python3 scripts/pcb/render.py
    ```
 
 3. Phase 3 steps 4–8 follow: support placement around your anchors, power copper, critical routes, the rest of the

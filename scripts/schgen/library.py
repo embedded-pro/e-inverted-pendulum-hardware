@@ -8,7 +8,8 @@ from sexpr import Str, find, find_all, parse
 
 SYSTEM_SYMBOLS = pathlib.Path("/usr/share/kicad/symbols")
 PROJECT_LIBRARY = "e-inverted-pendulum"
-PROJECT_SYMBOLS = pathlib.Path(__file__).resolve().parent.parent / "lib" / f"{PROJECT_LIBRARY}.kicad_sym"
+PROJECT_SYMBOLS = (pathlib.Path(__file__).resolve().parents[2] / "hardware" / PROJECT_LIBRARY
+                   / f"{PROJECT_LIBRARY}.kicad_sym")
 
 _cache = {}
 

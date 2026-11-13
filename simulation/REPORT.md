@@ -2,7 +2,7 @@
 
 Reproduce everything: `python3 simulation/fetch_models.py` (TI models, not committed) then
 `python3 simulation/run_all.py`. Per-step results are in `results/*.json` and plots in `plots/`.
-Values are read from `kicad/*.kicad_sch` (`kicad_values.py`); the Phase 1 values are kept as explicit
+Values are read from `hardware/e-inverted-pendulum/*.kicad_sch` (`kicad_values.py`); the Phase 1 values are kept as explicit
 comparison variants so the before/after numbers stay reproducible.
 
 ## Phase 2 summary

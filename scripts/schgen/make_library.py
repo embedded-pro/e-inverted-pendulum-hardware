@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the project symbol library kicad/lib/e-inverted-pendulum.kicad_sym.
+"""Generate the project symbol library hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sym.
 
 Pin tables are transcribed from the vendor datasheets named in each entry. The file is written
 in a format KiCad parses and then normalised with `kicad-cli sym upgrade`.
@@ -10,7 +10,8 @@ import subprocess
 
 from sexpr import Str, Sym, dump
 
-LIB = pathlib.Path(__file__).resolve().parent.parent / "lib" / "e-inverted-pendulum.kicad_sym"
+LIB = (pathlib.Path(__file__).resolve().parents[2] / "hardware" / "e-inverted-pendulum"
+       / "e-inverted-pendulum.kicad_sym")
 FONT = [Sym("effects"), [Sym("font"), [Sym("size"), 1.27, 1.27]]]
 PIN_LENGTH = 2.54
 PITCH = 2.54

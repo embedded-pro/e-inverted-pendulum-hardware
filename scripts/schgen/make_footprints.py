@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the project footprints in kicad/lib/e-inverted-pendulum.pretty from datasheet land patterns.
+"""Generate the project footprints in hardware/e-inverted-pendulum/e-inverted-pendulum.pretty from datasheet land patterns.
 
 Each footprint lists its source (document and figure). Files are normalised with `kicad-cli fp upgrade`.
 """
@@ -10,7 +10,8 @@ import uuid
 
 from sexpr import Str, Sym, dump
 
-PRETTY = pathlib.Path(__file__).resolve().parent.parent / "lib" / "e-inverted-pendulum.pretty"
+PRETTY = (pathlib.Path(__file__).resolve().parents[2] / "hardware" / "e-inverted-pendulum"
+          / "e-inverted-pendulum.pretty")
 NAMESPACE = uuid.UUID("0c3f6a47-2b8e-4f0e-8f5d-7a1d9e2c4b60")
 
 

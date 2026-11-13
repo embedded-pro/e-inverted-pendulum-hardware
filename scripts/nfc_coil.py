@@ -13,7 +13,7 @@ Inductance, two independent ways (they must agree within 5 %):
   - Modified Wheeler for a square spiral, L = K1 mu0 n^2 d_avg / (1 + K2 rho), K1 2.34, K2 2.75 (Mohan et al., IEEE
     JSSC 34(10), 1999), applied to the square of equal area. A cross-check only: the coil is rectangular.
 
-Footprint (kicad/lib/e-inverted-pendulum.pretty/NFC_Coil_25x21mm.kicad_mod), built like KiCad's SWRA117D antenna:
+Footprint (hardware/e-inverted-pendulum/e-inverted-pendulum.pretty/NFC_Coil_25x21mm.kicad_mod), built like KiCad's SWRA117D antenna:
   - pad 1 (AC0 end) at the outer start, pad 2 at the inner end (a via) and again outside the coil (a via);
   - the spiral is footprint copper on F.Cu, the underpass on B.Cu; net_tie_pad_groups "1,2" allows the coil to join
     pads 1 and 2.
@@ -28,7 +28,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "kicad" / "gen"))
+sys.path.insert(0, str(ROOT / "scripts" / "schgen"))
 from make_footprints import PRETTY, footprint, hidden, label, uid  # noqa: E402
 from sexpr import Str, Sym, dump  # noqa: E402
 

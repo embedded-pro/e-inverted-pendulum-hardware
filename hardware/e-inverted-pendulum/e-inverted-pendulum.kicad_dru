@@ -1,0 +1,41 @@
+(version 1)
+
+# BEGIN pcb_rules managed block (jlcpcb, 4+ layers). Re-run pcb_rules.py apply to change;
+# rules you add below this block override it.
+(rule "fab: plated pad annular ring"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint annular_width (min 0.15mm)))
+(rule "fab: pad hole to pad hole (different nets)"
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && (A.NetName != B.NetName || A.NetName == '')")
+  (constraint hole_to_hole (min 0.45mm)))
+(rule "fab: plated pad hole to copper"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole'")
+  (constraint hole_clearance (min 0.28mm)))
+(rule "fab: NPTH minimum drill"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_size (min 0.5mm)))
+(rule "quality: 45-degree corners only (no 90-degree or acute corners, no mid-track branches)"
+  (constraint track_angle (min 135)))
+# END pcb_rules managed block
+
+# Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
+
+(rule "RF1 matching trace: DS12804 Fig. 13 copies a 104 um gap (docs/rf.md)"
+  (condition "A.NetName == 'RF1'")
+  (constraint clearance (min 0.1mm)))
+
+(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
+  (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
+  (constraint annular_width (min 0.1mm)))
+
+(rule "Battery on the back: no through-hole pins under it (D-025)"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.insideArea('BATTERY_BACK')")
+  (constraint disallow pad))
+
+(rule "Bracket strip: no parts except the bracket holes (D-026)"
+  (condition "A.Type == 'Footprint' && A.insideArea('BRACKET_STRIP') && A.Reference != 'MB*'")
+  (constraint disallow footprint))
+
+(rule "NPTH to copper: screw threads touch the hole wall; washers and brackets are kept off by the footprint keep-out"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_clearance (min 0.5mm)))

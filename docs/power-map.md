@@ -1,7 +1,7 @@
 # Power map and net classes
 
-Built per `power-pcb-layout` §2 before placement. The net classes in `kicad/e-inverted-pendulum.kicad_pro`
-come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way round.
+Built per `power-pcb-layout` §2 before placement. The net classes in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pro`
+come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way round.
 
 **Track widths:** IPC-2221, ΔT 10 °C, 1 oz outer / 0.5 oz inner (D-008), using the skill's `width_mm()`:
 - 4.2 A (two MG310s at the 2.0 A trip plus logic, D-027): 2.17 mm outer, 11.3 mm inner;
