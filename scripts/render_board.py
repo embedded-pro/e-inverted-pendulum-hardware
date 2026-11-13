@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Render the board for review (power-pcb-layout s6.4): every copper layer, both sides, and a 3D view.
+"""Render the board for review (power-pcb-layout s6.4): every copper layer, both sides, a whole-page overview
+(board plus the staging area) and a 3D view.
 
 SVGs come from `kicad-cli pcb export svg` (board area only, no drawing sheet) and are rasterised with cairosvg on a
 white background. The 3D view uses `kicad-cli pcb render`; parts without installed 3D models show as bare pads.
@@ -25,7 +26,9 @@ VIEWS = {
     "L3_In2.Cu": "In2.Cu,Edge.Cuts",
     "L4_B.Cu": "B.Cu,Edge.Cuts",
     "placement": "F.CrtYd,F.Fab,F.SilkS,User.Drawings,User.Comments,Edge.Cuts",
+    "overview": "F.CrtYd,F.Fab,User.Drawings,User.Comments,Edge.Cuts",
 }
+WHOLE_PAGE = {"overview"}
 MIRRORED = {"bottom", "L4_B.Cu"}
 
 
@@ -33,7 +36,7 @@ def render_svg(name, layers, out, dpi):
     with tempfile.TemporaryDirectory() as tmp:
         svg = pathlib.Path(tmp) / f"{name}.svg"
         command = ["kicad-cli", "pcb", "export", "svg", "-l", layers, "--exclude-drawing-sheet",
-                   "--page-size-mode", "2", "-o", str(svg), str(BOARD)]
+                   "--page-size-mode", "0" if name in WHOLE_PAGE else "2", "-o", str(svg), str(BOARD)]
         if name in MIRRORED:
             command.insert(-1, "--mirror")
         subprocess.run(command, check=True, capture_output=True)

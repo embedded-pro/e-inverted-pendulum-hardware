@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 """Create or update kicad/e-inverted-pendulum.kicad_pcb from the schematic: a scripted "Update PCB from Schematic".
 
-What it owns (docs/mechanical.md, docs/rf.md, docs/power-map.md, D-008, D-024):
-  - board outline 85 x 130 mm with 1 mm corner radii, battery strap slots;
-  - JLC04161H-7628 stack-up, title block;
-  - board-only mechanical footprints (motor-mount slots, bumper holes) and rule areas (antenna keep-out,
-    battery zone);
-  - one footprint per schematic symbol with its fields, sheet path, DNP/BOM flags and pad nets;
-  - net classes (NET_CLASSES, from docs/power-map.md) and the JLC rules (pcb-design-rules skill, pcb_rules.py).
+Placement belongs to the owner (D-032): the .kicad_pcb is the source of truth for where parts are and for the
+board geometry. This script never moves, reshapes or deletes anything that already exists on the board. It:
+  - creates what is missing: the 85 x 130 mm outline, the rule areas and reference drawings from placement.py, and the
+    bracket holes (placement.MECHANICAL), each only if absent;
+  - syncs the schematic: one footprint per symbol with its fields, sheet path, DNP/BOM flags and pad nets; a footprint
+    whose library entry changed is swapped in place (position, rotation and lock kept); new parts go to the staging
+    area right of the board; parts removed from the schematic are deleted (board-only footprints are never deleted);
+  - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the JLC rules
+    (pcb-design-rules skill, pcb_rules.py) plus the project rules below.
 
-Re-running keeps every footprint where it is. Locked footprints are never moved. Footprints listed in
-placement.ANCHORS are moved to their anchor position only while they are unlocked (drafts before owner approval).
-Everything else that is new goes to a staging area right of the board.
+--stage-all (one-shot) moves every unlocked footprint except the bracket holes off the board into the staging area,
+one column per schematic sheet, packed by courtyard so nothing overlaps, with the sheet name on Cmts.User.
 
 Coordinates in placement.py are mechanical (docs/mechanical.md): x across the plate, z up from the wheel axle,
-both in mm, viewed from the top (component) side.
+both in mm, viewed from the front (component side).
 
-Run: python3 kicad/gen/board.py [--rules path/to/pcb_rules.py]
+Run: python3 kicad/gen/board.py [--rules path/to/pcb_rules.py] [--stage-all]
 """
 
 import argparse
@@ -208,20 +209,10 @@ def shape_points(shape):
     return [to_board(*start), to_board(*rotate(centre, start, sweep / 2.0)), to_board(*rotate(centre, start, sweep))]
 
 
-def signature(points):
-    return tuple(sorted((round(p.x, -3), round(p.y, -3)) for p in points))
-
-
 def ensure_outline(board):
-    target = outline_shapes()
-    edges = [item for item in board.GetDrawings() if item.GetLayer() == pcbnew.Edge_Cuts]
-    have = sorted(signature([e.GetStart(), e.GetEnd()] + ([e.GetArcMid()] if e.GetShape() == pcbnew.SHAPE_T_ARC else []))
-                  for e in edges)
-    if have == sorted(signature(shape_points(shape)) for shape in target):
+    if any(item.GetLayer() == pcbnew.Edge_Cuts for item in board.GetDrawings()):
         return
-    for item in edges:
-        board.Delete(item)
-    for shape in target:
+    for shape in outline_shapes():
         points = shape_points(shape)
         item = pcbnew.PCB_SHAPE(board, pcbnew.SHAPE_T_SEGMENT if shape[0] == "line" else pcbnew.SHAPE_T_ARC)
         if shape[0] == "line":
@@ -236,80 +227,58 @@ def ensure_outline(board):
 
 def ensure_drawings(board):
     layer = pcbnew.Dwgs_User
-    target = []
+    if any(d.GetLayer() == layer for d in board.GetDrawings()):
+        return
     for item in placement.DRAWINGS:
         if item[0] == "rect":
             (x0, z0), (x1, z1) = item[1], item[2]
-            target += [("line", (x0, z0), (x1, z0)), ("line", (x1, z0), (x1, z1)),
-                       ("line", (x1, z1), (x0, z1)), ("line", (x0, z1), (x0, z0))]
+            shapes = [((x0, z0), (x1, z0)), ((x1, z0), (x1, z1)), ((x1, z1), (x0, z1)), ((x0, z1), (x0, z0))]
         else:
-            target.append(("line", item[1], item[2]))
-    texts = [(item[3], (item[1][0] + item[2][0]) / 2.0, max(item[1][1], item[2][1]) - 1.5)
-             for item in placement.DRAWINGS if len(item) > 3 and item[3]]
-    lines = [d for d in board.GetDrawings() if d.GetLayer() == layer and d.GetClass() == "PCB_SHAPE"]
-    labels = [d for d in board.GetDrawings() if d.GetLayer() == layer and d.GetClass() == "PCB_TEXT"]
-    same_lines = (sorted(signature([d.GetStart(), d.GetEnd()]) for d in lines)
-                  == sorted(signature(shape_points(t)) for t in target))
-    same_texts = sorted((t.GetText(), t.GetPosition().x, t.GetPosition().y) for t in labels) == sorted(
-        (text, to_board(x, z).x, to_board(x, z).y) for text, x, z in texts)
-    if same_lines and same_texts:
-        return
-    for item in lines + labels:
-        board.Delete(item)
-    for shape in target:
-        start, end = shape_points(shape)
-        line = pcbnew.PCB_SHAPE(board, pcbnew.SHAPE_T_SEGMENT)
-        line.SetStart(start)
-        line.SetEnd(end)
-        line.SetLayer(layer)
-        line.SetWidth(pcbnew.FromMM(0.15))
-        board.Add(line)
-    for text, x, z in texts:
-        label = pcbnew.PCB_TEXT(board)
-        label.SetText(text)
-        label.SetPosition(to_board(x, z))
-        label.SetLayer(layer)
-        label.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.2), pcbnew.FromMM(1.2)))
-        label.SetTextThickness(pcbnew.FromMM(0.15))
-        board.Add(label)
+            shapes = [(item[1], item[2])]
+        for start, end in shapes:
+            line = pcbnew.PCB_SHAPE(board, pcbnew.SHAPE_T_SEGMENT)
+            line.SetStart(to_board(*start))
+            line.SetEnd(to_board(*end))
+            line.SetLayer(layer)
+            line.SetWidth(pcbnew.FromMM(0.15))
+            board.Add(line)
+        if len(item) > 3 and item[3]:
+            add_label(board, item[3], to_board((item[1][0] + item[2][0]) / 2.0, max(item[1][1], item[2][1]) - 1.5), layer)
+
+
+def add_label(board, text, position, layer, size=1.2):
+    label = pcbnew.PCB_TEXT(board)
+    label.SetText(text)
+    label.SetPosition(position)
+    label.SetLayer(layer)
+    label.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(size), pcbnew.FromMM(size)))
+    label.SetTextThickness(pcbnew.FromMM(0.15))
+    board.Add(label)
+    return label
 
 
 def ensure_rule_areas(board):
-    wanted = {area["name"] for area in placement.RULE_AREAS}
-    stale = [zone for zone in board.Zones() if zone.GetIsRuleArea() and zone.GetZoneName() not in wanted]
-    for zone in stale:
-        board.Delete(zone)
-    current = {zone.GetZoneName(): zone for zone in board.Zones() if zone.GetIsRuleArea()}
+    present = {zone.GetZoneName() for zone in board.Zones() if zone.GetIsRuleArea()}
     for area in placement.RULE_AREAS:
+        if area["name"] in present:
+            continue
         layers = pcbnew.LSET()
         for layer in area["layers"]:
             layers.AddLayer(board.GetLayerID(layer))
-        points = [to_board(x, z) for x, z in area["polygon"]]
-        zone = current.get(area["name"])
-        if zone is not None:
-            outline = zone.Outline()
-            existing = [outline.CVertex(i) for i in range(outline.TotalVertices())]
-            same = ([(p.x, p.y) for p in existing] == [(p.x, p.y) for p in points]
-                    and zone.GetLayerSet().Seq().size() == layers.Seq().size())
-            if same:
-                continue
-            board.Delete(zone)
         zone = pcbnew.ZONE(board)
         zone.SetIsRuleArea(True)
         zone.SetZoneName(area["name"])
         zone.SetLayerSet(layers)
         outline = zone.Outline()
         outline.NewOutline()
-        for point in points:
-            outline.Append(point)
-        board.Add(zone)
-    for area in placement.RULE_AREAS:
-        zone = next(z for z in board.Zones() if z.GetIsRuleArea() and z.GetZoneName() == area["name"])
+        for x, z in area["polygon"]:
+            outline.Append(to_board(x, z))
         zone.SetDoNotAllowTracks("tracks" in area["deny"])
         zone.SetDoNotAllowVias("vias" in area["deny"])
         zone.SetDoNotAllowPads("pads" in area["deny"])
         zone.SetDoNotAllowZoneFills("pour" in area["deny"])
         zone.SetDoNotAllowFootprints("footprints" in area["deny"])
+        board.Add(zone)
 
 
 def fingerprint(fp):
@@ -359,11 +328,10 @@ def ensure_mechanical(board, existing):
             fp = load_footprint(board, f"{PROJECT_LIBRARY}:{item['footprint']}")
             fp.SetReference(item["ref"])
             fp.SetValue(item["value"])
-            board.Add(fp)
-            existing[item["ref"]] = fp
-        if not fp.IsLocked():
             fp.SetPosition(to_board(item["x"], item["z"]))
             fp.SetOrientationDegrees(item.get("rot", 0.0))
+            board.Add(fp)
+            existing[item["ref"]] = fp
         fp.SetBoardOnly(True)
         fp.SetExcludedFromBOM(True)
         fp.SetExcludedFromPosFiles(True)
@@ -377,10 +345,9 @@ def sync_footprints(board, components, nets, pins):
             found = pcbnew.NETINFO_ITEM(board, name)
             board.Add(found)
         netinfo[name] = found
-    mechanical = {item["ref"] for item in placement.MECHANICAL}
     existing = {fp.GetReference(): fp for fp in board.GetFootprints()}
     for ref, fp in list(existing.items()):
-        if ref not in components and ref not in mechanical:
+        if ref not in components and not fp.IsBoardOnly():
             board.Delete(fp)
             del existing[ref]
     staged = 0
@@ -417,11 +384,6 @@ def sync_footprints(board, components, nets, pins):
         for pad in fp.Pads():
             net = pins.get((ref, pad.GetNumber()))
             pad.SetNet(netinfo[net] if net else netinfo[""])
-        anchor = placement.ANCHORS.get(ref)
-        if anchor is not None and not fp.IsLocked():
-            x, z, rotation = anchor[:3]
-            fp.SetPosition(to_board(x, z))
-            fp.SetOrientationDegrees(rotation)
         existing[ref] = fp
     return existing
 
@@ -444,6 +406,8 @@ def write_stackup():
     general = child(tree, Sym("general"))[0]
     for item in child(general, Sym("thickness")):
         item[1] = 1.6
+    for item in child(tree, Sym("paper")):
+        item[1:] = [Str("A3")]
     BOARD.write_text(dump(tree) + "\n", encoding="utf-8")
 
 
@@ -473,7 +437,58 @@ def apply_rules(script):
     RULES.write_text(text + CUSTOM_RULES, encoding="utf-8")
 
 
-def build_board():
+STAGE_LABEL = "STAGING: "
+STAGE_COLUMN_WIDTH = 46.0
+STAGE_GAP = 1.0
+STAGE_ROW_WIDTH = 210.0
+
+
+def stage_all(board):
+    keep = {item["ref"] for item in placement.MECHANICAL}
+    for item in [d for d in board.GetDrawings() if d.GetClass() == "PCB_TEXT" and d.GetText().startswith(STAGE_LABEL)]:
+        board.Delete(item)
+    groups = {}
+    for fp in board.GetFootprints():
+        if fp.IsLocked() or fp.GetReference() in keep:
+            continue
+        group = fp.GetSheetname() or "Mechanical (owner to place)"
+        groups.setdefault(group, []).append(fp)
+    right = to_board(placement.WIDTH / 2.0, 0.0).x
+    top = to_board(0.0, placement.TOP_Z).y
+    gap, width = pcbnew.FromMM(STAGE_GAP), pcbnew.FromMM(STAGE_COLUMN_WIDTH)
+    first_x, limit = right + pcbnew.FromMM(10.0), right + pcbnew.FromMM(STAGE_ROW_WIDTH)
+    column_x, row_y, row_height = first_x, top + pcbnew.FromMM(4.0), 0
+    moved = 0
+    for group in sorted(groups):
+        if column_x > first_x and column_x + width > limit:
+            column_x, row_y, row_height = first_x, row_y + row_height + pcbnew.FromMM(10.0), 0
+        parts = sorted(groups[group], key=lambda f: (f.GetFPIDAsString(), f.GetReference()))
+        label = add_label(board, STAGE_LABEL + group, pcbnew.VECTOR2I(column_x, row_y - pcbnew.FromMM(3.0)),
+                          pcbnew.Cmts_User, size=1.2)
+        label.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_LEFT)
+        x, y, shelf = column_x, row_y, 0
+        widest = 0
+        for fp in parts:
+            fp.SetOrientationDegrees(0)
+            fp.BuildCourtyardCaches()
+            box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+            if box.GetWidth() == 0:
+                box = fp.GetBoundingBox(False)
+            w, h = box.GetWidth(), box.GetHeight()
+            if x > column_x and x + w > column_x + width:
+                x, y, shelf = column_x, y + shelf + gap, 0
+            offset = fp.GetPosition() - box.GetPosition()
+            fp.SetPosition(pcbnew.VECTOR2I(x, y) + offset)
+            x += w + gap
+            shelf = max(shelf, h)
+            widest = max(widest, x - column_x)
+            moved += 1
+        row_height = max(row_height, y + shelf - row_y)
+        column_x += max(width, widest) + pcbnew.FromMM(8.0)
+    return moved
+
+
+def build_board(stage=False):
     components, nets, pins = read_netlist()
     board = pcbnew.LoadBoard(str(BOARD)) if BOARD.exists() else pcbnew.NewBoard(str(BOARD))
     board.SetCopperLayerCount(4)
@@ -489,42 +504,27 @@ def build_board():
     ensure_mechanical(board, footprints)
     ensure_rule_areas(board)
     ensure_drawings(board)
+    staged = stage_all(board) if stage else 0
     board.GetDesignSettings().SetGridOrigin(to_board(0.0, 0.0))
     board.GetDesignSettings().SetAuxOrigin(to_board(-placement.WIDTH / 2.0, placement.BOTTOM_Z))
     pcbnew.SaveBoard(str(BOARD), board)
-    anchored = sum(1 for ref in footprints if ref in placement.ANCHORS)
     print(f"{BOARD.name}: {len(components)} schematic parts, {len(nets)} nets, "
-          f"{len(placement.MECHANICAL)} mechanical, {anchored} anchors")
-
-
-LAYOUT_DOC = ROOT / "docs" / "layout.md"
-
-
-def write_anchor_table():
-    if not LAYOUT_DOC.exists():
-        return
-    rows = ["| Ref | x | z | Rot | Why |", "|---|---|---|---|---|"]
-    rows += [f"| {ref} | {x:+.2f} | {z:+.2f} | {rot} | {why} |" for ref, (x, z, rot, why) in placement.ANCHORS.items()]
-    rows += [f"| {m['ref']} | {m['x']:+.2f} | {m['z']:+.2f} | {m.get('rot', 0)} | {m['value']} ({m['footprint']}) |"
-             for m in placement.MECHANICAL]
-    text = LAYOUT_DOC.read_text(encoding="utf-8")
-    begin, end = "<!-- BEGIN anchors (kicad/gen/board.py) -->", "<!-- END anchors -->"
-    head, rest = text.split(begin, 1)
-    tail = rest.split(end, 1)[1]
-    LAYOUT_DOC.write_text(head + begin + "\n" + "\n".join(rows) + "\n" + end + tail, encoding="utf-8")
+          f"{len(placement.MECHANICAL)} bracket holes" + (f", {staged} footprints staged" if stage else ""))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--rules", type=pathlib.Path, help="pcb_rules.py from the pcb-design-rules skill")
+    parser.add_argument("--stage-all", action="store_true",
+                        help="move every unlocked footprint except the bracket holes into the staging area (one-shot)")
     parser.add_argument("--pcbnew-stage", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.pcbnew_stage:
-        build_board()
+        build_board(stage=args.stage_all)
         return
     # pcbnew rewrites the .kicad_pro when its process exits (power-pcb-layout s6.2), so the board is built in a
     # child process and the project, stack-up and rules are written after it has gone.
-    subprocess.run([sys.executable, __file__, "--pcbnew-stage"], check=True)
+    subprocess.run([sys.executable, __file__, "--pcbnew-stage"] + (["--stage-all"] if args.stage_all else []), check=True)
     write_stackup()
     write_net_classes()
     if args.rules:
@@ -532,7 +532,6 @@ def main():
     project = PROJECT.read_bytes()
     subprocess.run(["kicad-cli", "pcb", "upgrade", "--force", str(BOARD)], check=True, capture_output=True)
     PROJECT.write_bytes(project)
-    write_anchor_table()
 
 
 if __name__ == "__main__":
