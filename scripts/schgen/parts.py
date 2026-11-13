@@ -1,10 +1,12 @@
-"""Part helpers: resolve passives from bom/passives.json and active parts from bom/parts.csv."""
+"""Part helpers for the sheet descriptions: passives from bom/passives.json, active parts from bom/parts.csv.
+
+Each helper places the symbol and labels its pins with the given nets; a later `rail`, `link` or `path` on the same
+pin draws the wire instead (and fails if the nets disagree).
+"""
 
 import csv
 import json
 import pathlib
-
-from schematic import Part
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PASSIVES = json.loads((ROOT / "bom" / "passives.json").read_text(encoding="utf-8"))
@@ -26,34 +28,38 @@ def _passive(key):
     return PASSIVES[key]
 
 
-def R(sheet, value, a, b, dnp=False, ref=None, purpose="", package="0603"):
+def _purpose(purpose):
+    return {"Purpose": purpose} if purpose else {}
+
+
+def R(sh, ref, value, x, y, n1, n2, rot=0, package="0603", dnp=False, purpose=""):
+    """Resistor; rot 0 is vertical with pin 1 on top, rot 90 horizontal with pin 1 on the left."""
     entry = _passive(f"R_{value}_{package}")
-    return sheet.add(Part(ref or sheet.next_ref("R"), "Device:R", value, {"1": a, "2": b},
-                          footprint=FOOTPRINT[f"R{package}"], lcsc=entry["lcsc"], mpn=entry["mpn"], dnp=dnp,
-                          fields={"Purpose": purpose} if purpose else None))
+    p = sh.part("Device:R", ref, value, (x, y), rot, fp=FOOTPRINT[f"R{package}"], lcsc=entry["lcsc"],
+                mpn=entry["mpn"], dnp=dnp, **_purpose(purpose))
+    sh.net(p["1"], n1)
+    sh.net(p["2"], n2)
+    return p
 
 
-def C(sheet, key, a, b, dnp=False, ref=None, purpose=""):
+def C(sh, ref, key, x, y, n1, n2="GND", rot=0, dnp=False, purpose=""):
+    """Capacitor from its catalog key (value_package_voltage_dielectric); pin 1 on top at rot 0."""
     entry = _passive(f"C_{key}")
-    package = key.split("_")[1]
-    value = key.split("_")[0] + "F"
-    return sheet.add(Part(ref or sheet.next_ref("C"), "Device:C", f"{value} {key.split('_')[2]}", {"1": a, "2": b},
-                          footprint=FOOTPRINT[f"C{package}"], lcsc=entry["lcsc"], mpn=entry["mpn"], dnp=dnp,
-                          fields={"Purpose": purpose} if purpose else None))
+    value, package, voltage = key.split("_")[:3]
+    p = sh.part("Device:C", ref, f"{value}F {voltage}", (x, y), rot, fp=FOOTPRINT[f"C{package}"],
+                lcsc=entry["lcsc"], mpn=entry["mpn"], dnp=dnp, **_purpose(purpose))
+    sh.net(p["1"], n1)
+    sh.net(p["2"], n2)
+    return p
 
 
-def active(sheet, mpn, lib_id, nets, footprint, prefix, value=None, ref=None, dnp=False, purpose=""):
+def active(sh, ref, mpn, lib_id, fp, x, y, rot=0, value=None, dnp=False, purpose="", unit=1, mirror=None):
+    """Part from bom/parts.csv (LCSC and MPN from the catalog); nets are added by the caller."""
     row = ACTIVE[mpn]
-    return sheet.add(Part(ref or sheet.next_ref(prefix), lib_id, value or mpn, nets, footprint=footprint,
-                          lcsc=row["lcsc"], mpn=row["mpn"], dnp=dnp,
-                          fields={"Purpose": purpose} if purpose else None))
+    return sh.part(lib_id, ref, value or mpn, (x, y), rot, unit=unit, fp=fp, lcsc=row["lcsc"], mpn=row["mpn"],
+                   dnp=dnp, mirror=mirror, **_purpose(purpose))
 
 
-def flag(sheet, net):
-    return sheet.add(Part(f"#FLG{sheet.index}{len([p for p in sheet.parts if p.ref.startswith('#FLG')]) + 1:02d}",
-                          "power:PWR_FLAG", "PWR_FLAG", {"1": net}))
-
-
-def nobom(sheet, prefix, lib_id, value, nets, footprint, purpose=""):
-    return sheet.add(Part(sheet.next_ref(prefix), lib_id, value, nets, footprint=footprint, in_bom=False,
-                          fields={"Purpose": purpose} if purpose else None))
+def nobom(sh, ref, lib_id, value, fp, x, y, rot=0, purpose=""):
+    """On the board but not in the BOM: printed antennas, net ties, test pads."""
+    return sh.part(lib_id, ref, value, (x, y), rot, fp=fp, in_bom=False, **_purpose(purpose))

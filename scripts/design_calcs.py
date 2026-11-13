@@ -146,11 +146,11 @@ def drive():
            "SLVSC40 p.3; AINx/BINx/RESET/SCS have internal pull-downs")
     record("DRV8711", "low-side clamps", "SS34 Schottky from GND to each phase node: freewheel at -0.36 V instead of the "
            "-0.73 V body diode", "S2; DRV8711 phase pins abs max -0.6 V (SLVSC40 Abs Max)")
-    record("DRV8711", "Rsense", "50 mOhm 1206 1 W 75 ppm/C; 1.3 A trip -> 85 mW; ISGAIN 40, TORQUE 242",
-           "S0 (simulation/REPORT.md); Eq. 1 p.11")
+    record("DRV8711", "Rsense", "50 mOhm 1206 1 W 75 ppm/C; 2.0 A trip -> 0.2 W; ISGAIN 20, TORQUE 186",
+           "D-027; S0 (simulation/REPORT.md); Eq. 1 p.11")
     record("DRV8711", "ISENSE filter", "0 Ohm fitted in each leg, 1 nF DNP across (fit 27-33 Ohm + 1 nF if noisy: RC 50-60 ns)",
            "SLVSC40 p.16 Fig. 6 (symmetric, <= 500 Ohm, matched 1 %)")
-    record("DRV8711", "firmware", "IDRIVE 00 (50/100 mA, default); TBLANK >= 1.2 us (sense amp settling at gain 40); "
+    record("DRV8711", "firmware", "IDRIVE 00 (50/100 mA, default); TBLANK >= 1.2 us (sense amp settling); "
            "SCLK <= 4 MHz; SCS active-high GPIO",
            "SLVSC40 p.7-8")
 

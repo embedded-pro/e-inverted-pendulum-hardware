@@ -56,7 +56,12 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/gcpw.py`: 50 Ω GCPW width/gap for the stack-up (`docs/rf.md`).
 - `python3 scripts/nfc_coil.py`: NFC coil inductance/resonance and its footprint (`docs/nfc.md`).
 - `python3 scripts/design_calcs.py`: values -> `scripts/schgen/values.json`, `docs/design-calcs.md`.
-- `python3 scripts/schgen/build.py`: regenerate the schematic into `hardware/e-inverted-pendulum/` (until the Phase 1 gate, D-020).
+- `python3 scripts/schgen/build.py`: regenerate the schematic into `hardware/e-inverted-pendulum/` from
+  `scripts/schgen/design/*.py` (D-020, D-033). Sheets follow e-psu-hardware: one titled box per functional block, circuits
+  wired with `rail` / `link` / `path`, a design note in each box, `sh.desc` for the root page. Fails on layout lint.
+- `python3 scripts/schgen/check.py`: the exported netlist matches `scripts/schgen/expected.json` (names included).
+- `python3 scripts/schgen/check_equivalence.py <rev | file.net>`: same parts, fields and connectivity as a git revision;
+  run it after any drawing-only change. `scripts/schgen/render.sh`: build, check, `docs/schematic.pdf`, sheet PNGs.
 - `python3 scripts/check_netlist.py` / `check_library.py`: netlist and symbol/footprint checks.
 - `python3 scripts/pcb/board.py --rules <pcb_rules.py>`: update the PCB from the schematic (footprints, nets, net classes
   from `docs/power-map.md`, JLC rules). Placement is the owner's (D-032): it never moves, reshapes or deletes what is on

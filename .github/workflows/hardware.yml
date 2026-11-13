@@ -20,7 +20,9 @@ jobs:
       - name: Regenerate the schematic and require no diff
         run: |
           python3 scripts/schgen/build.py
-          git diff --exit-code -- hardware/
+          git diff --exit-code -- hardware/ scripts/schgen/expected.json
+      - name: Netlist matches the generator's intent
+        run: python3 scripts/schgen/check.py
       - name: ERC
         run: kicad-cli sch erc --severity-all --exit-code-violations -o erc.rpt hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sch
       - name: Netlist checks
