@@ -12649,7 +12649,7 @@
 				)
 			)
 		)
-		(property "Purpose" "D-004; mount on the sagittal centreline near the axle (HW-SNS-002)"
+		(property "Purpose" "D-004; rigid, beside the MCU, axes aligned to the body frame (HW-SNS-002, D-029)"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)

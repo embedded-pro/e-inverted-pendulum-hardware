@@ -25,7 +25,7 @@ def build(project, values):
     sh.rail("IMU_REGOUT", 33.02, [c703["1"]], label="right", ext=5.08)
     u = sh.part("e-inverted-pendulum:MPU-6500", "U701", "MPU-6500", (127.0, 101.6),
                 fp="Sensor_Motion:InvenSense_QFN-24_3x3mm_P0.4mm", lcsc="C50278", mpn="MPU-6500",
-                Purpose="D-004; mount on the sagittal centreline near the axle (HW-SNS-002)")
+                Purpose="D-004; rigid, beside the MCU, axes aligned to the body frame (HW-SNS-002, D-029)")
     u.fpos = (-17.78, -24.13, "left")
     sh.vrail("+3V3", 106.68, [u["13"], u["8"]], tap=(81.28, (0, -1)))
     sh.nets(u, {"10": "IMU_REGOUT", "22": "IMU_NCS", "23": "IMU_SCK", "24": "IMU_MOSI", "9": "IMU_MISO", "11": "GND",
@@ -36,7 +36,7 @@ def build(project, values):
         "Decoupling per PS-MPU-6500A-01 Table 11: C1 100 nF REGOUT, C2 100 nF VDD, C3 10 nF VDDIO.",
         "R701 holds nCS high until the MCU drives it: SDO stays high-Z and the part stays in SPI mode.",
         "FSYNC unused, tied to GND (Table 10); AUX_DA / AUX_CL unconnected.",
-        "Mount on the sagittal centreline near the axle (HW-SNS-002)."])
+        "Mount rigidly beside the MCU, ~90 mm above the axle, axes x forward / y left / z up (HW-SNS-002, D-029)."])
 
     sh.box(205.74, 20.32, 405.13, 165.1, "SPI flash: W25Q16JV on SPI1 (D-005)")
     f = active(sh, "U702", "W25Q16JVSSIQ", "Memory_Flash:W25Q16JVSS", "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm",

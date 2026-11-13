@@ -16,7 +16,7 @@ Verification methods:
 | HW-PWR-001 | The board shall run from a 3S LiPo over 9.0–12.6 V and survive 13.5 V (a pack charged with a mis-set charger) without damage. | D-003 | R, S1 |
 | HW-PWR-002 | The motor bus (VM) shall stay ≥ 8.0 V, the DRV8711 VM minimum (TI SLVSC40), at the lowest battery voltage under peak motor current. | D-003 | S1, S3 |
 | HW-PWR-003 | Reverse battery connection shall neither damage the board nor apply more than 1 mA to any load. | `mcu-circuit-design` §11 | S1, B |
-| HW-PWR-004 | When the board is switched off while the wheels turn, regenerated energy shall not raise VM above 24 V. The TVS clamp must stay under the lowest absolute maximum on the bus: 30 V (TPS62933 VIN). | D-011 | S1 |
+| HW-PWR-004 | When the board is switched off while the wheels turn, regenerated energy shall not raise VM above 24 V. The TVS clamp must stay under the lowest absolute maximum on the bus: 30 V (AO4805 V_DS); the TPS62933 VIN is 32 V abs max, 30 V recommended (SLUSEA4 s8.1, s8.3). | D-011 | S1 |
 | HW-PWR-005 | 3V3 ripple at VDDRF shall stay within ST AN5165 limits. | `rf-layout` §5 | S4, B |
 | HW-PWR-006 | Battery voltage shall be measurable by the MCU ADC with ±50 mV/cell accuracy (3σ). This closes the open undervoltage item in the firmware's `safety-supervisor.md`. | firmware `safety-supervisor.md` "Open items" | S5, B |
 | HW-PWR-007 | A single switch shall disconnect every load from the battery. Off-state drain ≤ 10 µA. | D-011 | R, B |

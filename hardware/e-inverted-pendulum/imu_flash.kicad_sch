@@ -1352,7 +1352,7 @@
 		)
 		(uuid "4a272499-98e6-5193-bfe4-2bb5df9564ea")
 	)
-	(text "SPI2: PB13 SCK, PB15 MOSI, PB14 MISO, PB12 nCS (GPIO); INT to PC6 (EXTI6, data ready).\nDecoupling per PS-MPU-6500A-01 Table 11: C1 100 nF REGOUT, C2 100 nF VDD, C3 10 nF VDDIO.\nR701 holds nCS high until the MCU drives it: SDO stays high-Z and the part stays in SPI mode.\nFSYNC unused, tied to GND (Table 10); AUX_DA / AUX_CL unconnected.\nMount on the sagittal centreline near the axle (HW-SNS-002)."
+	(text "SPI2: PB13 SCK, PB15 MOSI, PB14 MISO, PB12 nCS (GPIO); INT to PC6 (EXTI6, data ready).\nDecoupling per PS-MPU-6500A-01 Table 11: C1 100 nF REGOUT, C2 100 nF VDD, C3 10 nF VDDIO.\nR701 holds nCS high until the MCU drives it: SDO stays high-Z and the part stays in SPI mode.\nFSYNC unused, tied to GND (Table 10); AUX_DA / AUX_CL unconnected.\nMount rigidly beside the MCU, ~90 mm above the axle, axes x forward / y left / z up (HW-SNS-002, D-029)."
 		(exclude_from_sim no)
 		(at 20.32 142.24 0)
 		(effects
@@ -3159,7 +3159,7 @@
 				)
 			)
 		)
-		(property "Purpose" "D-004; mount on the sagittal centreline near the axle (HW-SNS-002)"
+		(property "Purpose" "D-004; rigid, beside the MCU, axes aligned to the body frame (HW-SNS-002, D-029)"
 			(at 127 101.6 0)
 			(hide yes)
 			(show_name no)
