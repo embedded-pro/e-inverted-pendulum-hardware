@@ -186,7 +186,8 @@ def plot(drawn, proposed):
     axes[2].set_xlabel("time (ms)")
     axes[0].legend(fontsize=6)
     common.finish(fig, "s1_switch_on")
-    fig, axes = common.figure(2, "S1 switch-off at 150 ms: stalled motors (1.37 A) and pushed robot (20 V EMF)")
+    stall = 12.6 / A["motor_r"]["value"]
+    fig, axes = common.figure(2, f"S1 switch-off at 150 ms: stalled motors ({stall:.1f} A, no trip) and pushed robot (20 V EMF)")
     for name, color in (("regen_stall_dump", "C0"), ("regen_pushed_20V_emf", "C3")):
         for traces, style in ((drawn, "-"), (proposed, "--")):
             r = traces[name]

@@ -46,7 +46,7 @@ Bbuck VBAT 0 I = {A['logic_power']['value']}/max(V(VBAT),1) * 0.5*(1+tanh((V(VBA
 
 def main():
     results, traces = {}, {}
-    for duty, current in ((0.5, 1.3), (0.9, 1.3), (0.5, 0.45)):
+    for duty, current in ((0.5, 2.0), (0.59, 2.0), (0.5, 0.5)):
         r = spice.run(f"s3_ripple_d{int(duty * 100)}_{int(current * 100)}", netlist(12.6, A["battery_r_int"]["nominal"], duty, current),
                       ["v(VBAT)", "@c.xc507.c1[i]", "@c502[i]", "@c201[i]"],
                       "save v(VBAT) @c.xc507.c1[i] @c502[i] @c201[i]\ntran 20n 3m 2m", timeout=600)
@@ -58,14 +58,14 @@ def main():
         }
         traces[f"ripple_D{duty}_I{current}"] = r
     for ocv in (9.9, 9.0):
-        r = spice.run(f"s3_sag_{ocv}", netlist(ocv, A["battery_r_int"]["worst"], 1.0, 1.3, step_at=1e-3),
+        r = spice.run(f"s3_sag_{ocv}", netlist(ocv, A["battery_r_int"]["worst"], 1.0, 2.0, step_at=1e-3),
                       ["v(VBAT)"], "tran 1u 6m", timeout=600)
         results[f"sag_ocv_{ocv}V_aged"] = {"vbat_min_V": float(np.min(r["v(VBAT)"])),
-                                           "hand_V": ocv - (2.6 + 1.56 / ocv) * (A["battery_r_int"]["worst"] + A["fuse_r"]["value"] + 0.04)}
+                                           "hand_V": ocv - (4.0 + 1.56 / ocv) * (A["battery_r_int"]["worst"] + A["fuse_r"]["value"] + 0.04)}
         traces[f"sag_{ocv}"] = r
     limit = 0.600 * 0.95
     checks = {
-        "c507_ripple_within_rating_at_continuous_current": results["ripple_D0.5_I0.45"]["c507_rms_A"] < limit,
+        "c507_ripple_within_rating_at_continuous_current": results["ripple_D0.5_I0.5"]["c507_rms_A"] < limit,
         "vbat_ripple_below_500mV": all(v["vbat_ripple_pp_mV"] < 500 for k, v in results.items() if k.startswith("ripple")),
         "logic_stays_up_at_9V9_aged": results["sag_ocv_9.9V_aged"]["vbat_min_V"] > 8.47 + 0.3,
         "drv8711_above_uvlo_at_9V0_aged": results["sag_ocv_9.0V_aged"]["vbat_min_V"] > 8.0,
@@ -73,8 +73,8 @@ def main():
     }
     common.save("s3_bus", {"results": results, "checks": checks,
                             "notes": {"c507_limit_A": limit, "uvlo_logic_stop_V": 8.47, "drv8711_uvlo_rising_max_V": 8.0}})
-    fig, axes = common.figure(2, "S3 motor bus: both bridges at 1.3 A in phase (left) / sag with aged battery")
-    for key in ("ripple_D0.5_I1.3", "ripple_D0.9_I1.3", "ripple_D0.5_I0.45"):
+    fig, axes = common.figure(2, "S3 motor bus: both bridges at the 2.0 A trip in phase / sag with aged battery")
+    for key in ("ripple_D0.5_I2.0", "ripple_D0.59_I2.0", "ripple_D0.5_I0.5"):
         r = traces[key]
         axes[0].plot((r["x"] - r["x"][0]) * 1e6, r["v(VBAT)"], label=key)
     axes[0].set_xlabel("time (us)")

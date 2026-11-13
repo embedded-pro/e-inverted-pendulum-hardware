@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""S0: motor, gear and current-limit sizing for the balancing robot.
+"""S0: motor, voltage-cap and current-trip sizing for the balancing robot (MG310 1:20 on 3S, D-027).
 
 Model
   The planar body/wheel model of e-inverted-pendulum/documentation/theory/pendulum-dynamics.md,
@@ -8,21 +8,23 @@ Model
   1/2 * J_R * (x_dot / r - theta_dot)^2, with J_R = 2 * J_rotor * G^2, adds:
       M_xx += J_R / r^2,  M_xtheta -= J_R / r,  M_thetatheta += J_R.
   Each motor is a brushed DC machine driven by bridge voltage (the firmware maps effort to duty,
-  motion-actuation.md Part C). Current is clipped at the DRV8711 trip current. Inductance is
-  ignored here: tau_e ~ 0.1-0.3 ms is far below the ~0.1 s fall time constant.
+  motion-actuation.md Part C). The firmware caps the average bridge voltage at V_cap because the MG310
+  is a 7.4 V motor on a 3S bus; current is clipped at the DRV8711 trip. Inductance is ignored here:
+  tau_e ~ 0.3 ms is far below the ~0.1 s fall time constant.
   Control is a discrete LQR at 500 Hz (REQ-RT-001) with a one-sample computation delay
-  (REQ-RT-004), designed on the delay-augmented ZOH model.
+  (REQ-RT-004), designed on the delay-augmented ZOH model with the capped voltage as the actuator range.
 
-Checks
+Checks, for every voltage cap and trip, worst case over gear efficiency and VBAT 9.9-12.6 V:
   - recovery from a 10 deg displacement: back within 3 deg in 1 s, never past 35 deg
     (REQ-CTRL-002, REQ-SAFE-002);
   - largest recoverable displacement (target >= 2 x 10 deg);
-  - duty headroom when cruising at 1.0 m/s (commanded limit) and 1.5 m/s (design limit,
-    wheel-odometry.md:104);
-  - DRV8711 TORQUE/ISGAIN for the chosen Rsense (Drv8711DriverConfiguration.cpp:10-19);
+  - motor voltage needed to cruise at 1.0 m/s (commanded limit) and 1.5 m/s (design limit,
+    wheel-odometry.md:104), against the cap;
+  - DRV8711 TORQUE/ISGAIN for the chosen trip (Drv8711DriverConfiguration.cpp:10-19);
   - PWM current ripple at 25 kHz (REQ-DRIVE-007) and encoder edge rates.
 
-Every input is in MOTORS, GEARS, ELECTRICAL or mechanical/mass_budget.csv, with its source.
+Every input is in MOTOR, ELECTRICAL, SWEEP or mechanical/mass_budget.csv, with its source.
+The JGA25-370 gear sweep behind the superseded D-013 is in git history (commit 802eb5e).
 Run: python3 simulation/sizing.py -> simulation/results/sizing_*.{csv,json}, simulation/plots/sizing_*.png
 """
 
@@ -38,24 +40,37 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "simulation" / "results"
 PLOTS = ROOT / "simulation" / "plots"
 GRAVITY = 9.81
+KGF_CM = 0.0980665
 
-MOTORS = {
-    "6000rpm": {
-        "source": "JGA25-370 12 V listings: 1:21.3 -> 280 rpm / 1:35 -> 170 rpm no-load, I0 60 mA, stall 1.3 A",
-        "v_rated": 12.0, "rpm_no_load": 6000.0, "i_no_load": 0.060, "i_stall": 1.30,
-        "j_rotor": 1.5e-6, "inductance": 1.5e-3, "i_rated": 0.45,
-    },
-    "4300rpm": {
-        "source": "JGA25-371 12 V encoder variant: 1:34 -> 126 rpm, I0 46 mA, stall 1.0 A",
-        "v_rated": 12.0, "rpm_no_load": 4284.0, "i_no_load": 0.046, "i_stall": 1.00,
-        "j_rotor": 1.5e-6, "inductance": 2.0e-3, "i_rated": 0.35,
+MOTOR = {
+    "name": "MG310 1:20 Hall encoder",
+    "listing": "seller listing (owner, 2026-11-13): 1:20, rated 7.4 V, rated 0.4 kgf.cm at 400 rpm +/-13 %, "
+               "rated current <= 500 mA, stall 1.5 kgf.cm, stall current '<= 2 mA' (typo, read as 2 A)",
+    "gear": 20.0,
+    "v_rated": 7.4,
+    "rated_torque": 0.4 * KGF_CM,
+    "rated_rpm_out": 400.0,
+    "stall_torque": 1.5 * KGF_CM,
+    "i_stall": 2.0,
+    "i_rated": 0.5,
+    "i_no_load": 0.12,
+    "j_rotor": 1.0e-6,
+    "inductance": 1.0e-3,
+    "encoder_ppr": 13,
+    "assumptions": {
+        "i_stall": "ASSUMPTION 2.0 A at 7.4 V: the listing says '<= 2 mA'; the listed torques give 1.9 A at efficiency 0.6",
+        "i_no_load": "ASSUMPTION 0.12 A, typical for a 7.4 V 310-size motor; measure at bring-up",
+        "j_rotor": "ASSUMPTION 1.0e-6 kg m^2 (310-size rotor); measure by spin-down",
+        "inductance": "ASSUMPTION 1.0 mH; measure with an LCR meter",
+        "encoder_ppr": "ASSUMPTION 13 pulses per motor revolution (common for MG310 Hall encoders); count at bring-up",
+        "no_load_rpm": "derived: straight torque-speed line through (rated torque, 400 rpm) and (stall torque, 0)",
     },
 }
-J_ROTOR_SOURCE = "ASSUMPTION 370-size rotor inertia 1.5e-6 kg m^2 (measure by spin-down)"
-INDUCTANCE_SOURCE = "ASSUMPTION 1-3 mH (measure with an LCR meter at bring-up)"
-GEARS = [4.4, 9.6, 20.4, 34.0, 46.8]
-GEAR_EFFICIENCY = {"low": 0.35, "nominal": 0.45}
-EFFICIENCY_SOURCE = "derived: listed stall torque / (Kt * I_stall * G) = 0.35-0.50 across listings"
+MOTOR["rpm_no_load_out"] = MOTOR["rated_rpm_out"] * MOTOR["stall_torque"] / (MOTOR["stall_torque"] - MOTOR["rated_torque"])
+MOTOR["rpm_no_load"] = MOTOR["rpm_no_load_out"] * MOTOR["gear"]
+GEAR_EFFICIENCY = {"low": 0.5, "nominal": 0.65}
+EFFICIENCY_SOURCE = ("derived: stall torque / (G * Kt * (I_stall - I_0)) = 0.66 and rated point 0.71 with the "
+                     "listed values; 0.5 taken as the low corner")
 
 ELECTRICAL = {
     "vbat": {"full": 12.6, "nominal": 11.1, "arm_min": 9.9},
@@ -63,8 +78,9 @@ ELECTRICAL = {
     "drv_vref": 2.75,
     "isgain": [40, 20, 10, 5],
     "pwm_hz": 25_000.0,
-    "encoder_lines": [100, 250, 500, 1000],
+    "connector_rating_a": 2.0,
 }
+SWEEP = {"v_cap": [7.4, 8.4, 9.9], "i_trip": [1.0, 1.5, 2.0]}
 
 CONTROL = {"period": 0.002, "theta_max": math.radians(2.0), "rate_max": 0.5,
            "x_max": 0.5, "v_max": 0.5, "voltage_fraction": 0.3}
@@ -122,6 +138,8 @@ def battery_side_variants(battery_item="battery_3s_1000mah", plate_half=0.8):
     return variants
 
 
+
+
 def motor_constants(motor):
     resistance = motor["v_rated"] / motor["i_stall"]
     omega0 = motor["rpm_no_load"] * 2 * math.pi / 60.0
@@ -130,10 +148,14 @@ def motor_constants(motor):
 
 
 class Robot:
-    def __init__(self, body, motor, gear, efficiency, i_trip):
-        self.b, self.motor, self.G, self.eta, self.i_trip = body, motor, gear, efficiency, i_trip
+    def __init__(self, body, motor, efficiency, i_trip, v_cap):
+        self.b, self.motor, self.G, self.eta = body, motor, motor["gear"], efficiency
+        self.i_trip, self.v_cap = i_trip, v_cap
         self.k = motor_constants(motor)
-        self.JR = 2.0 * motor["j_rotor"] * gear ** 2
+        self.JR = 2.0 * motor["j_rotor"] * self.G ** 2
+
+    def limit(self, vbat):
+        return min(vbat, self.v_cap)
 
     def wheel_torque(self, voltage, x_dot, theta_dot):
         omega_m = self.G * (x_dot / self.b["r"] - theta_dot)
@@ -177,19 +199,20 @@ class Robot:
         ba = np.vstack([np.zeros((n, 1)), np.ones((1, 1))])
         q = np.diag([1 / CONTROL["theta_max"] ** 2, 1 / CONTROL["rate_max"] ** 2,
                      1 / CONTROL["x_max"] ** 2, 1 / CONTROL["v_max"] ** 2, 0.0])
-        r = np.array([[1.0 / (CONTROL["voltage_fraction"] * vbat) ** 2]])
+        r = np.array([[1.0 / (CONTROL["voltage_fraction"] * self.limit(vbat)) ** 2]])
         p = solve_discrete_are(aa, ba, q, r)
         return np.linalg.solve(r + ba.T @ p @ ba, ba.T @ p @ aa)
 
     def simulate(self, theta0_deg, vbat, gain, duration=3.0, substeps=4):
         period = CONTROL["period"]
         dt = period / substeps
+        limit = self.limit(vbat)
         state = np.array([math.radians(theta0_deg), 0.0, 0.0, 0.0])
         applied = 0.0
         trace = {"t": [], "theta": [], "voltage": [], "current": [], "omega_m": []}
         fell, last_outside = False, 0.0
         for step in range(int(duration / period)):
-            command = float(np.clip(-(gain @ np.append(state, applied))[0], -vbat, vbat))
+            command = float(np.clip(-(gain @ np.append(state, applied))[0], -limit, limit))
             for _ in range(substeps):
                 k1 = self.derivative(state, applied)
                 k2 = self.derivative(state + 0.5 * dt * k1, applied)
@@ -227,9 +250,9 @@ class Robot:
             low, high = (mid, high) if self.simulate(mid, vbat, gain)["settled"] else (low, mid)
         return low
 
-    def cruise_duty(self, speed, vbat):
+    def cruise_voltage(self, speed):
         omega_m = self.G * speed / self.b["r"]
-        return (self.k["Ke"] * omega_m + self.k["R"] * self.motor["i_no_load"]) / vbat
+        return self.k["Ke"] * omega_m + self.k["R"] * self.motor["i_no_load"]
 
 
 def drv8711_setting(i_trip, rsense):
@@ -241,130 +264,125 @@ def drv8711_setting(i_trip, rsense):
     return None
 
 
+def passes(w):
+    return w["all_recover_10deg"] and w["min_recoverable_deg"] >= 20.0 and w["cruise_1p0_fraction_of_cap"] <= 0.70
+
+
 def main():
     RESULTS.mkdir(parents=True, exist_ok=True)
     PLOTS.mkdir(parents=True, exist_ok=True)
     body = body_parameters()
     tau = math.sqrt((body["J"] + body["m"] * body["l"] ** 2) / (body["m"] * GRAVITY * body["l"]))
+    k = motor_constants(MOTOR)
     print(f"body: m={body['m']:.3f} kg  l={body['l'] * 1000:.1f} mm  J={body['J']:.2e} kg m^2  "
-          f"M={body['M']:.3f} kg  Jw={body['Jw']:.2e}  r={body['r'] * 1000:.0f} mm  "
+          f"M={body['M']:.3f} kg  Jw={body['Jw']:.2e}  r={body['r'] * 1000:.1f} mm  "
           f"lean={body['lean_deg']:.1f} deg  tau={tau * 1000:.0f} ms")
+    print(f"motor: R={k['R']:.2f} ohm  Ke=Kt={k['Ke'] * 1e3:.2f} mV s/rad  no-load {MOTOR['rpm_no_load_out']:.0f} rpm "
+          f"out at {MOTOR['v_rated']} V")
 
     rows = []
-    for motor_name, motor in MOTORS.items():
-        for gear in GEARS:
+    for v_cap in SWEEP["v_cap"]:
+        for i_trip in SWEEP["i_trip"]:
             for eta_name, eta in GEAR_EFFICIENCY.items():
-                for limit_name, i_trip in (("rated", motor["i_rated"]), ("stall", motor["i_stall"])):
-                    for v_name, vbat in ELECTRICAL["vbat"].items():
-                        robot = Robot(body, motor, gear, eta, i_trip)
-                        gain = robot.controller(vbat)
-                        run = robot.simulate(10.0, vbat, gain)
-                        rows.append({
-                            "motor": motor_name, "gear": gear, "efficiency": eta_name,
-                            "current_limit": limit_name, "i_trip": i_trip, "vbat": vbat, "vbat_case": v_name,
-                            "reflected_inertia": robot.JR,
-                            "recover_10deg": run["settled"] and run["settle_time"] <= 1.0,
-                            "settle_time_10deg": run["settle_time"],
-                            "peak_current_10deg": run["peak_current"],
-                            "peak_duty_10deg": run["peak_duty"],
-                            "max_recoverable_deg": robot.recoverable_angle(vbat, gain),
-                            "duty_1p0_mps": robot.cruise_duty(1.0, vbat),
-                            "duty_1p5_mps": robot.cruise_duty(1.5, vbat),
-                        })
+                for v_name, vbat in ELECTRICAL["vbat"].items():
+                    robot = Robot(body, MOTOR, eta, i_trip, v_cap)
+                    gain = robot.controller(vbat)
+                    run = robot.simulate(10.0, vbat, gain)
+                    rows.append({
+                        "v_cap": v_cap, "i_trip": i_trip, "efficiency": eta_name, "vbat": vbat, "vbat_case": v_name,
+                        "reflected_inertia": robot.JR,
+                        "recover_10deg": run["settled"] and run["settle_time"] <= 1.0,
+                        "settle_time_10deg": run["settle_time"],
+                        "peak_current_10deg": run["peak_current"],
+                        "peak_duty_10deg": run["peak_duty"],
+                        "max_recoverable_deg": robot.recoverable_angle(vbat, gain),
+                        "cruise_v_1p0_mps": robot.cruise_voltage(1.0),
+                        "cruise_v_1p5_mps": robot.cruise_voltage(1.5),
+                    })
 
     with open(RESULTS / "sizing_sweep.csv", "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
 
-    def worst(motor, gear, limit):
-        cases = [r for r in rows if r["motor"] == motor and r["gear"] == gear and r["current_limit"] == limit]
-        return {
-            "all_recover_10deg": all(r["recover_10deg"] for r in cases),
-            "min_recoverable_deg": min(r["max_recoverable_deg"] for r in cases),
-            "max_duty_1p0_at_arm_min": max(r["duty_1p0_mps"] for r in cases if r["vbat_case"] == "arm_min"),
-            "max_duty_1p5_at_arm_min": max(r["duty_1p5_mps"] for r in cases if r["vbat_case"] == "arm_min"),
-            "max_peak_current": max(r["peak_current_10deg"] for r in cases),
-        }
+    summary = {"motor": {key: value for key, value in MOTOR.items()}, "motor_constants": k, "body": body,
+               "tau_s": tau, "per_config": {}}
+    print(f"\n{'V_cap':>6} {'trip':>5} {'10deg ok':>8} {'min recov':>9} {'V@1.0':>6} {'V@1.5':>6} {'Ipk':>5} pass")
+    passing = []
+    for v_cap in SWEEP["v_cap"]:
+        for i_trip in SWEEP["i_trip"]:
+            cases = [r for r in rows if r["v_cap"] == v_cap and r["i_trip"] == i_trip]
+            w = {
+                "all_recover_10deg": all(r["recover_10deg"] for r in cases),
+                "min_recoverable_deg": min(r["max_recoverable_deg"] for r in cases),
+                "cruise_v_1p0": cases[0]["cruise_v_1p0_mps"], "cruise_v_1p5": cases[0]["cruise_v_1p5_mps"],
+                "cruise_1p0_fraction_of_cap": cases[0]["cruise_v_1p0_mps"] / min(v_cap, ELECTRICAL["vbat"]["arm_min"]),
+                "max_peak_current": max(r["peak_current_10deg"] for r in cases),
+            }
+            w["pass"] = passes(w)
+            summary["per_config"][f"cap{v_cap}_trip{i_trip}"] = w
+            if w["pass"]:
+                passing.append((v_cap, i_trip))
+            print(f"{v_cap:6.1f} {i_trip:5.1f} {str(w['all_recover_10deg']):>8} {w['min_recoverable_deg']:8.1f}° "
+                  f"{w['cruise_v_1p0']:6.2f} {w['cruise_v_1p5']:6.2f} {w['max_peak_current']:5.2f} {w['pass']}")
 
-    def passes(w):
-        return (w["all_recover_10deg"] and w["min_recoverable_deg"] >= 20.0
-                and w["max_duty_1p0_at_arm_min"] <= 0.70)
-
-    summary = {"body": body, "tau_s": tau, "per_config": {}}
-    print(f"\n{'motor':>8} {'gear':>5} {'limit':>6} {'10deg ok':>8} {'min recov':>9} {'duty@1.0':>8} {'duty@1.5':>8} {'Ipk':>5} pass")
-    candidates = []
-    for motor in MOTORS:
-        for gear in GEARS:
-            for limit in ("rated", "stall"):
-                w = worst(motor, gear, limit)
-                w["pass"] = passes(w)
-                summary["per_config"][f"{motor}_1:{gear}_{limit}"] = w
-                if w["pass"] and limit == "stall":
-                    rated = summary["per_config"][f"{motor}_1:{gear}_rated"]["min_recoverable_deg"]
-                    candidates.append((motor, gear, w["min_recoverable_deg"], rated))
-                print(f"{motor:>8} {gear:5.1f} {limit:>6} {str(w['all_recover_10deg']):>8} {w['min_recoverable_deg']:8.1f}° "
-                      f"{w['max_duty_1p0_at_arm_min']:8.2f} {w['max_duty_1p5_at_arm_min']:8.2f} {w['max_peak_current']:5.2f} {w['pass']}")
-
-    chosen = max(candidates, key=lambda c: (round(c[2]), c[3])) if candidates else None
-    summary["criteria"] = ("per motor winding, worst case over gear efficiency 0.35-0.45 and VBAT 9.9-12.6 V: "
-                           "recover 10 deg within 1 s; >= 20 deg recoverable; duty at 1.0 m/s <= 0.70 at 9.9 V; "
-                           "rank by recoverable angle at the stall trip, then at the rated-current limit "
-                           "(the search stops at 34 deg, so several configurations can tie at the ceiling)")
-    summary["candidates"] = [{"motor": m, "gear": g, "min_recoverable_deg": d, "min_recoverable_rated_deg": r}
-                             for m, g, d, r in candidates]
+    recommended = min(passing) if passing else None
+    summary["criteria"] = ("worst case over gear efficiency 0.5-0.65 and VBAT 9.9-12.6 V: recover 10 deg within 1 s; "
+                           ">= 20 deg recoverable (the search stops at 34 deg); cruise voltage at 1.0 m/s <= 70 % of "
+                           "the cap; recommend the lowest passing cap (closest to the motor rating), then the lowest "
+                           "passing trip")
+    summary["recommended"] = {"v_cap": recommended[0], "i_trip": recommended[1]} if recommended else None
     summary["lean_by_battery_side"] = battery_side_variants()
-    summary["chosen"] = {"motor": chosen[0], "gear": chosen[1]} if chosen else None
 
-    i_trip = max(m["i_stall"] for m in MOTORS.values())
-    summary["drv8711"] = {"rsense": ELECTRICAL["rsense"], "i_trip": i_trip,
-                          **drv8711_setting(i_trip, ELECTRICAL["rsense"]),
-                          "rsense_power_w": i_trip ** 2 * ELECTRICAL["rsense"]}
+    if recommended:
+        i_trip = recommended[1]
+        summary["drv8711"] = {"rsense": ELECTRICAL["rsense"], "i_trip": i_trip,
+                              **drv8711_setting(i_trip, ELECTRICAL["rsense"]),
+                              "rsense_power_w": i_trip ** 2 * ELECTRICAL["rsense"],
+                              "connector_rating_a": ELECTRICAL["connector_rating_a"]}
     period = 1.0 / ELECTRICAL["pwm_hz"]
-    summary["pwm_ripple_pp_a"] = {
-        f"L={m['inductance'] * 1e3:.1f}mH": ELECTRICAL["vbat"]["full"] * period / (4 * m["inductance"])
-        for m in MOTORS.values()}
-    motor_rev_s = max(m["rpm_no_load"] for m in MOTORS.values()) / 60.0 * ELECTRICAL["vbat"]["full"] / 12.0
-    summary["encoder"] = {"max_motor_rev_s": motor_rev_s, "channel_hz_by_lines": {
-        n: n * motor_rev_s for n in ELECTRICAL["encoder_lines"]}}
-    summary["sources"] = {"motors": {k: v["source"] for k, v in MOTORS.items()},
-                          "rotor_inertia": J_ROTOR_SOURCE, "inductance": INDUCTANCE_SOURCE,
+    summary["pwm_ripple_pp_a"] = ELECTRICAL["vbat"]["full"] * period / (4 * MOTOR["inductance"])
+    v_motor_max = recommended[0] if recommended else ELECTRICAL["vbat"]["full"]
+    motor_rev_s = MOTOR["rpm_no_load"] / 60.0 * v_motor_max / MOTOR["v_rated"]
+    summary["encoder"] = {"ppr": MOTOR["encoder_ppr"], "max_motor_rev_s": motor_rev_s,
+                          "channel_hz": MOTOR["encoder_ppr"] * motor_rev_s,
+                          "counts_per_wheel_rev": 4 * MOTOR["encoder_ppr"] * MOTOR["gear"]}
+    summary["sources"] = {"motor": MOTOR["listing"], "assumptions": MOTOR["assumptions"],
                           "gear_efficiency": EFFICIENCY_SOURCE}
 
     with open(RESULTS / "sizing_summary.json", "w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2, default=float)
-    print(f"\ncandidates {summary['candidates']} -> chosen {summary['chosen']}")
+    print(f"\nrecommended {summary['recommended']}")
     print(f"lean by battery side: {summary['lean_by_battery_side']}")
-    print(f"DRV8711: {summary['drv8711']}")
-    print(f"PWM ripple: {summary['pwm_ripple_pp_a']}")
-    print(f"encoder channel frequency: {summary['encoder']}")
+    print(f"DRV8711: {summary.get('drv8711')}")
+    print(f"PWM ripple: {summary['pwm_ripple_pp_a']:.3f} A p-p")
+    print(f"encoder: {summary['encoder']}")
 
-    if chosen:
-        plot_recovery(body, chosen[0], chosen[1])
+    if recommended:
+        plot_recovery(body, *recommended)
 
 
-def plot_recovery(body, motor_name, gear):
+def plot_recovery(body, v_cap, i_trip):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(3, 1, figsize=(7, 7), sharex=True)
     for v_name, vbat in ELECTRICAL["vbat"].items():
-        motor = MOTORS[motor_name]
-        robot = Robot(body, motor, gear, GEAR_EFFICIENCY["low"], motor["i_stall"])
+        robot = Robot(body, MOTOR, GEAR_EFFICIENCY["low"], i_trip, v_cap)
         run = robot.simulate(10.0, vbat, robot.controller(vbat))
         tr = run["trace"]
         axes[0].plot(tr["t"], tr["theta"], label=f"{vbat} V")
-        axes[1].plot(tr["t"], np.array(tr["voltage"]) / vbat)
+        axes[1].plot(tr["t"], tr["voltage"])
         axes[2].plot(tr["t"], tr["current"])
     axes[0].axhline(3, ls=":", c="grey")
     axes[0].axhline(-3, ls=":", c="grey")
     axes[0].set_ylabel("pitch (deg)")
-    axes[1].set_ylabel("duty")
+    axes[1].set_ylabel("bridge voltage (V)")
     axes[2].set_ylabel("motor current (A)")
     axes[2].set_xlabel("time (s)")
     axes[0].legend()
-    axes[0].set_title(f"Recovery from 10 deg: {motor_name} motor, 1:{gear}, efficiency 0.35, I_trip = stall")
+    axes[0].set_title(f"Recovery from 10 deg: MG310 1:20, efficiency 0.5, V_cap {v_cap} V, I_trip {i_trip} A")
     fig.tight_layout()
     fig.savefig(PLOTS / "sizing_recovery.png", dpi=110)
 

@@ -20,79 +20,77 @@ Device models: `models/devices.lib` (ours, from datasheets; cross-checked: CSD88
 fetched by `fetch_models.py` (TI copyright, no redistribution grant). Assumptions are listed in `common.py`
 (battery 60/150 mΩ, MLCC DC-bias derating, motor R/L, logic load 1.56 W).
 
-## S0: motor, gear and current-limit sizing
+## S0: motor, voltage cap and current trip (`sizing.py`)
+
+Re-run 2026-11-13 for the hardware the owner supplied (D-026, D-027): **MG310 1:20** gearmotors (7.4 V rated, Hall A/B
+encoder) on a **WHEELTEC 102 mm U-bracket**, **65 mm wheels**, battery on the back (D-025). The earlier JGA25-370
+gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5e).
 
 **Scope.**
 - **Model.** The firmware's planar pendulum model (`pendulum-dynamics.md`), plus:
   - rotor inertia reflected through the gearbox;
   - a voltage-driven brushed DC motor with coulomb gearbox friction;
+  - **the firmware's average-voltage cap** (the MG310 is a 7.4 V motor on a 3S bus);
   - DRV8711 current clipping at I_trip;
-  - a discrete 500 Hz LQR with a one-sample delay (REQ-RT-001, REQ-RT-004).
+  - a discrete 500 Hz LQR with a one-sample delay (REQ-RT-001, REQ-RT-004), designed for the capped range.
 - **Ideal:** inductance (τ_e ≪ τ), backlash, wheel slip, sensor noise.
-- **Sweep, 160 cases:**
-  - 2 motor windings;
-  - 5 gear ratios;
-  - gear efficiency 0.35 / 0.45;
-  - I_trip = rated or stall current;
-  - VBAT 12.6 / 11.1 / 9.9 V.
+- **Sweep, 54 cases:** voltage cap 7.4 / 8.4 / 9.9 V × trip 1.0 / 1.5 / 2.0 A × gear efficiency 0.5 / 0.65 × VBAT
+  12.6 / 11.1 / 9.9 V.
 
 **Inputs and their sources.**
-- Motor data comes from JGA25-370 seller listings: the 6000 rpm winding (1:21.3 → 280 rpm, 1:35 → 170 rpm, stall 1.3 A at 12 V) and the 4300 rpm JGA25-371 encoder variant (1:34 → 126 rpm, stall 1.0 A).
-- Gear efficiency is derived from the listed stall torques.
-- Rotor inertia (1.5e-6 kg·m²) and inductance (1–3 mH) are **ASSUMPTIONS**; measure them at bring-up.
-- Body parameters come from `mechanical/mass_budget.csv`: the 85 × 130 mm plate (D-024), with the CoM measured from the **wheel axle** (its own `axle` row).
+- The MG310 listing gives 1:20, 7.4 V, 0.4 kgf·cm at 400 rpm, 1.5 kgf·cm stall and ≤ 500 mA rated. Its stall current
+  reads "≤ 2 mA"; the listed torques give 1.9 A at efficiency 0.6, so **2.0 A is an ASSUMPTION**.
+- Derived constants:
+  - no-load 545 rpm at the output (straight torque-speed line through the two listed points);
+  - R = 7.4 V / 2.0 A = 3.70 Ω;
+  - Ke = Kt = 6.09 mV·s/rad (I₀ 0.12 A ASSUMPTION);
+  - gear efficiency 0.66 at stall and 0.71 at the rated point. 0.5 is used as the low corner.
+- Rotor inertia 1.0e-6 kg·m², inductance 1 mH and 13 encoder pulses per motor revolution are **ASSUMPTIONS**; measure them at
+  bring-up.
+- Body parameters come from `mechanical/mass_budget.csv` (bracket, motors, battery on the back; pivot on the axle).
 
 **Hand cross-checks.**
-- τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.85e-4 + 0.392·0.0263²) / (0.392·9.81·0.0263)) = √(7.56e-4 / 0.1011) = 86.5 ms; the script prints 86 ms.
-- CoM offset from the axle, toward the top side: (0.033·14 + 0.025·16 + 0.024·5 + 0.085·25.8 + 0.035·14) / 0.392 = 9.35 mm; lean = atan(9.35 / 24.6) = 20.8°; the script prints 20.8°.
-- Duty at 1.0 m/s, 1:9.6, 9.9 V = (0.01833·282 + 9.2·0.06)/9.9 = 0.58; the script prints 0.58.
-- TORQUE = 256·40·0.05·1.3/2.75 = 242; the script prints 242.
+- Body: m = 0.387 kg, ℓ = 29.6 mm, J = 4.59e-04 kg·m².
+  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.59e-04 + 0.387·0.0296²) / (0.387·9.81·0.0296)) =
+  84 ms. The script prints 84 ms.
+- Cruise voltage at 1.0 m/s = Ke·G·v/r + R·I₀ = 0.00609·20·1.0/0.0325 + 3.70·0.12 = 4.19 V. The script prints 4.19 V.
+- TORQUE at 2.0 A = 256·20·0.05·2.0/2.75 = 186 (ISGAIN 20). The script prints 186.
 
 ### Findings
 
-1. **Gear ratio: 1:9.6 (about 620 rpm output at 12 V) on the 6000 rpm winding.**
-   - It recovers from 10° within 1 s at every corner. At the stall trip it recovers from anything up to the 34° search limit (the 35° fall limit) worst case; so do 1:4.4 and the 4300 rpm 1:4.4.
-   - The tie is broken by recovery at the rated-current limit: 17.0° at 1:9.6 against 14.0° at 1:4.4. 1:9.6 has the most torque margin while the I²t model limits the current.
-   - Cruising at 1.0 m/s needs 58 % duty at 9.9 V, leaving headroom to balance.
-   - Ratios of 1:20.4 and above can't reach the firmware's 1.0 m/s command limit at all: duty would exceed 100 % at 9.9 V.
-   - Fallback if only the 4300 rpm winding is available: 1:4.4 (≥ 34° recoverable, 39 % duty).
-2. **REQ-DRIVE-005 as written makes the robot fail.**
-   - With the hardware trip set to the motor's continuous rating (0.35–0.45 A), it can't recover 10° at 1:34 and above, and recovers only 17.0° at 1:9.6, short of the 2 × 10° target.
-   - Recommendation for the firmware: set the DRV8711 trip at about stall (1.3 A), a peak and protective limit, and enforce the continuous rating in firmware with an I²t / RMS thermal model.
-3. **DRV8711 setting for Rsense = 50 mΩ** (the firmware default, kept): I_trip 1.30 A → ISGAIN 40, TORQUE 242, about 5 mA resolution. Rsense dissipates 85 mW, so a 1206 part is enough; the 2512 in the plan is oversized.
-4. **PWM ripple** at 25 kHz, D = 0.5, 12.6 V: 63–84 mA p-p for L = 2.0–1.5 mH, under 7 % of I_trip (REQ-DRIVE-007 satisfied). Recheck after measuring L.
-5. **Encoder channel frequency** at maximum motor speed (105 rev/s at 12.6 V):
-   - 10.5 kHz (100 lines), 52.5 kHz (500 lines) or 105 kHz (1000 lines) per channel;
-   - ×4 for the count rate.
-   - The input RC corner and buffer must pass ≥ 2× this (S5).
-   - If LPTIM1 is clocked from a low-frequency source, it can't count this fast; the firmware must clock it from PCLK or HSI16.
-6. **Reflected rotor inertia matters.** At 1:9.6 it is equivalent to 0.24 kg on the axle, against a 0.39 kg body. The firmware's pendulum model (and its LQR) should include it.
-7. **Fall time constant τ = 86 ms** on the 85 × 130 mm plate (the firmware doc's example is 130 ms). A 500 Hz loop gives about 43 updates per τ, which is still comfortable.
-8. **Static lean is about 21° toward the top side, not 7°.**
-   - Phase 0 measured the CoM from the plate plane. The pivot is the wheel axle, which is the motor axis, about 14 mm from the plate on the bottom side. Measured from the axle, the plate, the parts and the battery all sit on the top side of it, and the motors add nothing.
-   - The battery is the main term (0.085 kg at 25.8 mm). Strapping it on the bottom side, over the motors, halves the lean to **9.8°** (`lean_by_battery_side` in `results/sizing_summary.json`).
-   - The dynamics (ℓ, J, τ) barely change. The cost is a pitch setpoint far from vertical, and a tilt-based fall cut-off that must be measured from that setpoint, not from vertical.
-
-### Proposed changes
-
-| Item | As planned | Proposed | Why |
-|---|---|---|---|
-| Motor | JGA25-370 class, ratio open | JGA25-370, 12 V, 6000 rpm winding, **1:9.6 (~620 rpm)**, ABZ encoder | Finding 1 |
-| Rsense | 50 mΩ 2512 | 50 mΩ **1206**, 1 %, ≥ 0.25 W | Finding 3 |
-| I_trip (firmware) | "≤ continuous rating" | 1.3 A hardware trip + firmware I²t | Finding 2 |
+1. **The trip must be 2.0 A.** At every voltage cap, 1.0 A and 1.5 A trips recover only 12–17° worst case, short of
+   the 2 × 10° target. **2.0 A recovers 21–22°**, which passes but with little margin.
+2. **A 7.4 V cap is enough.** The cap barely changes recovery (22.3° at 7.4 V, 21.0° at 8.4 V, 20.9° at 9.9 V), and
+   cruising at 1.0 m/s needs 4.2 V (57 % of the cap) and at 1.5 m/s 6.1 V. **The firmware limits the average motor
+   voltage to 7.4 V** (duty ≤ 0.59 at 12.6 V): the motor stays at its rating, and stall current at the cap equals
+   the trip.
+3. **DRV8711 setting for Rsense = 50 mΩ:** I_trip 2.0 A → ISGAIN 20, TORQUE 186 (2.00 A). Rsense dissipates 0.2 W
+   at the trip, within the 1 W 1206 part.
+4. **The 2.0 A trip equals the JST PH contact rating (2 A).** Peaks are short (recovery bursts). The motor's 0.5 A
+   continuous rating is enforced by the firmware I²t model (D-014's approach, kept).
+5. **PWM ripple** at 25 kHz, D 0.5, 12.6 V with L = 1 mH: 126 mA p-p, 6 % of the trip (REQ-DRIVE-007).
+6. **Encoder:** 13 pulses per motor revolution × 20 = 260 per wheel revolution, **1040 counts** with ×4 decoding. At the
+   7.4 V cap the channel rate is about 2.4 kHz, far below the input filter corner (S5).
+7. **Fall time constant τ = 84 ms**, about 42 updates per τ at 500 Hz.
+8. **Static lean ≈ 17° toward the front.** The bracket puts the axle 18.8 mm behind the plate,
+   so the plate, the parts and even the back-mounted battery (7 mm ahead of the axle) sit in front of it. With the
+   battery on the front the lean would be 26°. The pitch setpoint and the fall limit are measured from this lean.
+9. **No index channel.** The MG310 encoder is A/B only, so REQ-ODOM-005 (index-based reset) can't be met with
+   this motor (D-028).
 
 ### Firmware constraints from S0
 
-- `Drv8711DriverConfiguration`: Rsense 0.05 Ω, I_trip 1.3 A → ISGAIN 40, TORQUE 242.
-- Pitch setpoint offset of about 21° toward the top side, or about 10° with the battery on the bottom side (finding 8; `docs/mechanical.md`). Measure the fall limit (REQ-SAFE-002) from the setpoint.
-- Gear ratio 9.6. The encoder CPR at the wheel is 4 × lines × 9.6.
-- LPTIM1 kernel clock fast enough for the encoder rate (finding 5).
-- Add reflected inertia to the plant model; fix the J definition (`docs/mechanical.md`).
+- `Drv8711DriverConfiguration`: Rsense 0.05 Ω, I_trip 2.0 A → ISGAIN 20, TORQUE 186; continuous rating 0.5 A by I²t.
+- Average motor voltage capped at 7.4 V (duty ≤ 7.4 / VBAT).
+- Gear ratio 20; wheel radius 0.0325 m; 1040 counts per wheel revolution (13 PPR ASSUMED; count at bring-up).
+- Pitch setpoint about 17° toward the front (`docs/mechanical.md`); fall limit measured from it.
+- Add reflected inertia to the plant model; J about the CoM (`docs/mechanical.md`).
 
 ### Model limits
 
-Not simulated: gearbox backlash (common on these gearboxes and harmful at small angles), wheel slip, sensor noise and estimator lag, motor inductance, battery sag (S1/S3 cover that). The motor constants come from seller listings. **Measure the purchased motor** (stall current at 12 V, no-load speed and current, L, spin-down inertia) and rerun.
-
+Not simulated: gearbox backlash, wheel slip, sensor noise and estimator lag, motor inductance, battery sag (S1/S3
+cover that). The motor constants come from a seller listing with a typo in the stall current. **Measure the
+purchased motor** (stall current at 7.4 V, no-load speed and current, L, spin-down inertia, encoder PPR) and rerun.
 
 ## S1: power entry (`power_entry.py`)
 
@@ -118,12 +116,15 @@ buck is a 1.56 W constant-power load above its 9.1 V UVLO; motors are R + L + ba
 | Hot plug, switch off: VBAT peak | **10.5 V** | **0.002 V** |
 | On-state V_GS at 12.6 V | −11.4 V | −5.5 V (R_DS(on) ≈ 20 mΩ) |
 | Reverse battery (switch on / off): load current, V_GS | 0, ≤ 0.69 V | 0, ≈ 0 V |
-| Switch-off with both motors stalled at 1.37 A | VBAT 12.66 V | VBAT 12.65 V; FET energy 2.1 mJ |
-| Switch-off while pushed at 20 V back-EMF (above no-load speed) | VBAT 17.75 V | VBAT 17.75 V (TVS onset); FET 7 mJ |
+| Switch-off with both MG310s stalled at full voltage (3.4 A each, no trip: pessimistic) | VBAT 12.84 V | VBAT 12.84 V; FET energy 2.1 mJ |
+| Switch-off while pushed at 20 V back-EMF (above no-load speed) | VBAT 17.84 V | VBAT 17.84 V (TVS onset); FET 34 mJ |
 
-Hand cross-check for the pushed case: 2 × (20 − 12.6 − 1.6) / 9.2 ≈ 1.26 A into the battery; simulated 1.15 A.
-Regeneration needs the wheels above the motors' no-load speed (≈ 2.3 m/s at 12.6 V), outside the 1.5 m/s
-design limit, and even then the TVS keeps VBAT < 24 V.
+Hand cross-check for the pushed case: 2 × (20 − 12.6 − 1.6) / 3.7 ≈ 3.1 A into the battery; simulated peak 2.9 A.
+Regeneration needs the wheels above the motors' no-load speed (MG310: 545 rpm × 12.6 / 7.4 = 928 rpm, ≈ 3.2 m/s on
+65 mm wheels), far outside the 1.5 m/s design limit, and even then the TVS keeps VBAT < 24 V. The FET energy
+(34 mJ) is spread over the ~100 ms soft turn-off, about 0.3 W on average. The LCSC datasheet for C3040596 is
+image-only, so the transient thermal rating is a bench check (thermocouple on Q101 during a pushed switch-off).
+Re-run 2026-11-13 with the MG310 (D-027).
 
 **Constraint:** turn-off is now slow (τ = 100k × 1.05 µF ≈ 105 ms); don't switch off while the motors are driven.
 
@@ -131,9 +132,10 @@ design limit, and even then the TVS keeps VBAT < 24 V.
 
 **Scope.** One full bridge at transistor level (4 × CSD88537ND VDMOS), slow decay at 25 kHz centre-aligned,
 850 ns dead time, DRV8711 gate drive as 10 V through R = 10 V / mean(IDRIVE source, sink); hot-loop
-inductance 5 / 15 nH; stall at duty 0.5 / 0.9 and running at duty 0.9 with 9 V back-EMF.
-Hand cross-checks: ripple at D 0.5 = V·T/(4L) = 84 mA (sim 83 mA); stall current at D 0.5 ≈ 0.67 A
-(sim 0.62 A, dead time included).
+inductance 5 / 15 nH; MG310 (3.7 Ω, 1 mH, D-027) stalled at duty 0.5 and at the 7.4 V cap (duty 0.59), and running
+at duty 0.59 with 5 V back-EMF.
+Hand cross-checks: ripple at D 0.5 = V·T/(4L) = 126 mA (sim 124 mA); stall current at D 0.5 ≈ 1.70 A
+(sim 1.52 A, dead time and FET resistance included).
 
 ### Findings
 
@@ -145,8 +147,8 @@ Hand cross-checks: ripple at D 0.5 = V·T/(4L) = 84 mA (sim 83 mA); stall curren
    hot loop (12 ns to −1.07 V at 15 nH) → **layout target: hot loop ≤ 5 nH** (Phase 3).
 3. **Gate drive strength:** IDRIVE 00 (50/100 mA, the default) keeps switch-node overshoot ≤ 0.2 V; IDRIVE 11
    (200/400 mA) rings to +2.7…+5.5 V and puts 21.8 V on the low-side FET. **Firmware: keep IDRIVE at 00.**
-4. **Losses are negligible:** ≤ 30 mW per FET package (Tj ≈ 42 °C at 40 °C ambient); no shoot-through in any
-   case. The 60 V FETs are heavily oversized, which is fine.
+4. **Losses are negligible:** Tj ≈ 44 °C at 40 °C ambient at the 2 A MG310 stall; no shoot-through in any
+   case. The 60 V FETs are heavily oversized, which is fine. The SS34 clamps hold the plateau at −0.39 V at 1.8 A.
 
 ## S3: motor bus (`bus.py`)
 
@@ -155,14 +157,14 @@ battery 60 / 150 mΩ, the VBAT capacitor set, 1.56 W logic load.
 
 | Case | Result | Limit |
 |---|---|---|
-| Electrolytic C507 ripple, both motors at 1.3 A, D 0.5 (braking transient) | 0.570 A rms | 0.57 A (600 mA × 0.95 at 25 kHz) |
-| C507 ripple at the continuous current (0.45 A each, D 0.5) | **0.197 A rms** | 0.57 A |
-| VBAT ripple p-p (1.3 A / 0.45 A) | 211 / 73 mV | — |
-| Sag, aged pack at 9.9 V OCV, 2.6 A step | 9.28 V (hand 9.28 V) | logic UVLO stop 8.47 V |
-| Sag, aged pack at 9.0 V OCV, 2.6 A step | 8.41 V (hand 8.38 V) | below 8.47 V: logic cuts off (intended) |
+| Electrolytic C507 ripple, both motors at the 2.0 A trip, D 0.5 (recovery burst) | 0.878 A rms | 0.57 A (600 mA × 0.95 at 25 kHz): **exceeded during bursts only** |
+| C507 ripple at the continuous current (0.5 A each, D 0.5) | **0.219 A rms** | 0.57 A |
+| VBAT ripple p-p (2.0 A / 0.5 A) | 324 / 81 mV | — |
+| Sag, aged pack at 9.9 V OCV, 4.0 A step | 8.96 V (hand 8.97 V) | logic UVLO stop 8.47 V |
+| Sag, aged pack at 9.0 V OCV, 4.0 A step | 8.10 V (hand 8.06 V) | below 8.47 V: logic cuts off (intended); DRV8711 still above 8.0 V |
 
 **Constraints for firmware:** enforce the continuous current with the I²t model (the bulk capacitor is sized
-for it, not for sustained 1.3 A at D 0.5); raise an undervoltage fault and disarm below ~9.5 V under load so
+for it, not for sustained 2 A at D 0.5: electrolytic ripple heating is a thermal, time-averaged limit); raise an undervoltage fault and disarm below ~9.5 V under load so
 the hardware cut-off at 8.47 V is never reached while balancing.
 
 ## S4: logic rails (`rails.py`)
@@ -221,7 +223,8 @@ were rerun after the change.
 
 ## Constraints for firmware (collected)
 
-- DRV8711: IDRIVEP/IDRIVEN = 00 (S2); TBLANK ≥ 1.2 µs; trip 1.3 A with an I²t model for the continuous rating (S0, S3).
+- DRV8711: IDRIVEP/IDRIVEN = 00 (S2); TBLANK ≥ 1.2 µs; trip 2.0 A (ISGAIN 20, TORQUE 186) with an I²t model for the 0.5 A continuous rating (S0, S3).
+- Average motor voltage capped at 7.4 V; gear 20; wheel r 0.0325 m; 1040 counts per wheel revolution; no index (S0).
 - Undervoltage fault and disarm below ~9.5 V under load; never rely on the 8.47 V hardware cut-off (S3).
 - VBAT sampled at ≤ 100 Hz, ratio 0.2126, per-board calibration stored in flash (S5).
 - Power switch: turn-off takes ~100 ms; stop the motors before switching off (S1).
@@ -231,6 +234,6 @@ were rerun after the change.
 - Battery, lead inductance, MLCC derating, motor R/L and rotor inertia are assumptions (`common.py`, S0); measure them.
 - Bridge gate drive is a resistive approximation of the DRV8711's current-source drive; hot-loop inductance is
   a corner (5 / 15 nH), not extracted from a layout. Re-run S2 with extracted parasitics after Phase 3.
-- No DRV8711 current chopping in S2 (stall at duty ≤ 0.9 stays below the trip); chopping is a bench check.
+- No DRV8711 current chopping in S2 (stall at the 7.4 V cap reaches the 2.0 A trip, not above it); chopping is a bench check.
 - Buck dynamics not simulated (see S4). LDO HF rejection depends on TI's model and the assumed output capacitance.
 - Encoder cable is lumped (1 m); no EMI or ESD simulation.

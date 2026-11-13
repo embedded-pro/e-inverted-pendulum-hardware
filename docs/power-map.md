@@ -4,19 +4,19 @@ Built per `power-pcb-layout` §2 before placement. The net classes in `kicad/e-i
 come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way round.
 
 **Track widths:** IPC-2221, ΔT 10 °C, 1 oz outer / 0.5 oz inner (D-008), using the skill's `width_mm()`:
-- 2.8 A: 1.24 mm outer, 6.4 mm inner;
-- 1.3 A: 0.43 mm outer;
-- 0.5 A: 0.13 mm outer.
+- 4.2 A (two MG310s at the 2.0 A trip plus logic, D-027): 2.17 mm outer, 11.3 mm inner;
+- 2.0 A: 0.78 mm outer;
+- 0.5 A: 0.12 mm outer.
 
 **Vias:** about 1 A each (0.3 mm drill), so every layer change needs ≥ I/1 A vias. **Clearance:** everything is ≤ 30 V
 (3S, TVS-clamped), so IPC-2221 B2 needs 0.1 mm. The fab design value of 0.15 mm governs. The bus and motor nets get 0.2 mm. The switch nodes keep 0.15 mm, because SMPS_LX sits on the MCU's 0.4 mm-pitch pins.
 
 | Net / group | Kind | I cont / peak | V max | Rule | Class |
 |---|---|---|---|---|---|
-| BAT_P → F101 → BAT_F → Q101 → PP_S → VBAT | high current | 1.0 A / 2.8 A | 12.6 V (SMBJ15A clamp 24 V) | Pours on L1 + L3; ≥ 3 vias per layer change; no necks below 1.3 mm outer | `PWR_BUS` |
-| VBAT at the bridges (HS drains; C502/C503 bridge A, C505/C506 bridge B, C507 bulk, C508 VM) | hot-loop member | 0.9 A / 2.6 A | 12.6 V | Pour on L1. The HF cap (100 nF) sits closest to each FET pair's drain and LS source; L2 GND directly under | `PWR_BUS` |
-| MOT_L_P, MOT_L_N, MOT_R_P, MOT_R_N | switch node (25 kHz, IDRIVE 00) | 0.45 A / 1.3 A | 12.6 V | 0.8 mm. Only the copper the current needs, from the FET to the SS34 and the XH connector. No sense or encoder trace beside or under it on any layer | `MOTOR` |
-| SENSE_A, SENSE_B (LS sources → Rsense) | hot-loop member | 0.45 A / 1.3 A | < 0.1 V | Short and wide (≥ 0.8 mm). The current flows straight through R509/R512 | `MOTOR` |
+| BAT_P → F101 → BAT_F → Q101 → PP_S → VBAT | high current | 1.2 A / 4.2 A | 12.6 V (SMBJ15A clamp 24 V) | Pours on L1 + L3; ≥ 5 vias per layer change; no necks below 2.2 mm outer | `PWR_BUS` |
+| VBAT at the bridges (HS drains; C502/C503 bridge A, C505/C506 bridge B, C507 bulk, C508 VM) | hot-loop member | 1.0 A / 4.0 A | 12.6 V | Pour on L1. The HF cap (100 nF) sits closest to each FET pair's drain and LS source; L2 GND directly under | `PWR_BUS` |
+| MOT_L_P, MOT_L_N, MOT_R_P, MOT_R_N | switch node (25 kHz, IDRIVE 00) | 0.5 A / 2.0 A | 12.6 V | 0.8 mm. Only the copper the current needs, from the FET to the SS34 and the PH 6-pin connector (2 A contacts, D-028). No sense or encoder trace beside or under it on any layer | `MOTOR` |
+| SENSE_A, SENSE_B (LS sources → Rsense) | hot-loop member | 0.5 A / 2.0 A | < 0.1 V | Short and wide (≥ 0.8 mm). The current flows straight through R509/R512 | `MOTOR` |
 | xHS_D/G, xLS_D/G (8 + 8 nets), PP_G | gate drive | mA / ~100 mA pulses | VBAT + 12 V | 0.3 mm. Gate R at the FET. Each route paired with its return: the phase node for HS, SENSE_x/GND for LS | `GATE` |
 | DRV_xISENP/N, KELVIN_xN | sense / Kelvin | µA | < 0.1 V | From the inner pad edges of Rsense (NT501/NT502 at the GND pad). Tight pair, filter at the DRV8711 | `SENSE` |
 | VBAT_SENSE | analog, high impedance | µA | 2.7 V | Divider and 100 nF at the ADC pin (PC1); away from switch nodes | `SENSE` |
@@ -35,7 +35,7 @@ come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way ro
 | Class | Track (mm) | Clearance (mm) | Via (mm, drill / pad) | Diff pair (mm, width / gap) |
 |---|---|---|---|---|
 | Default | 0.20 | 0.15 | 0.30 / 0.60 | — |
-| `PWR_BUS` | 1.30 | 0.20 | 0.30 / 0.60 | — |
+| `PWR_BUS` | 2.20 | 0.20 | 0.30 / 0.60 | — |
 | `MOTOR` | 0.80 | 0.20 | 0.30 / 0.60 | — |
 | `GATE` | 0.30 | 0.15 | 0.30 / 0.60 | — |
 | `SENSE` | 0.20 | 0.15 | 0.30 / 0.60 | 0.20 / 0.20 |

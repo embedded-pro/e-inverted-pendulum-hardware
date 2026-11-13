@@ -65,7 +65,7 @@ STACKUP = [
 ]
 
 NET_CLASSES = {
-    "PWR_BUS": {"track_width": 1.3, "clearance": 0.2,
+    "PWR_BUS": {"track_width": 2.2, "clearance": 0.2,
                 "patterns": ["VBAT", "*/BAT_P", "*/BAT_F", "*/PP_S"]},
     "MOTOR": {"track_width": 0.8, "clearance": 0.2,
               "patterns": ["MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N", "*/SENSE_A", "*/SENSE_B"]},

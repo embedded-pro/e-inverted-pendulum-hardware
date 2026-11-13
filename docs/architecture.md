@@ -7,8 +7,8 @@ graph LR
     BAT[3S LiPo 9.0-12.6 V] --> XT30[XT30] --> FUSE[Fuse 4 A] --> PP[Back-to-back PMOS AO4805<br/>on/off + reverse + soft-start]
     PP --> VM[VM bus<br/>SMBJ15A + 220 uF]
     VM --> DRV[DRV8711 + 4x CSD88537ND<br/>Rsense 2x 50 mOhm]
-    DRV --> ML[Left motor + ABZ encoder]
-    DRV --> MR[Right motor + ABZ encoder]
+    DRV --> ML[Left MG310 + Hall A/B encoder]
+    DRV --> MR[Right MG310 + Hall A/B encoder]
     VM --> DIV[VBAT divider] --> MCU
     VM --> BUCK[TPS62933 -> 5V0] --> LDO[TLV75533 -> 3V3]
     BUCK --> ENCP[Encoder VCC]
@@ -39,13 +39,13 @@ Numbers marked **A** are ASSUMPTIONS to replace with datasheet maxima during the
 | 3V3 | Qwiic allowance | 50 mA | design choice |
 | **3V3 total** | | **≈ 115 mA** | TLV75533 (500 mA): (5.0 − 3.3) × 0.115 ≈ 0.20 W |
 | 5V0 | 3V3 rail | 115 mA | above |
-| 5V0 | 2 ABZ encoders | 60 mA | **A**, 30 mA each typical for optical/magnetic ABZ |
+| 5V0 | 2 MG310 Hall encoders | 20 mA | **ASSUMPTION**, about 10 mA each for a Hall encoder board |
 | 5V0 | Buzzer (MLT-8530 via NPN) | 90 mA peak | **A**, check the MLT-8530 datasheet |
 | **5V0 total** | | **≈ 265 mA** | TPS62933 (3 A), plenty of margin |
 | VBAT | 5V0 buck input at 9.9 V, η ≈ 0.85 | ≈ 160 mA | 5 × 0.265 / 0.85 / 9.9 |
-| VBAT | Two motors at I_trip (peak) | 2 × 1.3 A | S0 |
-| VBAT | Two motors, continuous (rated) | 2 × 0.45 A | JGA25-370 listing |
-| **VBAT peak** | | **≈ 2.8 A** | 4 A fuse (about 75 % derating → 3 A continuous) |
+| VBAT | Two motors at I_trip (peak) | 2 × 2.0 A | S0 (D-027) |
+| VBAT | Two motors, continuous (rated) | 2 × 0.5 A | MG310 listing |
+| **VBAT peak** | | **≈ 4.2 A** | 4 A fuse (1206FA-4A): 1.2 A continuous is within 75 % derating; 4.2 A recovery bursts (≪ 1 s) are 105 % of rating, which the fuse holds for ≥ 4 h; it opens at 250 % within 5 s (datasheet time-current table) |
 
 ## Safety chain (hardware part)
 

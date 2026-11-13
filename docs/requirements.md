@@ -40,10 +40,10 @@ Verification methods:
 | ID | Requirement | Source | Verify |
 |---|---|---|---|
 | HW-SNS-001 | The IMU (MPU-6500) shall be on SPI2 (PB13/PB14/PB15, CS PB12), with data-ready on PC6 (EXTI6). | REQ-IMU-001, `InertialSensorStm.hpp:31-38` | R |
-| HW-SNS-002 | The IMU shall be mounted rigidly on the body's sagittal centreline, axes aligned to the body frame (x forward, y left, z up). The mounting-to-body axis map is published for the firmware. | REQ-IMU-007, `imu-sensing.md` | R |
-| HW-SNS-003 | Left encoder A/B/Z = PC0 (LPTIM1_IN1) / PC2 (LPTIM1_IN2) / PC5. Right encoder A/B/Z = PA0 (TIM2_CH1) / PA1 (TIM2_CH2) / PC3. | REQ-ODOM-001, REQ-ODOM-005, `WheelEncodersStm.hpp:23-29` | R (`check_pinmap.py`) |
+| HW-SNS-002 | The IMU shall be mounted rigidly on the plate, axes aligned to the body frame (x forward, y left, z up), beside the MCU (D-029). Its position from the axle (about 90 mm) and the mounting-to-body axis map are published for the firmware. | REQ-IMU-007, `imu-sensing.md`, D-029 | R |
+| HW-SNS-003 | Left encoder A/B = PC0 (LPTIM1_IN1) / PC2 (LPTIM1_IN2). Right encoder A/B = PA0 (TIM2_CH1) / PA1 (TIM2_CH2). The index pins PC5 / PC3 stay wired to the buffer and read low: the MG310 has no index (D-028). | REQ-ODOM-001, REQ-ODOM-005, `WheelEncodersStm.hpp:23-29`, D-028 | R (`check_pinmap.py`) |
 | HW-SNS-004 | Encoder inputs shall carry clean edges up to the maximum edge rate from S0 with ≥ 2× margin. They shall not back-power the MCU while 3V3 is off. | REQ-ODOM-001, D-012 | S5, B |
-| HW-SNS-005 | The index (Z) lines shall reach EXTI-capable pins with unique EXTI line numbers. | REQ-ODOM-005, `imu-sensing.md` (EXTI uniqueness) | R (`check_pinmap.py`) |
+| HW-SNS-005 | The index (Z) lines shall reach EXTI-capable pins with unique EXTI line numbers. With the MG310 they carry no signal (D-028); REQ-ODOM-005 is reported to the firmware as unsupported by this motor. | REQ-ODOM-005, `imu-sensing.md` (EXTI uniqueness), D-028 | R (`check_pinmap.py`) |
 
 ## Radio, clocks, storage, interfaces
 
@@ -52,15 +52,17 @@ Verification methods:
 | HW-RF-001 | The BLE link shall work through an on-board antenna with the battery and motors fitted. | REQ-LINK-001 | B (VNA, RSSI) |
 | HW-RF-002 | HSE 32 MHz with total error ≤ ±50 ppm after trim. LSE 32.768 kHz within ±500 ppm (BLE sleep clock). | `rf-layout` §6, `PlatformImpl.cpp:3`, `PlatformImpl.hpp:88` | R, B |
 | HW-MEM-001 | Non-volatile storage for parameters and bonds: W25Q16 on SPI1 with CS on PA15. | REQ-TUNE-007, D-005 | R, B |
+| HW-MEM-002 | An I2C EEPROM (M24C64, 64 Kbit) on I2C3 at address 0x50 for calibration and configuration. | D-031 | R, B |
 | HW-IF-001 | USART1 (PB6 TX / PB7 RX) console, SWD and NRST on an STDC14 connector. | `PlatformImpl.hpp:61-65`, D-009 | R, B |
 | HW-IF-002 | A user button, two LEDs and a buzzer for local status. | firmware has none; added by D-009 review | R |
 | HW-IF-003 | Every off-board signal shall have ESD protection at its connector. | `mcu-circuit-design` §6, `interface-layout` §2 | R |
+| HW-IF-004 | An NFC Forum Type 5 tag (ST25DV04KC) on I2C3 (0x53/0x57), with its GPO interrupt on PA2 (EXTI2) and a PCB coil readable by a phone at the top-right corner of the front. | D-030 | R, B (phone read) |
 
 ## Mechanical
 
 | ID | Requirement | Source | Verify |
 |---|---|---|---|
-| HW-MEC-001 | The PCB shall be the pendulum body. It carries both motors (bracket holes), the battery (strap slots) and every electronic part. | D-006 | R |
-| HW-MEC-002 | Wheel radius about 0.034 m and track width about 0.145 m, as the firmware's placeholders. Final values are measured and fed back to the firmware. | `WheelOdometryImpl.hpp:19-20` | R |
+| HW-MEC-001 | The PCB carries every electronic part. It bolts to the WHEELTEC U-bracket (which holds both motors) in its bottom 25 mm strip, and carries the battery on its back. | D-006, D-025, D-026 | R |
+| HW-MEC-002 | Wheel radius 0.0325 m (65 mm wheels) and track width about 0.15 m (102 mm bracket plus hubs). Final values are measured and fed back to the firmware (placeholders 0.034 m / 0.145 m). | `WheelOdometryImpl.hpp:19-20`, D-026 | R |
 | HW-MEC-003 | Mass, CoM height ℓ and inertia J shall be computed from the CAD/mass budget and published for the firmware model. | `pendulum-dynamics.md` | S0 |
 | HW-MEC-004 | A fall shall not strike the antenna edge: bumpers on both faces near the top. | D-007 | R |

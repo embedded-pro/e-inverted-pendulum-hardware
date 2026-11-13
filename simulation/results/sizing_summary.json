@@ -1,244 +1,174 @@
 {
+  "motor": {
+    "name": "MG310 1:20 Hall encoder",
+    "listing": "seller listing (owner, 2026-11-13): 1:20, rated 7.4 V, rated 0.4 kgf.cm at 400 rpm +/-13 %, rated current <= 500 mA, stall 1.5 kgf.cm, stall current '<= 2 mA' (typo, read as 2 A)",
+    "gear": 20.0,
+    "v_rated": 7.4,
+    "rated_torque": 0.0392266,
+    "rated_rpm_out": 400.0,
+    "stall_torque": 0.14709975,
+    "i_stall": 2.0,
+    "i_rated": 0.5,
+    "i_no_load": 0.12,
+    "j_rotor": 1e-06,
+    "inductance": 0.001,
+    "encoder_ppr": 13,
+    "assumptions": {
+      "i_stall": "ASSUMPTION 2.0 A at 7.4 V: the listing says '<= 2 mA'; the listed torques give 1.9 A at efficiency 0.6",
+      "i_no_load": "ASSUMPTION 0.12 A, typical for a 7.4 V 310-size motor; measure at bring-up",
+      "j_rotor": "ASSUMPTION 1.0e-6 kg m^2 (310-size rotor); measure by spin-down",
+      "inductance": "ASSUMPTION 1.0 mH; measure with an LCR meter",
+      "encoder_ppr": "ASSUMPTION 13 pulses per motor revolution (common for MG310 Hall encoders); count at bring-up",
+      "no_load_rpm": "derived: straight torque-speed line through (rated torque, 400 rpm) and (stall torque, 0)"
+    },
+    "rpm_no_load_out": 545.4545454545455,
+    "rpm_no_load": 10909.09090909091
+  },
+  "motor_constants": {
+    "R": 3.7,
+    "Ke": 0.006088949812809732,
+    "Kt": 0.006088949812809732,
+    "Tf": 0.0007306739775371678
+  },
   "body": {
-    "m": 0.39200000000000007,
-    "l": 0.026332996976189807,
-    "J": 0.00048500828860544216,
-    "M": 0.07,
-    "Jw": 2.4276000000000003e-05,
-    "r": 0.034,
-    "com_y_mm": -9.349489795918366,
-    "lean_deg": -20.796413880508673
+    "m": 0.38700000000000007,
+    "l": 0.02955336307237164,
+    "J": 0.0004586738556072352,
+    "M": 0.06,
+    "Jw": 1.90125e-05,
+    "r": 0.0325,
+    "com_y_mm": -8.74470284237726,
+    "lean_deg": -17.211234504896485
   },
-  "tau_s": 0.08645138136343787,
+  "tau_s": 0.08426525832257441,
   "per_config": {
-    "6000rpm_1:4.4_rated": {
+    "cap7.4_trip1.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 14.01953125,
-      "max_duty_1p0_at_arm_min": 0.29407633882061723,
-      "max_duty_1p5_at_arm_min": 0.41314248025889794,
-      "max_peak_current": 0.45,
+      "min_recoverable_deg": 11.5703125,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.5663575727908301,
+      "max_peak_current": 1.0,
       "pass": false
     },
-    "6000rpm_1:4.4_stall": {
+    "cap7.4_trip1.5": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 33.87109375,
-      "max_duty_1p0_at_arm_min": 0.29407633882061723,
-      "max_duty_1p5_at_arm_min": 0.41314248025889794,
-      "max_peak_current": 1.3,
+      "min_recoverable_deg": 14.53515625,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.5663575727908301,
+      "max_peak_current": 1.5,
+      "pass": false
+    },
+    "cap7.4_trip2.0": {
+      "all_recover_10deg": true,
+      "min_recoverable_deg": 22.26953125,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.5663575727908301,
+      "max_peak_current": 2.0,
       "pass": true
     },
-    "6000rpm_1:9.6_rated": {
+    "cap8.4_trip1.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 16.984375,
-      "max_duty_1p0_at_arm_min": 0.5755054004020078,
-      "max_duty_1p5_at_arm_min": 0.8352860726309838,
-      "max_peak_current": 0.45,
+      "min_recoverable_deg": 12.34375,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.4989340522204932,
+      "max_peak_current": 1.0,
       "pass": false
     },
-    "6000rpm_1:9.6_stall": {
+    "cap8.4_trip1.5": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 33.87109375,
-      "max_duty_1p0_at_arm_min": 0.5755054004020078,
-      "max_duty_1p5_at_arm_min": 0.8352860726309838,
-      "max_peak_current": 1.3,
+      "min_recoverable_deg": 15.6953125,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.4989340522204932,
+      "max_peak_current": 1.5,
+      "pass": false
+    },
+    "cap8.4_trip2.0": {
+      "all_recover_10deg": true,
+      "min_recoverable_deg": 20.98046875,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.4989340522204932,
+      "max_peak_current": 2.0,
       "pass": true
     },
-    "6000rpm_1:20.4_rated": {
+    "cap9.9_trip1.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 10.41015625,
-      "max_duty_1p0_at_arm_min": 1.1600119129172037,
-      "max_duty_1p5_at_arm_min": 1.7120458414037778,
-      "max_peak_current": 0.45,
-      "pass": false
-    },
-    "6000rpm_1:20.4_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 32.58203125,
-      "max_duty_1p0_at_arm_min": 1.1600119129172037,
-      "max_duty_1p5_at_arm_min": 1.7120458414037778,
-      "max_peak_current": 1.3,
-      "pass": false
-    },
-    "6000rpm_1:34.0_rated": {
-      "all_recover_10deg": false,
-      "min_recoverable_deg": 6.28515625,
-      "max_duty_1p0_at_arm_min": 1.8960571508993025,
-      "max_duty_1p5_at_arm_min": 2.816113698376926,
-      "max_peak_current": 0.45,
-      "pass": false
-    },
-    "6000rpm_1:34.0_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 25.10546875,
-      "max_duty_1p0_at_arm_min": 1.8960571508993025,
-      "max_duty_1p5_at_arm_min": 2.816113698376926,
-      "max_peak_current": 1.3,
-      "pass": false
-    },
-    "6000rpm_1:46.8_rated": {
-      "all_recover_10deg": false,
-      "min_recoverable_deg": 4.609375,
-      "max_duty_1p0_at_arm_min": 2.5888056101765717,
-      "max_duty_1p5_at_arm_min": 3.855236387292828,
-      "max_peak_current": 0.45,
-      "pass": false
-    },
-    "6000rpm_1:46.8_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 18.7890625,
-      "max_duty_1p0_at_arm_min": 2.5888056101765717,
-      "max_duty_1p5_at_arm_min": 3.855236387292828,
-      "max_peak_current": 1.3,
-      "pass": false
-    },
-    "4300rpm_1:4.4_rated": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 15.1796875,
-      "max_duty_1p0_at_arm_min": 0.38932997254928914,
-      "max_duty_1p5_at_arm_min": 0.5561161709451459,
-      "max_peak_current": 0.35,
-      "pass": false
-    },
-    "4300rpm_1:4.4_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 33.87109375,
-      "max_duty_1p0_at_arm_min": 0.38932997254928914,
-      "max_duty_1p5_at_arm_min": 0.5561161709451459,
+      "min_recoverable_deg": 13.375,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.42333798370223663,
       "max_peak_current": 1.0,
+      "pass": false
+    },
+    "cap9.9_trip1.5": {
+      "all_recover_10deg": true,
+      "min_recoverable_deg": 17.37109375,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.42333798370223663,
+      "max_peak_current": 1.5,
+      "pass": false
+    },
+    "cap9.9_trip2.0": {
+      "all_recover_10deg": true,
+      "min_recoverable_deg": 20.8515625,
+      "cruise_v_1p0": 4.191046038652143,
+      "cruise_v_1p5": 6.064569057978214,
+      "cruise_1p0_fraction_of_cap": 0.42333798370223663,
+      "max_peak_current": 2.0,
       "pass": true
-    },
-    "4300rpm_1:9.6_rated": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 18.40234375,
-      "max_duty_1p0_at_arm_min": 0.7835518960304049,
-      "max_duty_1p5_at_arm_min": 1.1474490561668194,
-      "max_peak_current": 0.35,
-      "pass": false
-    },
-    "4300rpm_1:9.6_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 33.87109375,
-      "max_duty_1p0_at_arm_min": 0.7835518960304049,
-      "max_duty_1p5_at_arm_min": 1.1474490561668194,
-      "max_peak_current": 1.0,
-      "pass": false
-    },
-    "4300rpm_1:20.4_rated": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 11.44140625,
-      "max_duty_1p0_at_arm_min": 1.6023205063373374,
-      "max_duty_1p5_at_arm_min": 2.3756019716272183,
-      "max_peak_current": 0.35,
-      "pass": false
-    },
-    "4300rpm_1:20.4_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 32.96875,
-      "max_duty_1p0_at_arm_min": 1.6023205063373374,
-      "max_duty_1p5_at_arm_min": 2.3756019716272183,
-      "max_peak_current": 1.0,
-      "pass": false
-    },
-    "4300rpm_1:34.0_rated": {
-      "all_recover_10deg": false,
-      "min_recoverable_deg": 7.05859375,
-      "max_duty_1p0_at_arm_min": 2.6333624600571786,
-      "max_duty_1p5_at_arm_min": 3.922164902206981,
-      "max_peak_current": 0.35,
-      "pass": false
-    },
-    "4300rpm_1:34.0_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 21.49609375,
-      "max_duty_1p0_at_arm_min": 2.6333624600571786,
-      "max_duty_1p5_at_arm_min": 3.922164902206981,
-      "max_peak_current": 1.0,
-      "pass": false
-    },
-    "4300rpm_1:46.8_rated": {
-      "all_recover_10deg": false,
-      "min_recoverable_deg": 5.125,
-      "max_duty_1p0_at_arm_min": 3.603754887087618,
-      "max_duty_1p5_at_arm_min": 5.377753542752638,
-      "max_peak_current": 0.35,
-      "pass": false
-    },
-    "4300rpm_1:46.8_stall": {
-      "all_recover_10deg": true,
-      "min_recoverable_deg": 15.953125,
-      "max_duty_1p0_at_arm_min": 3.603754887087618,
-      "max_duty_1p5_at_arm_min": 5.377753542752638,
-      "max_peak_current": 1.0,
-      "pass": false
     }
   },
-  "criteria": "per motor winding, worst case over gear efficiency 0.35-0.45 and VBAT 9.9-12.6 V: recover 10 deg within 1 s; >= 20 deg recoverable; duty at 1.0 m/s <= 0.70 at 9.9 V; rank by recoverable angle at the stall trip, then at the rated-current limit (the search stops at 34 deg, so several configurations can tie at the ceiling)",
-  "candidates": [
-    {
-      "motor": "6000rpm",
-      "gear": 4.4,
-      "min_recoverable_deg": 33.87109375,
-      "min_recoverable_rated_deg": 14.01953125
-    },
-    {
-      "motor": "6000rpm",
-      "gear": 9.6,
-      "min_recoverable_deg": 33.87109375,
-      "min_recoverable_rated_deg": 16.984375
-    },
-    {
-      "motor": "4300rpm",
-      "gear": 4.4,
-      "min_recoverable_deg": 33.87109375,
-      "min_recoverable_rated_deg": 15.1796875
-    }
-  ],
+  "criteria": "worst case over gear efficiency 0.5-0.65 and VBAT 9.9-12.6 V: recover 10 deg within 1 s; >= 20 deg recoverable (the search stops at 34 deg); cruise voltage at 1.0 m/s <= 70 % of the cap; recommend the lowest passing cap (closest to the motor rating), then the lowest passing trip",
+  "recommended": {
+    "v_cap": 7.4,
+    "i_trip": 2.0
+  },
   "lean_by_battery_side": {
     "top_side": {
       "battery_y_mm": -11.8,
-      "l_mm": 26.332996976189808,
-      "com_y_mm": -9.349489795918366,
-      "lean_deg": -20.796413880508673
+      "l_mm": 31.47896490976617,
+      "com_y_mm": -13.928165374676999,
+      "lean_deg": -26.260909067258584
     },
     "bottom_side": {
       "battery_y_mm": 11.8,
-      "l_mm": 24.978486813001805,
-      "com_y_mm": -4.232142857142856,
-      "lean_deg": -9.75476777818653
+      "l_mm": 29.55336307237164,
+      "com_y_mm": -8.74470284237726,
+      "lean_deg": -17.211234504896485
     }
-  },
-  "chosen": {
-    "motor": "6000rpm",
-    "gear": 9.6
   },
   "drv8711": {
     "rsense": 0.05,
-    "i_trip": 1.3,
-    "isgain": 40,
-    "torque": 242,
-    "actual_trip": 1.2998046875,
-    "rsense_power_w": 0.08450000000000002
+    "i_trip": 2.0,
+    "isgain": 20,
+    "torque": 186,
+    "actual_trip": 1.998046875,
+    "rsense_power_w": 0.2,
+    "connector_rating_a": 2.0
   },
-  "pwm_ripple_pp_a": {
-    "L=1.5mH": 0.08399999999999999,
-    "L=2.0mH": 0.063
-  },
+  "pwm_ripple_pp_a": 0.126,
   "encoder": {
-    "max_motor_rev_s": 105.0,
-    "channel_hz_by_lines": {
-      "100": 10500.0,
-      "250": 26250.0,
-      "500": 52500.0,
-      "1000": 105000.0
-    }
+    "ppr": 13,
+    "max_motor_rev_s": 181.81818181818184,
+    "channel_hz": 2363.636363636364,
+    "counts_per_wheel_rev": 1040.0
   },
   "sources": {
-    "motors": {
-      "6000rpm": "JGA25-370 12 V listings: 1:21.3 -> 280 rpm / 1:35 -> 170 rpm no-load, I0 60 mA, stall 1.3 A",
-      "4300rpm": "JGA25-371 12 V encoder variant: 1:34 -> 126 rpm, I0 46 mA, stall 1.0 A"
+    "motor": "seller listing (owner, 2026-11-13): 1:20, rated 7.4 V, rated 0.4 kgf.cm at 400 rpm +/-13 %, rated current <= 500 mA, stall 1.5 kgf.cm, stall current '<= 2 mA' (typo, read as 2 A)",
+    "assumptions": {
+      "i_stall": "ASSUMPTION 2.0 A at 7.4 V: the listing says '<= 2 mA'; the listed torques give 1.9 A at efficiency 0.6",
+      "i_no_load": "ASSUMPTION 0.12 A, typical for a 7.4 V 310-size motor; measure at bring-up",
+      "j_rotor": "ASSUMPTION 1.0e-6 kg m^2 (310-size rotor); measure by spin-down",
+      "inductance": "ASSUMPTION 1.0 mH; measure with an LCR meter",
+      "encoder_ppr": "ASSUMPTION 13 pulses per motor revolution (common for MG310 Hall encoders); count at bring-up",
+      "no_load_rpm": "derived: straight torque-speed line through (rated torque, 400 rpm) and (stall torque, 0)"
     },
-    "rotor_inertia": "ASSUMPTION 370-size rotor inertia 1.5e-6 kg m^2 (measure by spin-down)",
-    "inductance": "ASSUMPTION 1-3 mH (measure with an LCR meter at bring-up)",
-    "gear_efficiency": "derived: listed stall torque / (Kt * I_stall * G) = 0.35-0.50 across listings"
+    "gear_efficiency": "derived: stall torque / (G * Kt * (I_stall - I_0)) = 0.66 and rated point 0.71 with the listed values; 0.5 taken as the low corner"
   }
 }

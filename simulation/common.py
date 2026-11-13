@@ -18,9 +18,9 @@ ASSUMPTIONS = {
     "fuse_r": {"value": 0.035, "source": "1206FA-4A cold resistance 0.035 Ohm typ"},
     "mlcc_10u_25v_at_12v": {"value": 5e-6, "source": "ASSUMPTION Samsung CL21A106KAYNNNE DC-bias ~-50 % at 12 V"},
     "mlcc_22u_25v_at_5v": {"value": 13e-6, "source": "ASSUMPTION CL21A226MAQNNNE DC-bias ~-40 % at 5 V"},
-    "motor_r": {"value": 9.2, "source": "S0: 12 V / 1.3 A stall (JGA25-370 6000 rpm winding)"},
-    "motor_l": {"value": 1.5e-3, "source": "ASSUMPTION 1-3 mH (S0); measure at bring-up"},
-    "motor_ke": {"value": 0.01833, "source": "S0 motor constant"},
+    "motor_r": {"value": 3.7, "source": "S0: 7.4 V / 2.0 A stall (MG310, D-027; stall current ASSUMPTION)"},
+    "motor_l": {"value": 1.0e-3, "source": "ASSUMPTION 1 mH (S0); measure at bring-up"},
+    "motor_ke": {"value": 0.00609, "source": "S0 motor constant (MG310)"},
     "logic_power": {"value": 1.56, "source": "docs/architecture.md: 5 V x 0.265 A / 0.85"},
 }
 

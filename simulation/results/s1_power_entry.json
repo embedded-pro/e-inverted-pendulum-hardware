@@ -81,34 +81,34 @@
         "vbat_min_V": -0.00020971065
       },
       "regen_stall_dump": {
-        "i_peak_A": 2.7376578,
-        "vbat_end_V": 8.8607612,
-        "vbat_peak_V": 12.662204,
+        "i_peak_A": 6.2066199,
+        "vbat_end_V": 8.8604901,
+        "vbat_peak_V": 12.835824,
         "rise_10_90_ms": 0.0,
-        "vgs_min_V": -11.185623,
-        "vgs_max_V": -0.017247999999998598,
-        "fet2_peak_power_W": 0.48958140679494705,
-        "fet2_energy_mJ": 24.473796512639257,
-        "i2t_A2s": 1.1254884576474684,
-        "tvs_peak_A": 0.00010455891,
+        "vgs_min_V": -10.843803900000001,
+        "vgs_max_V": -0.01712899999999884,
+        "fet2_peak_power_W": 0.5119341668976037,
+        "fet2_energy_mJ": 86.55980894394236,
+        "i2t_A2s": 5.779962995811211,
+        "tvs_peak_A": 0.00024723181,
         "emf_V": 0.0,
-        "vbat_peak_after_off_V": 12.662204,
-        "fet2_energy_after_off_mJ": 9.765633032383603
+        "vbat_peak_after_off_V": 12.835824,
+        "fet2_energy_after_off_mJ": 9.770632109593022
       },
       "regen_pushed_20V_emf": {
-        "i_peak_A": 1.1475132,
-        "vbat_end_V": 17.753717,
-        "vbat_peak_V": 17.753717,
-        "rise_10_90_ms": 189.84241,
-        "vgs_min_V": -11.567083,
-        "vgs_max_V": -0.007654999999999745,
-        "fet2_peak_power_W": 0.13816579935600104,
-        "fet2_energy_mJ": 4.268507249442088,
-        "i2t_A2s": 0.2465234794026649,
-        "tvs_peak_A": 0.11487765,
+        "i_peak_A": 2.8905576,
+        "vbat_end_V": 17.844441,
+        "vbat_peak_V": 17.844441,
+        "rise_10_90_ms": 187.65102,
+        "vgs_min_V": -11.7378211,
+        "vgs_max_V": -0.007711999999997943,
+        "fet2_peak_power_W": 0.5587464594291986,
+        "fet2_energy_mJ": 24.88135903912321,
+        "i2t_A2s": 1.54787580997566,
+        "tvs_peak_A": 0.34543031,
         "emf_V": 20.0,
-        "vbat_peak_after_off_V": 17.753717,
-        "fet2_energy_after_off_mJ": 1.7258537050243914
+        "vbat_peak_after_off_V": 17.844441,
+        "fet2_energy_after_off_mJ": 8.860018827572295
       }
     },
     "checks": {
@@ -198,34 +198,34 @@
         "vbat_min_V": -0.00021487548
       },
       "regen_stall_dump": {
-        "i_peak_A": 2.7312815,
-        "vbat_end_V": 8.885898,
-        "vbat_peak_V": 12.649275,
+        "i_peak_A": 6.1717534,
+        "vbat_end_V": 8.884418,
+        "vbat_peak_V": 12.835975,
         "rise_10_90_ms": 0.0,
-        "vgs_min_V": -6.144457699999999,
-        "vgs_max_V": -0.6139770000000002,
-        "fet2_peak_power_W": 0.21519526251625629,
-        "fet2_energy_mJ": 23.36917026306706,
-        "i2t_A2s": 1.1209729110472666,
-        "tvs_peak_A": 0.0001044143,
+        "vgs_min_V": -5.947262199999999,
+        "vgs_max_V": -0.5940709999999996,
+        "fet2_peak_power_W": 0.7484039405172065,
+        "fet2_energy_mJ": 114.3189407221707,
+        "i2t_A2s": 5.713121623588132,
+        "tvs_peak_A": 0.0002464159,
         "emf_V": 0.0,
-        "vbat_peak_after_off_V": 12.649275,
-        "fet2_energy_after_off_mJ": 2.0797734833141557
+        "vbat_peak_after_off_V": 12.835975,
+        "fet2_energy_after_off_mJ": 2.0851192629205704
       },
       "regen_pushed_20V_emf": {
-        "i_peak_A": 1.145045,
-        "vbat_end_V": 17.753717,
-        "vbat_peak_V": 17.753717,
-        "rise_10_90_ms": 272.42928,
-        "vgs_min_V": -6.3649501,
-        "vgs_max_V": -0.5809630000000006,
-        "fet2_peak_power_W": 0.1447998585255982,
-        "fet2_energy_mJ": 10.637852018130099,
-        "i2t_A2s": 0.34864808688974014,
-        "tvs_peak_A": 0.11487766,
+        "i_peak_A": 2.8753934,
+        "vbat_end_V": 17.844441,
+        "vbat_peak_V": 17.844441,
+        "rise_10_90_ms": 265.77557,
+        "vgs_min_V": -6.4628380000000005,
+        "vgs_max_V": -0.590523000000001,
+        "fet2_peak_power_W": 0.5671536732017013,
+        "fet2_energy_mJ": 56.87490337188232,
+        "i2t_A2s": 2.1316199073993065,
+        "tvs_peak_A": 0.34543015,
         "emf_V": 20.0,
-        "vbat_peak_after_off_V": 17.753717,
-        "fet2_energy_after_off_mJ": 7.017672652742179
+        "vbat_peak_after_off_V": 17.844441,
+        "fet2_energy_after_off_mJ": 34.36034848093612
       }
     },
     "checks": {
@@ -261,12 +261,12 @@
       "source": "docs/architecture.md: 5 V x 0.265 A / 0.85"
     },
     "motor_r": {
-      "value": 9.2,
-      "source": "S0: 12 V / 1.3 A stall (JGA25-370 6000 rpm winding)"
+      "value": 3.7,
+      "source": "S0: 7.4 V / 2.0 A stall (MG310, D-027; stall current ASSUMPTION)"
     },
     "motor_l": {
-      "value": 0.0015,
-      "source": "ASSUMPTION 1-3 mH (S0); measure at bring-up"
+      "value": 0.001,
+      "source": "ASSUMPTION 1 mH (S0); measure at bring-up"
     }
   }
 }

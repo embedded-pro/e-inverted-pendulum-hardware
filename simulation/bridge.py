@@ -5,7 +5,8 @@ Forward effort e in slow decay (firmware BridgeMapping): AIN1 held high, AIN2 PW
 (HS1/LS1 complementary with dead time) and LS2 stays on. Centre-aligned 25 kHz (MotionActuationImpl.hpp:18),
 DTIME 850 ns (Drv8711DriverConfiguration). DRV8711 gate drive = 10 V steps through R = 10 V / mean(IDRIVEP, IDRIVEN)
 (SLVSC40 p.6, p.28), i.e. 133 Ohm for setting 00 and 33 Ohm for setting 11. Hot-loop inductance between the 100 nF cap and the FETs is a corner.
-Ideal: battery stiff behind 60 mOhm; no current chopping (stall at duty <= 0.9 stays below the 1.3 A trip).
+Ideal: battery stiff behind 60 mOhm; no current chopping (stall at the firmware's 7.4 V cap, duty 0.59 at 12.6 V,
+draws 2.0 A = the trip, D-027).
 """
 
 import itertools
@@ -103,7 +104,7 @@ def metrics(r, duty):
 def main():
     drives = {"IDRIVE 00 (50/100 mA)": (0.05, 0.10), "IDRIVE 11 (200/400 mA)": (0.20, 0.40)}
     loops = {"loop 5 nH": 5e-9, "loop 15 nH": 15e-9}
-    points = {"stall D0.5": (0.5, 0.0), "stall D0.9": (0.9, 0.0), "running D0.9 E9V": (0.9, 9.0)}
+    points = {"stall D0.5": (0.5, 0.0), "stall D0.59 (7.4 V cap)": (0.59, 0.0), "running D0.59 E5V": (0.59, 5.0)}
     assert all(kicad_values.values()[f"D50{i}"]["raw"] == "SS34" for i in range(1, 5)), "SS34 clamps missing"
     variants = {"phase1 (no clamps)": False, "current (SS34 D501-D504)": True}
     results, traces = {}, {}
@@ -139,13 +140,15 @@ def main():
 
 
 def plot(traces):
-    fig, axes = common.figure(3, "S2 HS turn-off + dead time, stall D0.9, 5 nH: no clamps vs SS34, IDRIVE 00 vs 11")
+    point, duty = "stall D0.59 (7.4 V cap)", 0.59
+    fig, axes = common.figure(3, f"S2 HS turn-off + dead time, {point}, 5 nH: no clamps vs SS34, IDRIVE 00 vs 11")
     for key, r in traces.items():
-        if "stall D0.9" not in key or "15 nH" in key:
+        if point not in key or "15 nH" in key:
             continue
         t = (r["x"] - r["x"][0]) * 1e6
-        sel = (t > 36.9) & (t < 38.4)
-        axes[0].plot(t[sel], r["v(OUT1)"][sel], label=key.replace(" | stall D0.9", "").replace(" | loop 5 nH", ""))
+        on_us = duty * PERIOD * 1e6
+        sel = (t > on_us + 0.9) & (t < on_us + 2.4)
+        axes[0].plot(t[sel], r["v(OUT1)"][sel], label=key.replace(f" | {point}", "").replace(" | loop 5 nH", ""))
         axes[1].plot(t[sel], r["v(GH1)"][sel] - r["v(OUT1)"][sel])
         axes[2].plot(t[sel], r["@mh1[id]"][sel])
     axes[0].axhline(-0.6, ls=":", c="grey")
