@@ -50,17 +50,17 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 - Body parameters come from `mechanical/mass_budget.csv` (bracket, motors, battery on the back; pivot on the axle).
 
 **Hand cross-checks.**
-- Body: m = 0.387 kg, ℓ = 29.6 mm, J = 4.59e-04 kg·m².
-  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.59e-04 + 0.387·0.0296²) / (0.387·9.81·0.0296)) =
-  84 ms. The script prints 84 ms.
+- Body: m = 0.387 kg, ℓ = 28.6 mm, J = 4.35e-04 kg·m².
+  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.35e-04 + 0.387·0.0286²) / (0.387·9.81·0.0286)) =
+  83 ms. The script prints 83 ms.
 - Cruise voltage at 1.0 m/s = Ke·G·v/r + R·I₀ = 0.00609·20·1.0/0.0325 + 3.70·0.12 = 4.19 V. The script prints 4.19 V.
 - TORQUE at 2.0 A = 256·20·0.05·2.0/2.75 = 186 (ISGAIN 20). The script prints 186.
 
 ### Findings
 
-1. **The trip must be 2.0 A.** At every voltage cap, 1.0 A and 1.5 A trips recover only 12–17° worst case, short of
-   the 2 × 10° target. **2.0 A recovers 21–22°**, which passes but with little margin.
-2. **A 7.4 V cap is enough.** The cap barely changes recovery (22.3° at 7.4 V, 21.0° at 8.4 V, 20.9° at 9.9 V), and
+1. **The trip must be 2.0 A.** At every voltage cap, 1.0 A and 1.5 A trips recover only 12–18° worst case, short of
+   the 2 × 10° target. **2.0 A recovers 21.6–23.0°**, which passes but with little margin.
+2. **A 7.4 V cap is enough.** The cap barely changes recovery (23.0° at 7.4 V, 21.8° at 8.4 V, 21.6° at 9.9 V), and
    cruising at 1.0 m/s needs 4.2 V (57 % of the cap) and at 1.5 m/s 6.1 V. **The firmware limits the average motor
    voltage to 7.4 V** (duty ≤ 0.59 at 12.6 V): the motor stays at its rating, and stall current at the cap equals
    the trip.
@@ -71,10 +71,10 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 5. **PWM ripple** at 25 kHz, D 0.5, 12.6 V with L = 1 mH: 126 mA p-p, 6 % of the trip (REQ-DRIVE-007).
 6. **Encoder:** 13 pulses per motor revolution × 20 = 260 per wheel revolution, **1040 counts** with ×4 decoding. At the
    7.4 V cap the channel rate is about 2.4 kHz, far below the input filter corner (S5).
-7. **Fall time constant τ = 84 ms**, about 42 updates per τ at 500 Hz.
-8. **Static lean ≈ 17° toward the front.** The bracket puts the axle 18.8 mm behind the plate,
+7. **Fall time constant τ = 83 ms**, about 42 updates per τ at 500 Hz.
+8. **Static lean ≈ 18° toward the front.** The bracket puts the axle 18.8 mm behind the plate,
    so the plate, the parts and even the back-mounted battery (7 mm ahead of the axle) sit in front of it. With the
-   battery on the front the lean would be 26°. The pitch setpoint and the fall limit are measured from this lean.
+   battery on the front the lean would be 27°. The pitch setpoint and the fall limit are measured from this lean.
 9. **No index channel.** The MG310 encoder is A/B only, so REQ-ODOM-005 (index-based reset) can't be met with
    this motor (D-028).
 
@@ -83,7 +83,7 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 - `Drv8711DriverConfiguration`: Rsense 0.05 Ω, I_trip 2.0 A → ISGAIN 20, TORQUE 186; continuous rating 0.5 A by I²t.
 - Average motor voltage capped at 7.4 V (duty ≤ 7.4 / VBAT).
 - Gear ratio 20; wheel radius 0.0325 m; 1040 counts per wheel revolution (13 PPR ASSUMED; count at bring-up).
-- Pitch setpoint about 17° toward the front (`docs/mechanical.md`); fall limit measured from it.
+- Pitch setpoint about 18° toward the front (`docs/mechanical.md`); fall limit measured from it.
 - Add reflected inertia to the plant model; J about the CoM (`docs/mechanical.md`).
 
 ### Model limits

@@ -109,7 +109,7 @@ def mechanical(name, description, length, width, keepout_width):
     half_l, half_w = max(length, keepout_width) / 2.0, keepout_width / 2.0
     k_len = length - width + keepout_width
     node = footprint(name, description, "smd", (-length / 2, -width / 2, length / 2, width / 2),
-                     (-k_len / 2 - 0.25, -half_w - 0.25, k_len / 2 + 0.25, half_w + 0.25),
+                     (-k_len / 2, -half_w, k_len / 2, half_w),
                      [npth(0, 0, length, width, name)], [keepout(stadium(k_len, keepout_width), name)], silk=False)
     attr = next(item for item in node if isinstance(item, list) and item and item[0] == Sym("attr"))
     attr[1:] = [Sym("board_only"), Sym("exclude_from_pos_files"), Sym("exclude_from_bom")]
@@ -152,6 +152,10 @@ FOOTPRINTS = {
     "MountingHole_M3_NPTH_KeepOut7mm": lambda n: mechanical(
         n, "M3 NPTH hole, 3.2 mm drill, outer-layer copper keep-out to 7 mm (M3 washer); inner layers 0.5 mm hole clearance (project rule); docs/mechanical.md",
         3.2, 3.2, 7.0),
+    "MountingHole_M2_NPTH_KeepOut5.5mm": lambda n: mechanical(
+        n, "M2 / Ø2.4 NPTH hole (WHEELTEC bracket 77 x 14 mm pattern), outer-layer copper keep-out to 5.5 mm; inner layers "
+           "0.5 mm hole clearance (project rule); docs/mechanical.md",
+        2.4, 2.4, 5.5),
     "MountingSlot_M3_10mm_NPTH_KeepOut7mm": lambda n: mechanical(
         n, "M3 NPTH slot, 3.2 mm wide with 10 mm travel (13.2 mm long), outer-layer copper keep-out 7 mm wide, inner layers "
            "0.5 mm hole clearance (project rule); "

@@ -32,19 +32,19 @@
   },
   "body": {
     "m": 0.38700000000000007,
-    "l": 0.02955336307237164,
-    "J": 0.0004586738556072352,
+    "l": 0.02861689555843236,
+    "J": 0.00043453550935400515,
     "M": 0.06,
     "Jw": 1.90125e-05,
     "r": 0.0325,
     "com_y_mm": -8.74470284237726,
-    "lean_deg": -17.211234504896485
+    "lean_deg": -17.792960342845973
   },
-  "tau_s": 0.08426525832257441,
+  "tau_s": 0.08316713311620552,
   "per_config": {
     "cap7.4_trip1.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 11.5703125,
+      "min_recoverable_deg": 11.95703125,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.5663575727908301,
@@ -53,7 +53,7 @@
     },
     "cap7.4_trip1.5": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 14.53515625,
+      "min_recoverable_deg": 15.05078125,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.5663575727908301,
@@ -62,7 +62,7 @@
     },
     "cap7.4_trip2.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 22.26953125,
+      "min_recoverable_deg": 23.04296875,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.5663575727908301,
@@ -71,7 +71,7 @@
     },
     "cap8.4_trip1.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 12.34375,
+      "min_recoverable_deg": 12.73046875,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.4989340522204932,
@@ -80,7 +80,7 @@
     },
     "cap8.4_trip1.5": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 15.6953125,
+      "min_recoverable_deg": 16.2109375,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.4989340522204932,
@@ -89,7 +89,7 @@
     },
     "cap8.4_trip2.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 20.98046875,
+      "min_recoverable_deg": 21.75390625,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.4989340522204932,
@@ -98,7 +98,7 @@
     },
     "cap9.9_trip1.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 13.375,
+      "min_recoverable_deg": 13.890625,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.42333798370223663,
@@ -107,7 +107,7 @@
     },
     "cap9.9_trip1.5": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 17.37109375,
+      "min_recoverable_deg": 17.88671875,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.42333798370223663,
@@ -116,7 +116,7 @@
     },
     "cap9.9_trip2.0": {
       "all_recover_10deg": true,
-      "min_recoverable_deg": 20.8515625,
+      "min_recoverable_deg": 21.625,
       "cruise_v_1p0": 4.191046038652143,
       "cruise_v_1p5": 6.064569057978214,
       "cruise_1p0_fraction_of_cap": 0.42333798370223663,
@@ -132,15 +132,15 @@
   "lean_by_battery_side": {
     "top_side": {
       "battery_y_mm": -11.8,
-      "l_mm": 31.47896490976617,
+      "l_mm": 30.601481570425573,
       "com_y_mm": -13.928165374676999,
-      "lean_deg": -26.260909067258584
+      "lean_deg": -27.07437781464541
     },
     "bottom_side": {
       "battery_y_mm": 11.8,
-      "l_mm": 29.55336307237164,
+      "l_mm": 28.616895558432358,
       "com_y_mm": -8.74470284237726,
-      "lean_deg": -17.211234504896485
+      "lean_deg": -17.792960342845973
     }
   },
   "drv8711": {

@@ -5,7 +5,7 @@
 	(layer "F.Cu")
 	(descr "M3 NPTH hole, 3.2 mm drill, outer-layer copper keep-out to 7 mm (M3 washer); inner layers 0.5 mm hole clearance (project rule); docs/mechanical.md")
 	(property "Reference" "REF**"
-		(at 0 -4.75 0)
+		(at 0 -4.5 0)
 		(layer "F.SilkS")
 		(uuid "c82f51c0-290b-5f66-87d2-9df43c55ff91")
 		(effects
@@ -16,7 +16,7 @@
 		)
 	)
 	(property "Value" "MountingHole_M3_NPTH_KeepOut7mm"
-		(at 0 4.75 0)
+		(at 0 4.5 0)
 		(layer "F.Fab")
 		(uuid "92e9f5bd-1193-553d-b576-c7de0831bcef")
 		(effects
@@ -55,8 +55,8 @@
 	(attr board_only exclude_from_pos_files exclude_from_bom)
 	(duplicate_pad_numbers_are_jumpers no)
 	(fp_rect
-		(start -3.75 -3.75)
-		(end 3.75 3.75)
+		(start -3.5 -3.5)
+		(end 3.5 3.5)
 		(stroke
 			(width 0.05)
 			(type solid)

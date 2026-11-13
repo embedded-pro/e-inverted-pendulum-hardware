@@ -79,6 +79,8 @@ NET_CLASSES = {
                "patterns": ["+5V", "+3V3", "VDDA", "*/ENC_VCC", "*/DRV_V5", "*/DRV_VINT", "*/DRV_VCP"]},
     "RF": {"track_width": 0.27, "clearance": 0.15,
            "patterns": ["RF1", "*/RF_50", "*/RF_ANT", "*/RF_UFL"]},
+    "NFC": {"track_width": 0.25, "clearance": 0.15,
+            "patterns": ["*/NFC_AC0", "*/NFC_AC1"]},
     "CRYSTAL": {"track_width": 0.2, "clearance": 0.15,
                 "patterns": ["*/HSE_IN", "*/HSE_OUT", "*/OSC32_IN", "*/OSC32_OUT"]},
 }
@@ -94,6 +96,16 @@ CUSTOM_RULES = """
 (rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
   (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
   (constraint annular_width (min 0.1mm)))
+"""
+
+CUSTOM_RULES += """
+(rule "Battery on the back: no through-hole pins under it (D-025)"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.insideArea('BATTERY_BACK')")
+  (constraint disallow pad))
+
+(rule "Bracket strip: no parts except the bracket holes (D-026)"
+  (condition "A.Type == 'Footprint' && A.insideArea('BRACKET_STRIP') && A.Reference != 'MB*'")
+  (constraint disallow footprint))
 """
 
 CUSTOM_RULES += """
@@ -263,6 +275,10 @@ def ensure_drawings(board):
 
 
 def ensure_rule_areas(board):
+    wanted = {area["name"] for area in placement.RULE_AREAS}
+    stale = [zone for zone in board.Zones() if zone.GetIsRuleArea() and zone.GetZoneName() not in wanted]
+    for zone in stale:
+        board.Delete(zone)
     current = {zone.GetZoneName(): zone for zone in board.Zones() if zone.GetIsRuleArea()}
     for area in placement.RULE_AREAS:
         layers = pcbnew.LSET()
@@ -301,7 +317,13 @@ def fingerprint(fp):
                    p.GetDrillSize().y, int(p.GetAttribute()), p.GetLayerSet().Seq().size(),
                    p.GetFPRelativePosition().x, p.GetFPRelativePosition().y) for p in fp.Pads())
     zones = sorted(z.GetLayerSet().Seq().size() for z in fp.Zones())
-    return fp.GetLibDescription(), tuple(pads), tuple(zones)
+    angle = fp.GetOrientationDegrees()
+    fp.SetOrientationDegrees(0)
+    fp.BuildCourtyardCaches()
+    box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    courtyard = (round(box.GetWidth(), -4), round(box.GetHeight(), -4))
+    fp.SetOrientationDegrees(angle)
+    return fp.GetLibDescription(), tuple(pads), tuple(zones), courtyard
 
 
 _LIBRARY_CACHE = {}

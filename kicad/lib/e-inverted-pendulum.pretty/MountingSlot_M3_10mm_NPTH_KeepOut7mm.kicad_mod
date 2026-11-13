@@ -5,7 +5,7 @@
 	(layer "F.Cu")
 	(descr "M3 NPTH slot, 3.2 mm wide with 10 mm travel (13.2 mm long), outer-layer copper keep-out 7 mm wide, inner layers 0.5 mm hole clearance (project rule); adjustable motor-mount default, docs/mechanical.md")
 	(property "Reference" "REF**"
-		(at 0 -4.75 0)
+		(at 0 -4.5 0)
 		(layer "F.SilkS")
 		(uuid "99ac81ec-a20b-54f0-8c06-6e7d72705a36")
 		(effects
@@ -16,7 +16,7 @@
 		)
 	)
 	(property "Value" "MountingSlot_M3_10mm_NPTH_KeepOut7mm"
-		(at 0 4.75 0)
+		(at 0 4.5 0)
 		(layer "F.Fab")
 		(uuid "498bfc23-49f6-5def-ae72-d3a3143ad9c4")
 		(effects
@@ -55,8 +55,8 @@
 	(attr board_only exclude_from_pos_files exclude_from_bom)
 	(duplicate_pad_numbers_are_jumpers no)
 	(fp_rect
-		(start -8.75 -3.75)
-		(end 8.75 3.75)
+		(start -8.5 -3.5)
+		(end 8.5 3.5)
 		(stroke
 			(width 0.05)
 			(type solid)

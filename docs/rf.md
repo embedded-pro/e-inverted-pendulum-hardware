@@ -57,16 +57,20 @@ The IPD is both the match and the harmonic filter (rf-layout §3). Copy FL401's 
 - **TI SWRA117D meandered IFA** (AE401), 15.2 × 5.7 mm, as an exact copy (KiCad `RF_Antenna:Texas_SWRA117D_2.4GHz_Left`).
   - The feed is pad 1; pad 2 is the shorting leg to GND.
   - The antenna stays under solder mask (rf-layout §2).
-- **Top-left corner** (seen from the top side), with the antenna running toward the corner. The MCU is rotated
-  so RF1 faces it, keeping MLPF OUT → pi → feed short (about 10 mm or less).
-- **Keep-out on all four layers:** no copper, traces, parts, screws or silkscreen inside the antenna area. The area
-  runs from the GND edge to the board edge, plus 1 mm around the antenna (rf-layout §4).
+- **Top edge, centred above RF1** (feed at x 0, D-029). The MCU sits at the top centre, rotated so RF1 faces the
+  antenna. RF1 → MLPF → pi → feed is one straight vertical run, with 6.8 mm from MLPF OUT to the feed.
+- **Keep-out on all four layers:** a **full-width band** from the GND edge (z 111.1) to the top edge (z 117.5). It holds no
+  copper, traces, parts, screws or silkscreen (rule areas `ANTENNA_KEEPOUT` and `ANTENNA_BASE`; rf-layout §4).
+  This mirrors SWRA117D's own board, where the antenna sits at the board end with ground below it only.
   - The radiating trace stays ≥ 0.5 mm and the shorting leg ≥ 1.0 mm from the board edge (AN1088).
 - **Ground plane:** the rest of the 85 × 130 mm board, ≫ λ/4 (rf-layout §4).
 - **Board thickness:** SWRA117D does not state its reference board thickness, and says to shorten the antenna on a thicker
   board and lengthen it on a thinner one. The DNP pi network covers the mismatch; trimming covers any frequency shift (open item 3).
-- **Near field:** no metal within about 5 mm of the keep-out. The bumper screws go in the top-right corner. The battery
-  top stays ≥ 22 mm below the keep-out (`docs/mechanical.md`). The STDC14 cable and the motor and encoder leads must not cross it.
+- **Near field:** no metal within about 5 mm of the keep-out.
+  - The bumper screws (MH1 at the top-left, MH2 on the right edge) are ≥ 18 mm from the band.
+  - The NFC coil's copper (`docs/nfc.md`) stays 5 mm below the band and 13 mm sideways from the antenna's end.
+  - The battery is on the back, top edge at z 75, 36 mm below the band (`docs/mechanical.md`).
+  - The STDC14 cable (right edge) and the motor and encoder leads (side edges, low) don't cross it.
 
 ## Tuning and test footprints
 
@@ -87,7 +91,7 @@ The IPD is both the match and the harmonic filter (rf-layout §3). Copy FL401's 
 - **STM32WB SMPS:**
   - the 10 µH + 10 nH inductors and the VDDSMPS capacitor sit at pins 41–44;
   - small copper area, return over solid L2, inductor orthogonal to the RF line (rf-layout §5).
-- **Buck:** TPS62933F (1.2 MHz) goes in the lower band, ≥ 40 mm from the antenna (rf-layout §5).
+- **Buck:** TPS62933F (1.2 MHz) sits mid-left (z ≈ 60), about 50 mm from the antenna (rf-layout §5).
 - **HSE 32 MHz:** harmonics at 2432 and 2464 MHz fall in band (rf-layout §6), as on every STM32WB design. Keep the crystal at
   pins 34/35 with a short, symmetric loop, ground straight to L2 and no GPIO nearby. HSETUNE is set per batch
   (`docs/firmware-interface.md`).

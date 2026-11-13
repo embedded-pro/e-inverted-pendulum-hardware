@@ -1,0 +1,121 @@
+(footprint "MountingHole_M2_NPTH_KeepOut5.5mm"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "M2 / Ø2.4 NPTH hole (WHEELTEC bracket 77 x 14 mm pattern), outer-layer copper keep-out to 5.5 mm; inner layers 0.5 mm hole clearance (project rule); docs/mechanical.md")
+	(property "Reference" "REF**"
+		(at 0 -3.75 0)
+		(layer "F.SilkS")
+		(uuid "4d7e467c-b376-5fc2-9d50-a8bfce6c48c4")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Value" "MountingHole_M2_NPTH_KeepOut5.5mm"
+		(at 0 3.75 0)
+		(layer "F.Fab")
+		(uuid "ef126dd3-6db6-5c92-b93f-65afc8e16788")
+		(effects
+			(font
+				(size 0.8 0.8)
+				(thickness 0.12)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "98cc2f1b-9e2c-5a03-b74a-da660adb6e9b")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "64318591-39b5-52cb-8df7-abe21b5dc2cd")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr board_only exclude_from_pos_files exclude_from_bom)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -2.75 -2.75)
+		(end 2.75 2.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "b7b62092-5089-592d-b75b-55c17857db60")
+	)
+	(fp_rect
+		(start -1.2 -1.2)
+		(end 1.2 1.2)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "1e6bee77-a18e-5773-bbc3-c969bf75ccb7")
+	)
+	(pad "" np_thru_hole circle
+		(at 0 0)
+		(size 2.4 2.4)
+		(drill 2.4)
+		(layers "*.Cu" "*.Mask")
+		(uuid "775012c3-7937-506f-ae9e-216622cae6b1")
+	)
+	(zone
+		(layers "F.Cu" "B.Cu")
+		(uuid "4c2a3479-ad26-5306-a9ac-9367c00b3684")
+		(name "mechanical keep-out")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 0 -2.75) (xy 0.7118 -2.6563) (xy 1.375 -2.3816) (xy 1.9445 -1.9445) (xy 2.3816 -1.375) (xy 2.6563 -0.7118)
+				(xy 2.75 0) (xy 2.6563 0.7118) (xy 2.3816 1.375) (xy 1.9445 1.9445) (xy 1.375 2.3816) (xy 0.7118 2.6563)
+				(xy 0 2.75) (xy -0.7118 2.6563) (xy -1.375 2.3816) (xy -1.9445 1.9445) (xy -2.3816 1.375) (xy -2.6563 0.7118)
+				(xy -2.75 0) (xy -2.6563 -0.7118) (xy -2.3816 -1.375) (xy -1.9445 -1.9445) (xy -1.375 -2.3816) (xy -0.7118 -2.6563)
+			)
+		)
+	)
+	(embedded_fonts no)
+)

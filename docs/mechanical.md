@@ -23,9 +23,9 @@ Side view (robot drives left/right on the page):
                 (parts)│ │
    z 117.5 ────────────┤ │  2.4 GHz antenna band (front, all layers)
                        │ │
-   z 79    ────────────┤ ├────────┐
+   z 75    ────────────┤ ├────────┐
                        │ │BATTERY │ 22 mm thick, on a printed cradle (4 × M3)
-   z 44    ────────────┤ ├────────┘
+   z 40    ────────────┤ ├────────┘
                        │ │
    z 12.5  ────────────┤ ├─┐  bracket base (2 mm steel) on the back of the strip
    z 0     ─ ─ ─ ─ ─ ─ ┤ ├─┼──────(●) motor axis = wheel axle, y = +18.8 mm
@@ -39,9 +39,9 @@ Front view (component side):
    ┌──────────────────────────────────────────────────┐ z 117.5
    │ ░░░░░░░ 2.4 GHz IFA keep-out band (all layers) ░░░░░░│
    │  MCU top centre, IMU beside it        NFC coil      │
-   │                                                    │ z ~86
+   │                                                    │ z ~76
    │       (battery behind this band: SMD parts only)   │ ◄ STDC14 at the middle of the right edge
-   │                                                    │ z ~44
+   │                                                    │ z ~40
    │► motor L (PH6)       DRV8711 + bridges     motor R ◄│
    ├──────────────────────────────────────────────────┤ z 12.5
    │ ○M3  ∘M2     bracket strip: no parts        ∘M2  ○M3│ (axle z 0)
@@ -88,8 +88,8 @@ From the owner's drawing (2026-11-13):
 |---|---|---|---|
 | PCB plate 85 × 130 × 1.6 | 33 g | z 52.5, y −18.8 mm | D-024, FR-4 1.85 g/cm³ |
 | Components | 30 g | z 60, y −20.8 mm | ASSUMPTION |
-| 3S 1000 mAh LiPo, 75 × 35 × 22 | 85 g | z 61.5, y −7.0 mm (on the back) | ASSUMPTION |
-| Battery cradle | 10 g | z 61.5, y −12.8 mm | ASSUMPTION |
+| 3S 1000 mAh LiPo, 75 × 35 × 22 | 85 g | z 57.5, y −7.0 mm (on the back, z 40–75) | ASSUMPTION |
+| Battery cradle | 10 g | z 57.5, y −12.8 mm | ASSUMPTION |
 | 2 × MG310 + encoder | 2 × 65 g | on the axle | ASSUMPTION |
 | WHEELTEC bracket | 64 g | z 0, y −11.7 mm | derived: 8.2 cm³ of steel |
 | Screws, cables, XT30 lead, bumpers | 35 g | z 10–100 mm | ASSUMPTION |
@@ -97,14 +97,14 @@ From the owner's drawing (2026-11-13):
 
 Result (S0, `simulation/results/sizing_summary.json`):
 - body m = 0.387 kg;
-- ℓ = 29.6 mm;
-- J about the CoM = 4.59e-4 kg·m²;
-- **fall time constant τ = 84 ms**: about 42 updates per τ at 500 Hz.
+- ℓ = 28.6 mm;
+- J about the CoM = 4.35e-04 kg·m²;
+- **fall time constant τ = 83 ms**: about 41 updates per τ at 500 Hz.
 
 ## Consequences for the firmware
 
-- **Static lean ≈ 17° toward the front.** The bracket puts the axle 18.8 mm behind the plate. The plate and parts
-  are in front of it, and even the back-mounted battery is 7 mm in front (battery on the front: 26°).
+- **Static lean ≈ 18° toward the front.** The bracket puts the axle 18.8 mm behind the plate. The plate and parts
+  are in front of it, and even the back-mounted battery is 7 mm in front (battery on the front: 27°).
   - Calibrate the pitch setpoint.
   - Measure the fall limit (REQ-SAFE-002) from that setpoint, not from vertical.
 - **Wheel radius 0.0325 m** (65 mm wheels, owner). **Track width ≈ 0.15 m**: wheel centre planes about 24 mm outside

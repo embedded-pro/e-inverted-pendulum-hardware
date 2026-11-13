@@ -54,6 +54,7 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 simulation/sizing.py`: motor/drive sizing (S0).
 - `python3 scripts/check_pinmap.py`: pin map validation.
 - `python3 scripts/gcpw.py`: 50 Ω GCPW width/gap for the stack-up (`docs/rf.md`).
+- `python3 scripts/nfc_coil.py`: NFC coil inductance/resonance and its footprint (`docs/nfc.md`).
 - `python3 scripts/design_calcs.py`: values -> `kicad/gen/values.json`, `docs/design-calcs.md`.
 - `python3 kicad/gen/build.py`: regenerate the schematic (until the Phase 1 gate, D-020).
 - `python3 scripts/check_netlist.py` / `check_library.py`: netlist and symbol/footprint checks.

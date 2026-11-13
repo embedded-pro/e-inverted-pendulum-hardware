@@ -28,6 +28,14 @@
   (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
   (constraint annular_width (min 0.1mm)))
 
+(rule "Battery on the back: no through-hole pins under it (D-025)"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.insideArea('BATTERY_BACK')")
+  (constraint disallow pad))
+
+(rule "Bracket strip: no parts except the bracket holes (D-026)"
+  (condition "A.Type == 'Footprint' && A.insideArea('BRACKET_STRIP') && A.Reference != 'MB*'")
+  (constraint disallow footprint))
+
 (rule "NPTH to copper: screw threads touch the hole wall; washers and brackets are kept off by the footprint keep-out"
   (condition "A.Type == 'Pad' && A.Pad_Type == 'NPTH, mechanical'")
   (constraint hole_clearance (min 0.5mm)))
