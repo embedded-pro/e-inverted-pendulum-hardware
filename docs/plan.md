@@ -84,19 +84,19 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 
 Stock risk: the MCU (225) and DRV8711 (128) are thin. Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
 
-## Hardware repo layout (`e-inverted-pendulum-hardware`, branch `claude/nice-ride-x9xyyl`)
+## Hardware repo layout (`e-inverted-pendulum-hardware`, the e-psu-hardware shape since D-033)
 ```
-README.md, CLAUDE.md (rules: skills to load, JLC constraints, no undocumented numbers)
-.claude/settings.json            # hardware-skills marketplace, project scope (skills README)
-docs/ requirements.md            # HW reqs traced to firmware REQ-IDs (DRIVE-005/007, SAFE-002/009, SYS-002/003, IMU-001/002, ODOM-001/003/005, RT-004)
-      architecture.md power-map.md pinmap.md mechanical.md rf.md bringup.md decisions.md
-cubemx/e-inverted-pendulum.ioc   # pin plan, validated by CubeMX
-kicad/  *.kicad_pro, hierarchical *.kicad_sch, *.kicad_pcb, lib/ (symbols, footprints, 3D)
-simulation/                      # exact layout from circuit-simulation §2
-mechanical/                      # STEP: motor, bracket, wheel, battery; mass/CoM script
-scripts/ jlc_stock.py, export_fab.sh, render_layers.py, route_metrics.py
-fab/                             # generated Gerbers, drill, BOM/CPL in JLC format
-.github/workflows/hardware.yml   # kicad-cli ERC/DRC, simulation run, fab artifact
+README.md, CLAUDE.md, PROJECT_CONTEXT.md, .mcp.json
+.claude/settings.json            # hardware-skills marketplace; agents/pendulum-board-reviewer.md
+docs/ requirements.md decisions.md plan.md design-calcs.md power-map.md pinmap.md mechanical.md rf.md nfc.md layout.md
+      robot-hardware-design-guide.md schematic.pdf images/
+hardware/e-inverted-pendulum/    # KiCad 10 project: root + 8 sheets, .kicad_pcb, .kicad_dru, project .kicad_sym / .pretty
+scripts/schgen/                  # schematic generator (design/*.py), check.py, check_equivalence.py, render.sh
+scripts/pcb/                     # board sync from the schematic (add-only, D-032), renders
+scripts/ export_review.py export_jlcpcb.py export_release.py visual_diff.py, check_*.py, export_bom.py, jlc_stock.py
+pin-data/ bom/ simulation/ mechanical/
+review_exports/ manufacturing/ release/ diff/   # generated, gitignored
+.github/workflows/               # hardware.yml, kicad-bot.yml, kicad-diff.yml, release.yml
 ```
 Tooling: KiCad 10 (`kicad-cli`, 10.0.8), ngspice (42 from Ubuntu; 47 if available), Python with numpy/scipy/matplotlib/spicelib.
 

@@ -69,3 +69,13 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.
+- `python3 scripts/export_review.py`: review package in `review_exports/e-inverted-pendulum/`.
+  `export_jlcpcb.py` (fab + assembly), `export_release.py` (release zip), `visual_diff.py` (PR diff); all outputs are
+  gitignored.
+- `.mcp.json`: kicad-mcp-pro on `hardware/` (schematic profile), as in e-psu-hardware.
+
+## 5. Review
+
+Design reviews use the `pendulum-board-reviewer` agent (`.claude/agents/`): read-only, works from
+`review_exports/e-inverted-pendulum/`, with `docs/requirements.md` as the contract, `simulation/REPORT.md` as the
+evidence and `docs/robot-hardware-design-guide.md` as the rubric. CI is a guardrail, not a review.
