@@ -16,6 +16,8 @@ sensing,IMU,MPU-6500,C50278,1,D-004
 sensing,Encoder Schmitt buffer x3,SN74LVC3G17DCTR,C18213,2,D-012
 sensing,Connector ESD (encoders + Qwiic),TPD4E05U06DQAR,C138714,3,one per encoder connector and one for Qwiic
 memory,SPI NOR flash 2 MB,W25Q16JVSSIQ,C131025,1,D-005
+memory,I2C EEPROM 64 Kbit,M24C64-RMN6TP,C79988,1,D-031; I2C3 at 0x50
+rf,NFC Type 5 tag with I2C,ST25DV04KC-IE8S3,C5221752,1,D-030; I2C3 at 0x53/0x57; GPO on PA2
 power,Buck 5 V (forced PWM),TPS62933FDRLR,C5219272,1,F = FCCM: fixed frequency near the radio
 power,Buck inductor 4.7 uH,SWPA4030S4R7MT,C57269,1,design-calcs TPS62933F L
 mcu,VDDA ferrite,BLM18PG221SN1D,C80165,1,mcu-circuit-design s2
@@ -26,8 +28,7 @@ power,TVS 15 V,SMBJ15A,C83846,1,HW-PWR-004
 power,Zener 15 V gate clamp,BZT52C15,C2104,1,
 power,Fuse 4 A 1206 (300 A @ 24 V breaking),1206FA-4A,C2937379,1,
 connector,Battery XT30 female PCB,XT30UPB-F,C108769,1,
-connector,Motor power 2-pin XH side entry,S2B-XH-A(LF)(SN),C157931,2,
-connector,Encoder 5-pin PH side entry,S5B-PH-K-S(LF)(SN),C157923,2,VCC GND A B Z; confirm against the cable
+connector,Motor + encoder 6-pin PH side entry,S6B-PH-K-S(LF)(SN),C157920,2,MG310 pinout 1 M- 2 VCC 3 A 4 B 5 GND 6 M+ (D-028); confirm against the cable
 connector,Debug STDC14,FTSH-107-01-L-DV-K,C5307809,1,D-009
 connector,Qwiic I2C,SM04B-SRSS-TB(LF)(SN),C160404,1,
 ui,Power slide switch (gate control only),SS-12D10L5,C319012,1,

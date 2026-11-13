@@ -65,6 +65,24 @@ SYMBOLS = {
         "left": [("A3", "IN", "passive"), None, ("B3", "GND1", "passive"), ("B2", "GND2", "passive")],
         "right": [("A1", "OUT", "passive"), None, ("B1", "GND3", "passive"), ("A2", "GND4", "passive")],
     },
+    "ST25DV04KC-IE8S3": {
+        "reference": "U",
+        "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
+        "datasheet": "https://www.st.com/resource/en/datasheet/st25dv04kc.pdf",
+        "description": "Dynamic NFC/RFID tag, NFC Forum Type 5 (ISO 15693), I2C, 4 Kbit, open-drain GPO, SO8N "
+                       "(DS13519 Rev 6, Table 1 and Fig. 2)",
+        "left": [("8", "VCC", "power_in"), ("1", "V_EH", "power_out"), None, ("2", "AC0", "passive"),
+                 ("3", "AC1", "passive"), None, ("4", "VSS", "power_in")],
+        "right": [("5", "SDA", "bidirectional"), ("6", "SCL", "input"), None, ("7", "GPO", "open_collector")],
+    },
+    "NFC_Coil": {
+        "reference": "AE",
+        "footprint": "e-inverted-pendulum:NFC_Coil_25x21mm",
+        "datasheet": "",
+        "description": "13.56 MHz printed loop antenna for the ST25DV (scripts/nfc_coil.py, docs/nfc.md)",
+        "left": [("1", "A", "passive")],
+        "right": [("2", "B", "passive")],
+    },
 }
 
 

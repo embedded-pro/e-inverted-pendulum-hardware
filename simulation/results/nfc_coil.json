@@ -1,0 +1,117 @@
+{
+  "coil": {
+    "width": 25.0,
+    "height": 21.0,
+    "trace": 0.15,
+    "gap": 0.15,
+    "copper_t": 0.035,
+    "underpass_dz": 1.49
+  },
+  "target_f0_MHz": 13.9,
+  "c_tun_pF": 28.5,
+  "c_parasitic_pF": 1.0,
+  "candidates": [
+    {
+      "turns": 4,
+      "L_greenhouse_uH": 1.0014370602706733,
+      "L_wheeler_uH": 0.9086121526372561,
+      "agreement_pct": -9.269170406807985,
+      "f0_MHz": 29.281767905484656
+    },
+    {
+      "turns": 5,
+      "L_greenhouse_uH": 1.4497172329803334,
+      "L_wheeler_uH": 1.3523264212890047,
+      "agreement_pct": -6.717917775669424,
+      "f0_MHz": 24.337024142344934
+    },
+    {
+      "turns": 6,
+      "L_greenhouse_uH": 1.9473875477541498,
+      "L_wheeler_uH": 1.8550100183550047,
+      "agreement_pct": -4.743664377729069,
+      "f0_MHz": 20.99824165020725
+    },
+    {
+      "turns": 7,
+      "L_greenhouse_uH": 2.484355143565217,
+      "L_wheeler_uH": 2.4051879043639723,
+      "agreement_pct": -3.1866313238788564,
+      "f0_MHz": 18.590980016565645
+    },
+    {
+      "turns": 8,
+      "L_greenhouse_uH": 3.05192520467906,
+      "L_wheeler_uH": 2.992519069641696,
+      "agreement_pct": -1.9465134645595343,
+      "f0_MHz": 16.77344159058452
+    },
+    {
+      "turns": 9,
+      "L_greenhouse_uH": 3.642465903761219,
+      "L_wheeler_uH": 3.607687793231162,
+      "agreement_pct": -0.954795774317196,
+      "f0_MHz": 15.353640802089341
+    },
+    {
+      "turns": 10,
+      "L_greenhouse_uH": 4.249192111055169,
+      "L_wheeler_uH": 4.242307178864827,
+      "agreement_pct": -0.1620292048559056,
+      "f0_MHz": 14.215297084121273,
+      "trim_cap_to_13p56_pF": 2.9201125126167806,
+      "f0_with_trim_MHz": 13.56
+    },
+    {
+      "turns": 11,
+      "L_greenhouse_uH": 4.866017310394373,
+      "L_wheeler_uH": 4.8888333807395945,
+      "agreement_pct": 0.46888592641222543,
+      "f0_MHz": 13.28379910093278
+    },
+    {
+      "turns": 12,
+      "L_greenhouse_uH": 5.487447696621867,
+      "L_wheeler_uH": 5.5404891621165335,
+      "agreement_pct": 0.9665962835020628,
+      "f0_MHz": 12.509038429871389
+    },
+    {
+      "turns": 13,
+      "L_greenhouse_uH": 6.108503887098485,
+      "L_wheeler_uH": 6.191195623125661,
+      "agreement_pct": 1.3537150430865028,
+      "f0_MHz": 11.856095704911251
+    },
+    {
+      "turns": 14,
+      "L_greenhouse_uH": 6.724661554246531,
+      "L_wheeler_uH": 6.8355110970607775,
+      "agreement_pct": 1.6484032976239094,
+      "f0_MHz": 11.299881987076482
+    },
+    {
+      "turns": 15,
+      "L_greenhouse_uH": 7.331805522732133,
+      "L_wheeler_uH": 7.4685763521381885,
+      "agreement_pct": 1.8654454074374918,
+      "f0_MHz": 10.82190345835941
+    }
+  ],
+  "chosen": {
+    "turns": 10,
+    "L_greenhouse_uH": 4.249192111055169,
+    "L_wheeler_uH": 4.242307178864827,
+    "agreement_pct": -0.1620292048559056,
+    "f0_MHz": 14.215297084121273,
+    "trim_cap_to_13p56_pF": 2.9201125126167806,
+    "f0_with_trim_MHz": 13.56
+  },
+  "footprint": "kicad/lib/e-inverted-pendulum.pretty/NFC_Coil_25x21mm.kicad_mod",
+  "sources": {
+    "c_tun": "DS13519 Rev 6, RF characteristics: CTUN 28.5 pF typ at 13.56 MHz",
+    "c_parasitic": "ASSUMPTION 1 pF coil + pad capacitance",
+    "greenhouse": "H. M. Greenhouse, IEEE Trans. Parts, Hybrids, and Packaging PHP-10(2), 1974",
+    "wheeler": "S. S. Mohan et al., IEEE JSSC 34(10), 1999, modified Wheeler K1 2.34, K2 2.75"
+  }
+}

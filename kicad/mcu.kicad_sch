@@ -3852,10 +3852,6 @@
 		(uuid "d91adcaa-2e03-52a5-8438-be348df2d601")
 	)
 	(no_connect
-		(at 83.82 53.34)
-		(uuid "e86ae0a4-2269-507c-9408-a150931acf1a")
-	)
-	(no_connect
 		(at 40.64 134.62)
 		(uuid "ede2e2c7-5301-5596-bc49-ccc8ab46f9f1")
 	)
@@ -4272,6 +4268,16 @@
 			(type default)
 		)
 		(uuid "6d9fac93-1462-54b4-b11a-b8b3e091b59b")
+	)
+	(wire
+		(pts
+			(xy 83.82 53.34) (xy 86.36 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6ddfc5d1-ae68-51a1-8833-d0cae5708255")
 	)
 	(wire
 		(pts
@@ -5696,6 +5702,30 @@
 		(uuid "3d85f381-366a-5f69-83a7-9b7aba3f6413")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 58.42 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "NFC_GPO"
+		(shape bidirectional)
+		(at 86.36 53.34 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "44d291f8-fc11-5a41-a8cc-66df04551892")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 86.36 53.34 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

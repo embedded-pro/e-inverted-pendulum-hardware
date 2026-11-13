@@ -1,6 +1,7 @@
-"""Sheet 8: LEDs, user button, buzzer, Qwiic I2C, test points.
+"""Sheet 8: LEDs, user button, buzzer, Qwiic I2C, I2C EEPROM, NFC tag, test points.
 
-Sources: docs/design-calcs.md (LEDs, Buzzer, Button, Qwiic); MLT-8530 p.3; SLVA689A.
+Sources: docs/design-calcs.md (LEDs, Buzzer, Button, Qwiic); MLT-8530 p.3; SLVA689A;
+M24C64 DocID16891 Rev 33 (Fig. 2, s2.3-2.4); ST25DV04KC DS13519 Rev 6 (Table 1, Fig. 2); docs/nfc.md.
 """
 
 from parts import C, R, active, nobom
@@ -40,6 +41,22 @@ def build(values):
            "Package_SON:USON-10_2.5x1.0mm_P0.5mm", "U", purpose="Qwiic ESD")
     R(sheet, "2.2k", "QWIIC_SDA", "+3V3", purpose="I2C pull-up (SLVA689A window 967-3541 ohm)")
     R(sheet, "2.2k", "QWIIC_SCL", "+3V3", purpose="I2C pull-up")
+    active(sheet, "M24C64-RMN6TP", "Memory_EEPROM:24LC64",
+           {"1": "GND", "2": "GND", "3": "GND", "4": "GND", "5": "QWIIC_SDA", "6": "QWIIC_SCL", "7": "GND", "8": "+3V3"},
+           "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", "U", value="M24C64-RMN6TP",
+           purpose="I2C EEPROM 64 Kbit at 0x50: E2..E0 low, WC low = writes enabled (D-031)")
+    C(sheet, "100n_0402_16V_X7R", "+3V3", "GND", purpose="EEPROM bypass")
+    active(sheet, "ST25DV04KC-IE8S3", "e-inverted-pendulum:ST25DV04KC-IE8S3",
+           {"1": None, "2": "NFC_AC0", "3": "NFC_AC1", "4": "GND", "5": "QWIIC_SDA", "6": "QWIIC_SCL",
+            "7": "NFC_GPO", "8": "+3V3"},
+           "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm", "U",
+           purpose="NFC Type 5 tag on I2C3 (0x53/0x57); V_EH unused; GPO to PA2 (D-030)")
+    C(sheet, "100n_0402_16V_X7R", "+3V3", "GND", purpose="NFC tag bypass")
+    R(sheet, "10k", "NFC_GPO", "+3V3", purpose="GPO is open drain (DS13519 Fig. 2)")
+    C(sheet, "2.7p_0402_50V_C0G", "NFC_AC0", "NFC_AC1", dnp=True,
+      purpose="coil trim: f0 14.2 -> 13.56 MHz needs about 2.9 pF (scripts/nfc_coil.py); fit after a phone/VNA check")
+    nobom(sheet, "AE", "e-inverted-pendulum:NFC_Coil", "NFC coil", {"1": "NFC_AC0", "2": "NFC_AC1"},
+          "e-inverted-pendulum:NFC_Coil_25x21mm", purpose="13.56 MHz printed loop, 10 turns, 25 x 21 mm (docs/nfc.md)")
     for net in ("VBAT", "+5V", "+3V3", "GND", "GND"):
         nobom(sheet, "TP", "Connector:TestPoint", net, {"1": net}, "TestPoint:TestPoint_Pad_D1.0mm",
               purpose="bring-up probe point")

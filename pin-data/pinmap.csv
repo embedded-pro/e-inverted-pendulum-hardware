@@ -18,10 +18,10 @@ IMU_CS,PB12,gpio_out,GPIO,chipSelect,IMU_NCS,10k pull-up
 IMU_DRDY,PC6,exti,EXTI6,dataReady,IMU_INT,push-pull active-high from the MPU-6500
 ENC_L_A,PC0,af,LPTIM1_IN1,leftPhaseA,ENC_L_A,via SN74LVC3G17 buffer
 ENC_L_B,PC2,af,LPTIM1_IN2,leftPhaseB,ENC_L_B,via SN74LVC3G17 buffer
-ENC_L_Z,PC5,exti,EXTI5,leftIndex,ENC_L_Z,index; firmware reads a level today and can latch on EXTI5 (REQ-ODOM-005)
+ENC_L_Z,PC5,exti,EXTI5,leftIndex,ENC_L_Z,index; no index on the MG310 (D-028): the buffer input is grounded and the pin reads low
 ENC_R_A,PA0,af,TIM2_CH1,rightPhaseA,ENC_R_A,via SN74LVC3G17 buffer
 ENC_R_B,PA1,af,TIM2_CH2,rightPhaseB,ENC_R_B,via SN74LVC3G17 buffer
-ENC_R_Z,PC3,exti,EXTI3,rightIndex,ENC_R_Z,index
+ENC_R_Z,PC3,exti,EXTI3,rightIndex,ENC_R_Z,index; no index on the MG310 (D-028): reads low
 CONSOLE_TX,PB6,af,USART1_TX,consoleTx,VCP_TX,to STDC14 T_VCP_RX
 CONSOLE_RX,PB7,af,USART1_RX,consoleRx,VCP_RX,from STDC14 T_VCP_TX
 LED_STATUS,PB0,gpio_out,GPIO,statusLed,LED_GREEN,green
@@ -36,3 +36,4 @@ I2C3_SCL,PB10,af,I2C3_SCL,,QWIIC_SCL,new; Qwiic expansion
 I2C3_SDA,PB11,af,I2C3_SDA,,QWIIC_SDA,new; Qwiic expansion
 DRV_STALLN,PB2,gpio_in,GPIO,,DRV_NSTALL,new; optional; open-drain with 10k pull-up
 BOOT0,PH3,boot,BOOT0,,BOOT0,10k pull-down + test pad
+NFC_GPO,PA2,exti,EXTI2,,NFC_GPO,new; ST25DV04KC GPO (open drain, 10k pull-up to 3V3), D-030

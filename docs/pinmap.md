@@ -17,8 +17,8 @@ schematic.
 2. Every alternate function or ADC channel exists on its pin.
 3. One signal per pin. The only shared net is `DRV_NFAULT`, which reaches PA6 (TIM1_BKIN) and
    PC4 (EXTI4), as the firmware expects.
-4. Unique EXTI lines. In use: 0 (button), 3 and 5 (encoder index), 4 (driver fault),
-   6 (IMU data-ready).
+4. Unique EXTI lines. In use: 0 (button), 2 (NFC GPO), 3 and 5 (encoder index; idle with the MG310, D-028),
+   4 (driver fault), 6 (IMU data-ready).
 5. Firmware parity: all 26 pins declared in `targets/platform_implementations/st/*.hpp` sit
    on the same pins.
 
@@ -33,11 +33,13 @@ None to existing pins. New signals for the firmware's board target:
 | BUZZER | PA7 / TIM17_CH1 | buzzer via NPN |
 | LED_FAULT | PB1 | red LED (green stays on PB0) |
 | USER_BUTTON | PD0 / EXTI0 | user button (NUCLEO SW2 pin) |
-| I2C3 SCL/SDA | PB10 / PB11 | Qwiic expansion |
+| I2C3 SCL/SDA | PB10 / PB11 | Qwiic expansion, M24C64 EEPROM (0x50), ST25DV04KC NFC tag (0x53/0x57) |
+| NFC_GPO | PA2 / EXTI2 | ST25DV04KC GPO, open drain with a 10 k pull-up (D-030) |
 | DRV_STALLN | PB2 | optional DRV8711 nSTALL input |
 
 ## Consequences
 
+- **No index:** the MG310 encoders are A/B only; PC5 and PC3 read low (D-028).
 - **No SWO:** PB3 is SPI1_SCK.
 - **No USB:** PA11 is TIM1_CH4 (D-009).
 - **SWD only:** PA15 (JTDI) is FLASH_CS, so firmware must not enable JTAG.
