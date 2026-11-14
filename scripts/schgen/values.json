@@ -1,0 +1,16 @@
+{
+  "buck": {
+    "rfbt": "52.3k",
+    "rfbb": "10k",
+    "en_r1": "240k",
+    "en_r2": "36k"
+  },
+  "lse_cap": {
+    "key": "6.8p_0402_50V_C0G",
+    "source": "LSE load: AN2867, DS11929 Table 41 note 3"
+  },
+  "vdda_ferrite": {
+    "lcsc": "C80165"
+  },
+  "stdc14_footprint": "Connector_PinHeader_1.27mm:PinHeader_2x07_P1.27mm_Vertical_SMD"
+}

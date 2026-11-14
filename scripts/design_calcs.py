@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 1 design calculations: compute component values from datasheet equations.
 
-Writes kicad/gen/values.json (consumed by the schematic generator) and docs/design-calcs.md.
+Writes scripts/schgen/values.json (consumed by the schematic generator) and docs/design-calcs.md.
 Every result carries its source. Resistor and capacitor picks are restricted to parts present in
 bom/passives.json so each value maps to a stocked JLCPCB part.
 
@@ -124,7 +124,8 @@ def power_path():
     c_load = 220e-6 + 6 * 10e-6
     record("Power path", "soft start", f"47 nF + 1k gate-to-VBAT (Miller): I_G ~{i_gate * 1e3:.2f} mA -> ~{slew / 1e3:.1f} V/ms, "
            f"inrush ~{c_load * slew:.2f} A for ~{12.6 / slew * 1e3:.0f} ms",
-           "S1: 0.54 A peak, 6.8 ms 10-90 % rise (was 44.6 A on hot plug with the Phase 1 values)")
+           "S1: 0.69 A peak with the 3.34 W logic load (D-035), 7.2 ms 10-90 % rise (was 44.6 A on hot plug with the "
+           "Phase 1 values)")
     record("Power path", "hot plug, switch off", f"1 uF gate-source cap: V_GS step = -12.6 x 47n/(47n+1u) = "
            f"{-12.6 * c_miller / (c_miller + c_gs):.2f} V (< |V_th,min| 1.0 V), FET stays off",
            "S1: VBAT stays at 0.002 V (was 10.5 V with the Phase 1 values)")
@@ -146,11 +147,11 @@ def drive():
            "SLVSC40 p.3; AINx/BINx/RESET/SCS have internal pull-downs")
     record("DRV8711", "low-side clamps", "SS34 Schottky from GND to each phase node: freewheel at -0.36 V instead of the "
            "-0.73 V body diode", "S2; DRV8711 phase pins abs max -0.6 V (SLVSC40 Abs Max)")
-    record("DRV8711", "Rsense", "50 mOhm 1206 1 W 75 ppm/C; 1.3 A trip -> 85 mW; ISGAIN 40, TORQUE 242",
-           "S0 (simulation/REPORT.md); Eq. 1 p.11")
+    record("DRV8711", "Rsense", "50 mOhm 1206 1 W 75 ppm/C; 2.0 A trip -> 0.2 W; ISGAIN 20, TORQUE 186",
+           "D-027; S0 (simulation/REPORT.md); Eq. 1 p.11")
     record("DRV8711", "ISENSE filter", "0 Ohm fitted in each leg, 1 nF DNP across (fit 27-33 Ohm + 1 nF if noisy: RC 50-60 ns)",
            "SLVSC40 p.16 Fig. 6 (symmetric, <= 500 Ohm, matched 1 %)")
-    record("DRV8711", "firmware", "IDRIVE 00 (50/100 mA, default); TBLANK >= 1.2 us (sense amp settling at gain 40); "
+    record("DRV8711", "firmware", "IDRIVE 00 (50/100 mA, default); TBLANK >= 1.2 us (sense amp settling); "
            "SCLK <= 4 MHz; SCS active-high GPIO",
            "SLVSC40 p.7-8")
 
@@ -166,11 +167,24 @@ def interfaces():
     r_max = 300e-9 / (0.8473 * 100e-12)
     r_min = (3.3 - 0.4) / 3e-3
     record("Qwiic I2C", "pull-ups", f"2.2k (window {r_min:.0f}-{r_max:.0f} Ohm, Fast mode, C_b 100 pF)", "SLVA689A")
-    record("LEDs", "series R", "red 680 Ohm (V_F 1.88 V at 2 mA), green 470 Ohm (V_F 2.45 V at 2 mA)",
-           "KT-0603R/G IF-VF curve p.5")
-    record("Buzzer", "drive", "+5V -> 33 Ohm -> MLT-8530 (16 Ohm) -> MMBT3904; peak ~96 mA (rated 95 mA max); "
-           "470 Ohm base, 1N4148WS across the coil", "MLT-8530 p.3 recommended driver")
-    record("Button", "debounce", "10k pull-up, 100 Ohm series, 100 nF at the MCU (tau 1 ms)", "mcu-circuit-design s11")
+    record("Status LED", "series R", "green 470 Ohm on PB0 (V_F 2.45 V at 2 mA -> ~1.8 mA)", "KT-0603G IF-VF curve p.5")
+    leds, i_channel = 12, 12e-3
+    i_chain = leds * 3 * i_channel
+    record("RGB LEDs", "chain", f"{leds} x WS2812B-2020-V6 on +5V, 12 mA per colour, 36 mA per LED at full white -> "
+           f"{i_chain * 1e3:.0f} mA for the chain; 100 nF per LED, 10 uF at the chain input",
+           "WS2812B-2020-V6 p.1 (12 mA per channel), p.3 (36 mA colour mix), p.6 (C_n 100 nF); 10 uF ASSUMPTION")
+    record("RGB LEDs", "data level", "LED V_IH = 0.55 VDD = 2.75 V at 5 V; MCU V_OH >= VDD - 0.4 = 2.9 V (0.15 V margin "
+           "direct), so SN74AHCT1G125 on +5V: V_IH 2.0 V (0.9 V margin), 5 V output",
+           "WS2812B-2020-V6 p.3; SCLS378L p.3; DS11929 Output voltage characteristics (VOH, 8 mA)")
+    record("RGB LEDs", "data line", "10k pull-down at the buffer input (data low while PA7 floats in reset); "
+           "33 Ohm source termination at the buffer output", "SCLS378L note 3 (inputs must not float); "
+           "mcu-circuit-design s9")
+    i_5v = i_chain + 0.115 + 0.020
+    record("+5V budget", "load", f"RGB chain {i_chain * 1e3:.0f} mA + 3V3 LDO 115 mA + encoders 20 mA = "
+           f"{i_5v * 1e3:.0f} mA; L201 peak {i_5v + 0.53 / 2:.2f} A at 12.6 V << I_sat 3.2 A, TPS62933F 3 A",
+           "docs/architecture.md; L201 ripple row above")
+    record("BOOT0", "entry", "10k pull-down, no button: test pad TP302 to +3V3 at reset, or nSWBOOT0 / nBOOT0 option "
+           "bytes over SWD", "mcu-circuit-design s3; RM0434 option bytes")
 
 
 def main():
@@ -182,11 +196,10 @@ def main():
     drive()
     interfaces()
     values["vdda_ferrite"] = {"lcsc": "C80165"}
-    values["tact_footprint"] = "e-inverted-pendulum:SW_Push_TS-1187A_5.1x5.1mm"
     values["stdc14_footprint"] = "Connector_PinHeader_1.27mm:PinHeader_2x07_P1.27mm_Vertical_SMD"
-    (ROOT / "kicad" / "gen" / "values.json").write_text(json.dumps(values, indent=2) + "\n", encoding="utf-8")
+    (ROOT / "scripts" / "schgen" / "values.json").write_text(json.dumps(values, indent=2) + "\n", encoding="utf-8")
     lines = ["# Design calculations (Phase 1)", "",
-             "Generated by `python3 scripts/design_calcs.py`. Values feed `kicad/gen/values.json` and the schematic "
+             "Generated by `python3 scripts/design_calcs.py`. Values feed `scripts/schgen/values.json` and the schematic "
              "generator; do not edit by hand.", "", "| Block | Item | Value | Source |", "|---|---|---|---|"]
     lines += [f"| {b} | {i} | {v} | {s} |" for b, i, v, s in rows]
     (ROOT / "docs" / "design-calcs.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

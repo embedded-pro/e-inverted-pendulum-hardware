@@ -4,7 +4,7 @@
 For each component in the exported netlist, the symbol's pin numbers must all exist as footprint
 pads, and every numbered copper pad must have a symbol pin (unnumbered pads are mechanical).
 
-Usage: check_library.py [kicad/e-inverted-pendulum.kicad_sch]
+Usage: check_library.py [hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sch]
 """
 
 import pathlib
@@ -14,11 +14,11 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "kicad" / "gen"))
+sys.path.insert(0, str(ROOT / "scripts" / "schgen"))
 from sexpr import find, find_all, parse  # noqa: E402
 
 SYSTEM_FP = pathlib.Path("/usr/share/kicad/footprints")
-PROJECT_FP = ROOT / "kicad" / "lib" / "e-inverted-pendulum.pretty"
+PROJECT_FP = ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.pretty"
 
 
 def pads(footprint):
@@ -32,7 +32,7 @@ def pads(footprint):
 
 
 def main():
-    schematic = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "kicad" / "e-inverted-pendulum.kicad_sch"
+    schematic = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.kicad_sch"
     with tempfile.TemporaryDirectory() as tmp:
         out = pathlib.Path(tmp) / "net.net"
         subprocess.run(["kicad-cli", "sch", "export", "netlist", "-o", str(out), str(schematic)],

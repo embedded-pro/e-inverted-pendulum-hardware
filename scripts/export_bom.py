@@ -4,7 +4,7 @@
 DNP parts and parts excluded from the BOM (antenna, net ties, test points) are left out.
 Lines are grouped by LCSC number.
 
-Usage: export_bom.py [kicad/e-inverted-pendulum.kicad_sch]
+Usage: export_bom.py [hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sch]
 """
 
 import csv
@@ -17,7 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 def main():
-    schematic = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "kicad" / "e-inverted-pendulum.kicad_sch"
+    schematic = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.kicad_sch"
     out = ROOT / "bom" / "raw_bom.csv"
     subprocess.run(["kicad-cli", "sch", "export", "bom", "--exclude-dnp", "--fields",
                     "Reference,Value,Footprint,LCSC,MPN,${QUANTITY}", "--labels", "Reference,Value,Footprint,LCSC,MPN,Qty",

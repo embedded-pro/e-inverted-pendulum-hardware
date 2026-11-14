@@ -16,7 +16,7 @@ Verification methods:
 | HW-PWR-001 | The board shall run from a 3S LiPo over 9.0–12.6 V and survive 13.5 V (a pack charged with a mis-set charger) without damage. | D-003 | R, S1 |
 | HW-PWR-002 | The motor bus (VM) shall stay ≥ 8.0 V, the DRV8711 VM minimum (TI SLVSC40), at the lowest battery voltage under peak motor current. | D-003 | S1, S3 |
 | HW-PWR-003 | Reverse battery connection shall neither damage the board nor apply more than 1 mA to any load. | `mcu-circuit-design` §11 | S1, B |
-| HW-PWR-004 | When the board is switched off while the wheels turn, regenerated energy shall not raise VM above 24 V. The TVS clamp must stay under the lowest absolute maximum on the bus: 30 V (TPS62933 VIN). | D-011 | S1 |
+| HW-PWR-004 | When the board is switched off while the wheels turn, regenerated energy shall not raise VM above 24 V. The TVS clamp must stay under the lowest absolute maximum on the bus: 30 V (AO4805 V_DS); the TPS62933 VIN is 32 V abs max, 30 V recommended (SLUSEA4 s8.1, s8.3). | D-011 | S1 |
 | HW-PWR-005 | 3V3 ripple at VDDRF shall stay within ST AN5165 limits. | `rf-layout` §5 | S4, B |
 | HW-PWR-006 | Battery voltage shall be measurable by the MCU ADC with ±50 mV/cell accuracy (3σ). This closes the open undervoltage item in the firmware's `safety-supervisor.md`. | firmware `safety-supervisor.md` "Open items" | S5, B |
 | HW-PWR-007 | A single switch shall disconnect every load from the battery. Off-state drain ≤ 10 µA. | D-011 | R, B |
@@ -54,7 +54,7 @@ Verification methods:
 | HW-MEM-001 | Non-volatile storage for parameters and bonds: W25Q16 on SPI1 with CS on PA15. | REQ-TUNE-007, D-005 | R, B |
 | HW-MEM-002 | An I2C EEPROM (M24C64, 64 Kbit) on I2C3 at address 0x50 for calibration and configuration. | D-031 | R, B |
 | HW-IF-001 | USART1 (PB6 TX / PB7 RX) console, SWD and NRST on an STDC14 connector. | `PlatformImpl.hpp:61-65`, D-009 | R, B |
-| HW-IF-002 | A user button, two LEDs and a buzzer for local status. | firmware has none; added by D-009 review | R |
+| HW-IF-002 | Local status for a robot that doubles as a toy: a chain of 12 addressable RGB LEDs on PA7 (TIM17_CH1 + DMA, 5 V through a level shifter), the green status LED on PB0, and test pads on the rails and key signals. No buttons, no buzzer, no power LED. | firmware statusLed (PB0); D-035 (supersedes the D-009 review addition) | R |
 | HW-IF-003 | Every off-board signal shall have ESD protection at its connector. | `mcu-circuit-design` §6, `interface-layout` §2 | R |
 | HW-IF-004 | An NFC Forum Type 5 tag (ST25DV04KC) on I2C3 (0x53/0x57), with its GPO interrupt on PA2 (EXTI2) and a PCB coil readable by a phone at the top-right corner of the front. | D-030 | R, B (phone read) |
 

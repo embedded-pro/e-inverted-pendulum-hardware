@@ -1,7 +1,7 @@
 # Power map and net classes
 
-Built per `power-pcb-layout` §2 before placement. The net classes in `kicad/e-inverted-pendulum.kicad_pro`
-come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way round.
+Built per `power-pcb-layout` §2 before placement. The net classes in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pro`
+come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way round.
 
 **Track widths:** IPC-2221, ΔT 10 °C, 1 oz outer / 0.5 oz inner (D-008), using the skill's `width_mm()`:
 - 4.2 A (two MG310s at the 2.0 A trip plus logic, D-027): 2.17 mm outer, 11.3 mm inner;
@@ -45,4 +45,4 @@ come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way ro
 | `CRYSTAL` | 0.20 | 0.15 | — | — |
 
 The RF1 matching trace (200 µm wide, 104 µm gap, 1.5 mm long, DS12804 Fig. 13) is below the class values. A custom
-rule in `e-inverted-pendulum.kicad_dru` allows 0.10 mm clearance on RF1 only. That is above JLC's 0.09 mm floor.
+rule in `e-inverted-pendulum.kicad_dru` allows 0.104 mm clearance on RF1 only. That is above JLC's 0.09 mm floor.

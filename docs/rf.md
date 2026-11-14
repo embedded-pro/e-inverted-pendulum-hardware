@@ -16,10 +16,10 @@ conducted test port. The `rf-layout` skill governs this document; its section nu
 
 | Item | Value | Source |
 |---|---|---|
-| Stack-up | JLC04161H-7628, 1.6 mm, L1 over a solid L2 GND | D-008 |
+| Stack-up | JLC04161H-7628, 1.6 mm, L1 over a solid L2 GND; JLCPCB only (D-036) | D-008, D-036 |
 | L1 → L2 | 0.2104 mm 7628 prepreg, Dk 4.4 (≤ 0.8 mm per rf-layout §2) | JLCPCB stack-up |
 | Line type | GCPW (rf-layout §2: less sensitive to thickness, isolates better) | AN928.2, AN91445 |
-| **50 Ω GCPW** | **0.27 mm track, 0.15 mm gap** to top-layer GND (49.8 Ω) | `scripts/gcpw.py` |
+| **50 Ω GCPW** | **0.27 mm track, 0.15 mm gap** to top-layer GND (49.8 Ω; solder mask, ignored by the model, lowers it by about 1–2 Ω) | `scripts/gcpw.py` |
 | Tolerance corners | 42.7–57.3 Ω (width ±0.03 mm, h ±10 %, Dk ±5 %): return loss ≥ 22 dB | `scripts/gcpw.py` |
 | Guided wavelength | λg ≈ 72 mm at 2.45 GHz (ε_eff 2.90) | `scripts/gcpw.py` |
 
@@ -39,7 +39,8 @@ from RF1 is copied (next section).
 - Via fence on both sides: 0.3 mm drill / 0.6 mm pad, 0.3 mm from the gap edge, **pitch 1.0–1.3 mm**.
 - Solder mask stays on the line (it lowers Z0 by about 1–2 Ω and keeps paste out of the 0.15 mm gaps). Pads are
   mask-defined per DS12804.
-- Confirm with JLC's impedance calculator, and order with impedance control on L1 for this line (open item 2).
+- Confirm with JLC's impedance calculator, and order with impedance control (50 Ω ±10 % on the L1 GCPW over L2); JLC
+  adjusts the width to its stack-up (open item 2).
 
 ## MLPF-WB55-01E3 and the matching trace
 

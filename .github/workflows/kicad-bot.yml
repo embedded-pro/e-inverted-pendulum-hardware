@@ -1,0 +1,48 @@
+name: kicad-bot
+
+# CI quality gate for the e-inverted-pendulum hardware design.
+# Runs ERC/DRC, BOM availability checks and visual diffs via embedded-pro/kicad-bot.
+# https://github.com/embedded-pro/kicad-bot
+
+# kicad-bot >= v0.1.5 installs the requested KiCad on Ubuntu 26.04 runners (it pins the KiCad PPA to amd64) and fails
+# if kicad-cli is another major. It runs without KiCad's libraries, so its ERC lists library-lookup warnings;
+# hardware.yml (KiCad 10 container with libraries) is the library check.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write   # allow posting the diff/report as a PR comment
+
+jobs:
+  kicad-bot:
+    name: ERC / DRC / BOM (${{ matrix.board }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false          # check every board even if one fails (one board today)
+      matrix:
+        board: [e-inverted-pendulum]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          # Full history so kicad-bot can compute schematic/PCB diffs against the base.
+          fetch-depth: 0
+
+      - name: Run kicad-bot
+        uses: embedded-pro/kicad-bot@693908db94231f662dde94b19cf5d282210c3a93 # v0.1.5
+        with:
+          project-dir: "hardware/${{ matrix.board }}"   # one KiCad project per board
+          kicad-version: "10"     # the project is saved by KiCad 10 (action default is 9)
+          run-verify: "true"      # ERC + DRC
+          run-bom-check: "false"  # BOM/distributor check not available yet (kicad-bot Phase 2)
+          run-diff: "false"       # visual schematic/PCB diff not available yet (Phase 3)
+          # Reported, not enforced: the board is not routed yet. Flips to "true" once it is.
+          fail-on-drc: "false"
+          fail-on-erc: "true"     # ERC violations fail the build
+          # kicad-bot uploads its own report; keep the artifact name unique per
+          # matrix board so parallel jobs don't collide on the same name.
+          artifact-name: "kicad-bot-output-${{ matrix.board }}"

@@ -11,16 +11,35 @@ simulation/work/
 __pycache__/
 *.py[cod]
 .venv/
-# Generated fab outputs are produced by scripts/export_fab.sh in CI
+# Generated outputs (e-psu-hardware pattern): review package, fab/assembly, release bundles, visual diffs
 fab/
+review_exports/
+manufacturing/
+release/
+diff/
+*.net
+*.rpt
+*.drl
+*.gbr
+*.gbrjob
+*.pos
+*.d356
+*.bak
+*-bak
+*-save.kicad_pcb
+*-save.kicad_sch
+.history/
+# kicad-bot
+kicad-bot-output/
+*.kicad_bot_metrics.json
+# Claude Code local settings
+.claude/settings.local.json
+.claude/*.local.json
 .claude/plans/
 
 # Vendor datasheets (copyrighted), fetched by scripts/fetch_datasheet.py
 datasheets/
 
-# KiCad local state
-kicad/*.kicad_prl
-kicad/fp-info-cache
 
 # Vendor simulation models (TI copyright), fetched by simulation/fetch_models.py
 simulation/models/ti/

@@ -1,64 +1,98 @@
-# PCB layout (Phase 3)
+# PCB layout (Phase 3): placement brief for the owner
 
-Status: **anchor draft v2 for owner gate A** (2026-11-13). It replaces v1, which the owner rejected. Nothing is locked yet.
-When the owner approves or corrects the anchors, they are locked on the board (`fp.SetLocked(True)`) and never moved
-again (power-pcb-layout §1).
+Status: **hand-off (2026-11-13, D-032).** The owner places the components in KiCad. The board starts as a clean
+slate:
+- **on the board:** the outline, the keep-out rule areas, the reference drawings and the WHEELTEC bracket holes;
+- **staging area right of the board:** every other part, grouped by schematic sheet (`docs/images/overview.png`).
+
+From now on the `.kicad_pcb` is the source of truth for placement. `scripts/pcb/board.py` never moves, reshapes or deletes
+anything on the board.
 
 **Sources:**
 - `docs/mechanical.md`: coordinates, bracket, battery, mass;
 - `docs/rf.md`: 2.4 GHz antenna and RF path;
 - `docs/nfc.md`: NFC coil;
-- `docs/power-map.md`: net classes;
-- decisions D-025 to D-031;
+- `docs/power-map.md`: net classes and current paths;
+- decisions D-025 to D-032;
 - the `power-pcb-layout`, `pcb-design-rules`, `rf-layout` and `interface-layout` skills.
-
-**Files:**
-- board: `kicad/e-inverted-pendulum.kicad_pcb`;
-- generator: `kicad/gen/board.py` + `kicad/gen/placement.py`;
-- renders: `kicad/renders/` (`scripts/render_board.py`).
 
 ## Board
 
 | Item | Value | Source |
 |---|---|---|
 | Outline | 85 × 130 mm, 1 mm corner radii | D-024 |
-| Coordinates | x ±42.5; z = 0 on the wheel axle at the centre of the 25 mm bracket strip; bottom edge z −12.5, top edge z 117.5; front view | D-026 |
+| Coordinates | Grid origin on the wheel axle at the centre line (x = 0, z = 0); the bottom edge is z −12.5, the top edge z 117.5 (KiCad Y = 150 − z) | D-026 |
 | Stack-up | JLC04161H-7628: L1 0.035 / 7628 0.2104 / L2 0.0152 / core 1.065 / L3 0.0152 / 7628 0.2104 / L4 0.035 mm | D-008 |
-| Layers | L1 parts, RF, short power pours · L2 solid GND, never cut · L3 VBAT/5V0/3V3 pours, slow signals · L4 signals + GND fill (none in the bracket strip) | `docs/plan.md`, D-026 |
-| Rules | JLC 4-layer profile (`pcb_rules.py apply --fab jlcpcb --netclasses`), 45° corners only, net classes from the power map | pcb-design-rules |
-| Project rules | RF1 clearance 0.10 mm (DS12804 copy); AE401 shorting-leg ring 0.10 mm (it is a via); NPTH to copper 0.5 mm; **no THT pin under the back-mounted battery**; **no part in the bracket strip** except the bracket holes | `kicad/e-inverted-pendulum.kicad_dru` |
-| Grid origin | the wheel axle on the centreline (x = 0, z = 0) | `docs/mechanical.md` |
-| Aux origin | bottom-left board corner (CPL files) | JLC |
+| Layers | L1 parts, RF, short power pours · L2 solid GND, never cut · L3 VBAT/5V0/3V3 pours, slow signals · L4 signals + GND fill | `docs/plan.md` |
+| Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.27 / 0.15 gap, NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
+| Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
+| Silkscreen | References only; test pads show their net name; net ties unlabelled | D-035, `scripts/pcb/board.py` |
+| Page | A3, so the staging area fits on the sheet | — |
 
-## Zones (front view)
+## What DRC enforces (rule areas and project rules)
 
-```
- x −42.5                                                        +42.5
-   ┌───────────── 2.4 GHz keep-out band, full width, all layers ─────────────┐ z 117.5
-   │                    AE401 IFA, feed above RF1 (x 0)                      │
-   ├─────────────────────────────────────────────────────────────────────────┤ z 111.1
-   │ SW101 (THT)  LEDs   J401  FL401→pi            U803 ┌── AE801 NFC coil ──┐│
-   │ MH1          U701 IMU  [U301 MCU]   Y302      U802 │  25 × 21, all-layer ││
-   │                         U702 flash                 └─── keep-out ───────┘│ z 84.5
-   │             · · · · · battery on the BACK, z 40–75 · · · · ·    MH2       │
-   │  MC3                     SW301 BOOT0         BZ801       MC4   J801 ◄────│ Qwiic
-   │       U201/L201 buck                                     J301 STDC14 ◄───│ mid right edge
-   │  MC1                      SW801 user                     MC2             │
-   │ F101  Q101  D102                                                        │ z 40
-   │ J101 XT30 (THT)    D501 D502      D503 D504                             │
-   │                Q501 Q502 [C507] Q503 Q504                               │
-   │──► J601 PH6  U601 U602   R509 [U501 DRV8711] R512   U604 U603  J602 ◄───│
-   ├──────────────── bracket strip: no parts, no B.Cu copper ────────────────┤ z 12.5
-   │ ∘MB5 ○MB1                     axle z 0                    ○MB2 ∘MB6     │
-   │ ∘MB7 ○MB3        (motors + WHEELTEC bracket behind)       ○MB4 ∘MB8     │
-   └─────────────────────────────────────────────────────────────────────────┘ z −12.5
-```
+These are on the board as rule areas (they can be moved or edited in KiCad) and in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_dru`:
 
-## Anchor draft
+| Name | Where | Rule | Why |
+|---|---|---|---|
+| `ANTENNA_KEEPOUT` / `ANTENNA_BASE` | full-width band, z 111.1 → top edge, all layers | no tracks, vias or pour (base strip: no vias or pour) | 2.4 GHz IFA keep-out (D-029, `docs/rf.md`) |
+| `NFC_COIL_KEEPOUT` | top-right, x 16 → edge, z 84.5–106.5, all layers | no tracks, vias or pour | NFC coil area; move it with the coil (`docs/nfc.md`) |
+| `BRACKET_STRIP` | bottom 25 mm, front and back | **no footprints** except the bracket holes MB1–MB8 (project rule) | Chassis attachment (D-026) |
+| `BRACKET_BASE_CONTACT` | bottom 25 mm, B.Cu | no tracks, vias or pour | The steel bracket base sits on the back |
+| `BATTERY_BACK` | x ±38.5, z 39–76, B.Cu | **no through-hole pins** (project rule; NPTH holes allowed) | The battery lies on the back (D-025) |
+| project rule | RF1 net | 0.104 mm clearance | DS12804 Fig. 13 matching trace |
+| project rule | NPTH holes | 0.5 mm hole-to-copper | Screw threads touch the hole wall |
 
-Mechanical coordinates (mm, front view); rotation in degrees, KiCad convention. Generated from `placement.py`.
+## Placement guidance (from the design docs)
 
-<!-- BEGIN anchors (kicad/gen/board.py) -->
+- **RF (`docs/rf.md`):**
+  - MLPF FL401 IN must sit 1.5 mm from the MCU's RF1 pad (pin 31), on a 200 µm trace with 104 µm gaps.
+  - RF1 is on the package's bottom edge at rot 0, so rotate the MCU so it faces the antenna.
+  - MLPF OUT → pi (C401, R401, C402) → AE401 feed: one short 50 Ω GCPW (0.27 / 0.15 mm), L1 only, no vias.
+  - U.FL J401 hangs off RF_50 through R402.
+  - HSE Y301 goes at pins 34/35; SMPS L301/L302 at pins 41–44; LSE Y302 at pins 3/4.
+- **IMU (U701):** next to the MCU's SPI2 pins (PB12–PB15, PC6). If it sits far from the axle, report its position for the
+  firmware (`docs/firmware-interface.md`, tangential acceleration).
+- **NFC:** the ST25DV (U803) right at the coil's terminals (AE801 pads 1/2 on its left side); AC0/AC1 short and paired.
+  Keep the coil ≥ 5 mm from the 2.4 GHz band and from metal (battery, screws).
+- **Power (`docs/power-map.md`, power-pcb-layout §3):**
+  - **Hot loop:** each bridge's 100 nF HF cap closest to its FET pair's drain and LS source, with L2 GND directly under the loop
+    (≤ 5 nH, S2).
+  - **Gate resistors:** at the FETs.
+  - **Rsense:** R509/R512 between their pair's LS sources, with Kelvin taps from the inner pad edges.
+  - **SS34 clamps:** D501–D504 at the phase nodes.
+  - **Bulk:** C507 between the bridges.
+  - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
+- **Encoders:** ESD (U601/U603) at each PH 6-pin connector, then the RC, then the buffer (U602/U604).
+  Motor pins 1 and 6 bracket the encoder pins, so keep the motor traces away from the encoder lines.
+- **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`.
+- **Holes for you to place (staged under "Mechanical"):** battery cradle MC1–MC4 and bumpers MH1/MH2. Footprints
+  `MountingHole_M3_NPTH_KeepOut7mm` and `..._M2_..._KeepOut5.5mm` are in the project library for more.
+
+## After placing
+
+1. Save in KiCad, then lock the parts you consider fixed (they become the anchors for routing; power-pcb-layout §1).
+2. Re-sync and check. This keeps every position:
+
+   ```bash
+   python3 scripts/pcb/board.py --rules <path to pcb_rules.py>
+   ```
+
+   ```bash
+   kicad-cli pcb drc --schematic-parity --severity-all hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb
+   ```
+
+   ```bash
+   python3 scripts/pcb/render.py
+   ```
+
+3. Phase 3 steps 4–8 follow: support placement around your anchors, power copper, critical routes, the rest of the
+   routing, fills, DRC and fab outputs.
+
+## Previous generated draft (gate A v2, not applied)
+
+For reference only; the owner rejected it. Mechanical coordinates (mm, front view), rotation in degrees.
+
 | Ref | x | z | Rot | Why |
 |---|---|---|---|---|
 | AE401 | +0.00 | +111.35 | 0 | SWRA117D IFA at the top edge, above RF1 (D-029, docs/rf.md) |
@@ -117,54 +151,12 @@ Mechanical coordinates (mm, front view); rotation in degrees, KiCad convention. 
 | MC4 | +30.00 | +72.00 | 0 | battery cradle (MountingHole_M3_NPTH_KeepOut7mm) |
 | MH1 | -38.00 | +92.00 | 0 | bumper (MountingHole_M3_NPTH_KeepOut7mm) |
 | MH2 | +39.50 | +80.50 | 0 | bumper (nylon) (MountingHole_M3_NPTH_KeepOut7mm) |
-<!-- END anchors -->
-
-### Why these positions
-
-The owner's floorplan (2026-11-13, D-029) fixes the MCU at the top centre, the antenna at the top, the battery on the
-back, an empty bottom strip for the chassis, motor connectors on both side edges, the STDC14 mid-edge and the IMU near
-the MCU. Within that:
-
-- **RF.**
-  - The STM32WB55 is rotated 180°, so RF1 (pin 31) is on its top edge.
-  - FL401 IN is 1.5 mm from the RF1 pad edge (DS12804 Fig. 13). OUT, the pi network and the feed lie on x = 0.
-  - The IFA keep-out is a full-width band, like SWRA117D's own board.
-  - HSE at pins 34/35; U.FL test port beside the RF_50 line.
-- **IMU (U701)** sits left of the MCU, next to its SPI2 pins (PB12–PB15, PC6 face left after the rotation). It is about
-  94 mm above the axle, so the firmware compensates for the tangential acceleration (`docs/firmware-interface.md`).
-- **NFC.** The coil is in the top-right corner, 5 mm below the 2.4 GHz band and 10 mm above the battery outline on the
-  back. The ST25DV is at the coil's terminals, rotated so AC0/AC1 face the coil and SDA/SCL/GPO face the MCU (I2C3 and
-  PA2 are on the MCU's right and top edges). The EEPROM shares I2C3 below it.
-- **Flash** below the MCU: SPI1 (PB3–PB5, PA15) is on the MCU's bottom edge after rotation.
-- **Over the battery (front, SMD only):** buck, buttons, buzzer, Qwiic, STDC14 at the middle of the right edge, and the
-  battery-cradle holes MC1–MC4 (inside the battery outline, so the cradle is a tray under the battery).
-- **Lower band (THT allowed):**
-  - XT30 on the left edge;
-  - MG310 sockets on both edges, entry from the side, just above the strip;
-  - encoder ESD and buffers inboard of each socket;
-  - DRV8711 at the centre (rotated 90°, gate-drive pins up), with the four FETs above it, the bulk cap between the
-    bridges and the SS34 clamps above the FETs;
-  - power path XT30 → F101 → Q101 → D102 into the bridge.
-- **Bracket strip (z −12.5…12.5):**
-  - only the bracket holes: 4 × M3 (64 × 17) and 4 × Ø2.4 (77 × 14), from the drawing;
-  - no parts on either face, and no copper on B.Cu, where the steel base sits;
-  - L2 GND runs through it (inner layers keep 0.5 mm from the holes).
-
-## Gate A v2: what the owner decides
-
-1. **Anchors:** approve, or move any of them. Approved anchors get locked.
-2. **Bracket screws:** which hole pattern carries the screws: M3 on 64 × 17, Ø2.4 on 77 × 14, or both (both are drilled
-   now). Confirm the 18 mm axis-to-base dimension (sets the axle and the S0 lean).
-3. **Battery cradle:** 4 × M3 at x ±30, z 50/72, inside the battery outline. Confirm, or give the cradle's hole pattern.
-4. **Bumpers:** MH1 top-left and MH2 on the right edge below the NFC coil (nylon, near the coil). Confirm the positions,
-   or say if bumpers should be a printed top cap instead (the top edge is the antenna).
-5. **STDC14** at the middle of the right edge (the left edge has the XT30 and the power path). Confirm the side.
 
 ## Open items
 
 1. STDC14 (J301) uses KiCad's generic `PinHeader_2x07_P1.27mm_Vertical_SMD`. The LCSC datasheet for C5307809 is Samtec's
    through-hole catalogue page, with no SMD land pattern. Check against Samtec's FTSH-1xx-01-xxx-DV-K footprint drawing.
-2. MG310 cable: confirm that its pin 1 (M−) lands on the board socket's pin 1 (PH cables are straight-through).
-3. NFC coil tuning and read-range check on the assembled robot (`docs/nfc.md`).
-4. 3D models are not installed in this environment, so the 3D render shows pads only.
-5. Phase 3 steps 4–8 (support placement, power copper, critical routes, routing, finish) start after gate A.
+2. MG310 cable: confirm that its pin 1 (M−) lands on the board socket's pin 1.
+3. Bracket: which hole pattern carries the screws (both are drilled), and the 18 mm axis-to-base dimension.
+4. NFC coil tuning and read-range check on the assembled robot (`docs/nfc.md`).
+5. 3D models are not installed in this environment, so the 3D render shows pads only.

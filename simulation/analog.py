@@ -3,7 +3,7 @@
 
 Sources: DS11929 Rev 11 Table 73 (C_ADC 5 pF, R_AIN max), Table 79 (TUE 5 LSB, offset 2.5, gain 4.5 LSB),
 VREFINT spread 7.5 mV over temperature; TLV755P accuracy +/-1.5 %; SN74LVC3G17 V_T+ 1.5-1.87 V,
-V_T- 0.84-1.14 V at 3 V (SCES470D p.4); TPD4E05U06 0.5 pF; design values from the schematic.
+V_T- 0.84-1.14 V at 3 V (SCES470D p.4); TPD4E05U06-Q1 0.5 pF (SLVSCO7A s7.5); design values from the schematic.
 Ideal: ADC switch 1 kOhm; encoder cable lumped (0.5 uH, 100 pF per metre); encoder driver 50 Ohm (push-pull)
 or a 10 Ohm open-collector transistor with the DNP 2.2k pull-up fitted.
 """
