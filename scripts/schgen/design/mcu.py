@@ -8,7 +8,7 @@ Pin nets come from pin-data/pinmap.csv so the schematic can't drift from the val
 import csv
 import pathlib
 
-from parts import C, R, active
+from parts import C, R, active, test_points
 from sch import Sheet
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -38,7 +38,7 @@ def build(project, values):
     v = values
     sh = Sheet(project, 3, "mcu", "MCU, clocks, supplies, debug")
     sh.desc = ["STM32WB55RGV6 (BLE 5), pin map from", "pin-data/pinmap.csv; core SMPS, HSE 32 MHz,",
-               "LSE 32.768 kHz, NRST / BOOT0,", "STDC14 SWD + virtual COM port"]
+               "LSE 32.768 kHz, NRST / BOOT0 pads,", "STDC14 SWD + virtual COM port"]
 
     sh.box(15.24, 20.32, 284.48, 76.2, "Supplies and decoupling (DS11929 Fig. 16)")
     decoupling = [
@@ -115,19 +115,14 @@ def build(project, values):
              purpose="NRST: DS11929 Fig. 24 (0.1 uF close to the pin)")
     sh.rail("NRST", 198.12, [c317["1"]], label="left", ext=7.62)
     r302 = R(sh, "R302", "10k", 58.42, 204.47, "BOOT0", "GND", purpose="BOOT0 must not float: mcu-circuit-design s3")
-    r303 = R(sh, "R303", "1k", 71.12, 198.12, "BOOT0", "BOOT0_BTN", rot=90, purpose="BOOT0 button series resistor")
-    sw = sh.part("Switch:SW_Push", "SW301", "BOOT0", (96.52, 198.12), 180, fp=v["tact_footprint"], lcsc="C318884",
-                 mpn="TS-1187A-B-A-B", Purpose="hold at reset to enter the ROM bootloader")
-    sh.rail("BOOT0", 198.12, [r302["1"], r303["1"]], label="left", ext=7.62)
-    sh.link(r303["2"], sw["2"], "BOOT0_BTN")
-    sh.rail("+3V3", 198.12, [sw["1"]], tap=(106.68, (0, -1)))
+    sh.rail("BOOT0", 198.12, [r302["1"]], label="left", ext=7.62)
     r301 = R(sh, "R301", "33", 132.08, 198.12, "SPI1_SCK", "SPI1_SCK_BUS", rot=90,
              purpose="SCK source termination, shared DRV8711 + flash bus (mcu-circuit-design s9)")
     sh.rail("SPI1_SCK", 198.12, [r301["1"]], label="left", ext=7.62)
     sh.rail("SPI1_SCK_BUS", 198.12, [r301["2"]], label="right", ext=2.54)
     sh.note(20.32, 220.98, [
         "NRST: 100 nF at the pin (DS11929 Fig. 24); the STDC14 probe drives it too.",
-        "BOOT0 (PH3): 10k pull-down; hold SW301 at reset for the ROM bootloader (mcu-circuit-design s3).",
+        "BOOT0 (PH3): 10k pull-down, no button (D-035): TP302 to +3V3 at reset, or the boot option bytes over SWD.",
         "R301 33 Ohm at PB3: source termination of the SCK shared by the DRV8711 and the flash (s9)."])
 
     sh.box(289.56, 20.32, 405.13, 106.68, "Debug and virtual COM port: STDC14 (D-009)")
@@ -138,6 +133,10 @@ def build(project, values):
     sh.note(294.64, 88.9, [
         "STLINK-V3 STDC14 (1.27 mm): SWD + virtual COM port on USART1 (PB6 TX, PB7 RX).",
         "SWO (pin 8) unused: PB3 is SPI1_SCK.  Pin 3 is the target VCC reference for the probe."])
+
+    sh.box(157.48, 205.74, 284.48, 246.38, "Test points")
+    test_points(sh, 172.72, 233.68, [("TP301", "NRST"), ("TP302", "BOOT0"), ("TP303", "VDDA"), ("TP304", "VFBSMPS")],
+                pitch=25.4)
 
     sh.box(289.56, 111.76, 405.13, 246.38, "Pin plan (pin-data/pinmap.csv, checked by scripts/check_pinmap.py)")
     rows = pin_map()

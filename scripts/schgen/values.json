@@ -12,6 +12,5 @@
   "vdda_ferrite": {
     "lcsc": "C80165"
   },
-  "tact_footprint": "e-inverted-pendulum:SW_Push_TS-1187A_5.1x5.1mm",
   "stdc14_footprint": "Connector_PinHeader_1.27mm:PinHeader_2x07_P1.27mm_Vertical_SMD"
 }

@@ -3,7 +3,7 @@
 Sources: PS-MPU-6500A-01 Table 10/11 p.19-20; W25Q16JV rev H s4, s6; docs/design-calcs.md.
 """
 
-from parts import C, R, active
+from parts import C, R, active, test_points
 from sch import Sheet
 
 
@@ -58,4 +58,8 @@ def build(project, values):
         "W25Q16JVSSIQ, 16 Mbit: SPI1 shared with the DRV8711 (SCK through R301 on the MCU sheet), /CS on PA15.",
         "R702 keeps /CS at VCC through power-up (s10.3).  /WP and /HOLD pulled up so IO2 / IO3 are defined;",
         "the IQ variant ships with QE = 1."])
+
+    sh.box(15.24, 170.18, 205.74, 210.82, "Test points: IMU SPI2 and flash chip select")
+    test_points(sh, 30.48, 198.12, [("TP701", "IMU_SCK"), ("TP702", "IMU_MOSI"), ("TP703", "IMU_MISO"),
+                                    ("TP704", "IMU_NCS"), ("TP705", "IMU_INT"), ("TP706", "FLASH_NCS")], pitch=25.4)
     return sh

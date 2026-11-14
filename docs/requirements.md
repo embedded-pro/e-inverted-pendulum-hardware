@@ -54,7 +54,7 @@ Verification methods:
 | HW-MEM-001 | Non-volatile storage for parameters and bonds: W25Q16 on SPI1 with CS on PA15. | REQ-TUNE-007, D-005 | R, B |
 | HW-MEM-002 | An I2C EEPROM (M24C64, 64 Kbit) on I2C3 at address 0x50 for calibration and configuration. | D-031 | R, B |
 | HW-IF-001 | USART1 (PB6 TX / PB7 RX) console, SWD and NRST on an STDC14 connector. | `PlatformImpl.hpp:61-65`, D-009 | R, B |
-| HW-IF-002 | A user button, two LEDs and a buzzer for local status. | firmware has none; added by D-009 review | R |
+| HW-IF-002 | Local status for a robot that doubles as a toy: a chain of 12 addressable RGB LEDs on PA7 (TIM17_CH1 + DMA, 5 V through a level shifter), the green status LED on PB0, and test pads on the rails and key signals. No buttons, no buzzer, no power LED. | firmware statusLed (PB0); D-035 (supersedes the D-009 review addition) | R |
 | HW-IF-003 | Every off-board signal shall have ESD protection at its connector. | `mcu-circuit-design` §6, `interface-layout` §2 | R |
 | HW-IF-004 | An NFC Forum Type 5 tag (ST25DV04KC) on I2C3 (0x53/0x57), with its GPO interrupt on PA2 (EXTI2) and a PCB coil readable by a phone at the top-right corner of the front. | D-030 | R, B (phone read) |
 

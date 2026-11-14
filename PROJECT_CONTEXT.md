@@ -12,13 +12,13 @@ The PCB is the robot's chassis: one vertical 85 × 130 mm board carries the elec
 The firmware is the requirement source: every hardware requirement in `docs/requirements.md` traces to a firmware
 `REQ-*` ID or a decision in `docs/decisions.md`. The work runs in phases with user gates (`docs/plan.md`).
 
-## Architecture (rev A schematic: KiCad 10, 8 sheets + root, 175 parts)
+## Architecture (rev A schematic: KiCad 10, 8 sheets + root, 230 parts)
 
 ### Power
 
 - **Battery:** 3S LiPo (9.0–12.6 V), XT30, 4 A fuse.
 - **Power switch (D-011, D-021):** back-to-back AO4805 P-FETs. FET A blocks a reversed pack, FET B switches the load
-  from a slide switch. Gate network: 100k / 100k divider, BZT52C15 V_GS clamp, Miller soft start (1k + 47 nF, ~0.5 A
+  from a slide switch. Gate network: 100k / 100k divider, BZT52C15 V_GS clamp, Miller soft start (1k + 47 nF, ~0.7 A
   inrush), 1 µF gate-source cap against hot-plug turn-on.
 - **Clamp and bulk:** SMBJ15A after the FETs; 220 µF + per-bridge 10 µF / 100 nF on VBAT.
 - **Rails:** TPS62933F buck VBAT → +5V at 1.2 MHz (EN UVLO start 9.1 V, stop 8.5 V); TLV75533P LDO +5V → +3V3.
@@ -27,7 +27,7 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 ### MCU and radio
 
 - STM32WB55RGV6: internal SMPS (10 µH + 10 nH), HSE 32 MHz without external caps (HSETUNE), LSE 32.768 kHz,
-  STDC14 (SWD + virtual COM on USART1), BOOT0 button.
+  STDC14 (SWD + virtual COM on USART1), BOOT0 pull-down + test pad (no button).
 - RF1 → MLPF-WB55-01E3 → 50 Ω GCPW (0.27 / 0.15 mm) → DNP pi tuning → TI SWRA117D printed IFA at the top edge; DNP U.FL.
 - Pin map in `pin-data/pinmap.csv`, kept 1:1 with the firmware's NUCLEO-WB55RG target (`scripts/check_pinmap.py`).
 
@@ -45,7 +45,10 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - MPU-6500 on SPI2 (INT to PC6); W25Q16JV on SPI1 shared with the DRV8711 (33 Ω SCK termination).
 - I2C3: Qwiic + ESD, M24C64 EEPROM at 0x50, ST25DV04KC NFC tag at 0x53 / 0x57 with a printed 10-turn 25 × 21 mm coil
   (f0 14.2 MHz, DNP 2.7 pF trim); GPO to PA2.
-- Green / red LEDs, user button, MLT-8530 buzzer on TIM17.
+- 12 × WS2812B-2020-V6 RGB LEDs on +5V from PA7 (TIM17 + DMA) through an SN74AHCT1G125; green status LED on PB0.
+  No buttons, no buzzer: the robot doubles as a toy (D-035).
+- Test pads with net names on the silkscreen on every sheet: rails, motor phases and shunts, PWM, SPI, encoders,
+  IMU, I2C, LED data (D-035).
 
 ## Simulation (ngspice, `simulation/`, REPORT.md)
 

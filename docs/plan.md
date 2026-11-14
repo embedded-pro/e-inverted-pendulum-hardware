@@ -30,7 +30,7 @@ Goal: one 4-layer PCB that is also the robot's structural body. It carries the m
                                                                        │                         ├ SPI1 ─ DRV8711 + W25Q16 flash   ├ RF1 ─ MLPF ─ 50Ω ─ pi(DNP) ─ IFA
                                                                        └ encoder VCC (0Ω opt)    ├ SPI2 ─ MPU-6500    ├ HSE 32 MHz / LSE 32.768 kHz
                                                                          ABZ ×2 ─ ESD ─ LVC3G17 ─┤ (5 V-tolerant Schmitt buffers powered from 3V3)
-                                                                                                 └ STDC14, LEDs, button, buzzer, Qwiic (I2C3)
+                                                                                                 └ STDC14, status LED, 12 RGB LEDs (D-035), Qwiic (I2C3)
 ```
 Back-to-back PMOS is used rather than an ideal diode: regenerated motor energy must be able to flow back into the battery while the board is on. When the board is off, the TVS and bulk capacitors absorb it.
 
@@ -47,8 +47,7 @@ Back-to-back PMOS is used rather than an ideal diode: regenerated motor energy m
 | Index as EXTI | PC5 = EXTI5, PC3 = EXTI3 | Wired so the firmware can latch the index later (REQ-ODOM-005); unique against EXTI0/4/6 |
 | Console USART1 → STDC14 VCP | PB6 TX / PB7 RX | SWO not available: PB3 = SPI1_SCK |
 | **New:** VBAT_SENSE | PC1 (ADC1_IN2) | |
-| **New:** buzzer, red fault LED, green LED | PA7 (TIM17_CH1), PB1, PB0 | |
-| **New:** user button | PD0 (EXTI0; Nucleo SW2 pin) | EXTI numbers stay unique |
+| **New:** RGB LED chain (D-035; replaced the buzzer, red LED and user button) | PA7 (TIM17_CH1 + DMA); green LED stays on PB0 | |
 | **New:** Qwiic I2C3 | PB10/PB11 | |
 | **New:** DRV nSTALL (optional) | PB2 | |
 | BOOT0 | PH3: 10 kΩ pull-down + pad | |
@@ -80,7 +79,7 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | SPI flash | W25Q16JVSSIQ, 2 MB, SOIC-8 208 mil (alternative: W25Q80DVSSIG, 1 MB, C98163, 29.7k, same footprint) | C131025 | 8.4k |
 | Debug | FTSH-107-01-L-DV-K (STDC14) | C5307809 | 616 |
 | Antenna test port (DNP) | BWU.FL-IPEX1 | C5137195 | 617k |
-| Buzzer / button / switch / Qwiic | MLT-8530 / TS-1187A-B-A-B / SS-12D10L5 / SM04B-SRSS-TB | C94599 / C318884 / C319012 / C160404 | ok |
+| RGB LED / LED buffer / switch / Qwiic | WS2812B-2020-V6 / SN74AHCT1G125DBVR / SS-12D10L5 / SM04B-SRSS-TB | C52917434 / C7484 / C319012 / C160404 | ok (2026-11-14) |
 
 Stock risk: the MCU (225) and DRV8711 (128) are thin. Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
 
@@ -175,8 +174,7 @@ Rules come from `mcu-circuit-design` §2–§12 and `analog-circuit-design`; the
 7. **IMU**: MPU-6500 per its datasheet (REGOUT cap, VDDIO, decoupling) and SPI2, with the data-ready line on PC6.
 8. **UI and expansion**:
    - STDC14 pinout per ST UM2448;
-   - LEDs, user button (100 Ω + RC), BOOT0 pad;
-   - buzzer: NPN + flyback diode;
+   - status LED, BOOT0 pad (D-035 later replaced the user button, buzzer and red LED with a 12-LED RGB chain);
    - Qwiic port with ESD and 2.2 kΩ pull-ups (SLVA689A calculation).
 
 Gate:
@@ -216,12 +214,12 @@ Gate:
 
 **Floorplan of the vertical plate, top to bottom.**
 1. Antenna on the top edge with a keep-out on all layers, plus the MLPF and RF path.
-2. MCU, crystals, STDC14, LEDs, button, buzzer.
+2. MCU, crystals, STDC14, status LED, RGB LEDs.
 3. Battery zone on the back face, ≥ 25 mm below the antenna keep-out, with logic power on the front.
 4. IMU on the vertical centreline, about 30 mm above the axle and ≥ 15 mm from switch nodes. Its axes are aligned to the body frame; the mapping is written in `docs/pinmap.md` for the firmware.
 5. Bottom band: DRV8711, FETs, Rsense and bulk caps in the centre; XT30 and switch; XH motor and PH encoder connectors, with the encoder buffers and ESD next to them, plus bracket holes at the left and right corners. Encoder traces stay off the bridge switch-node copper on every layer.
 
-**Anchors the user places.** XT30, switch, XH/PH connectors, bracket and strap holes, antenna, MCU, IMU, STDC14, buttons, LEDs, bumpers.
+**Anchors the user places.** XT30, switch, XH/PH connectors, bracket and strap holes, antenna, MCU, IMU, STDC14, RGB LEDs, bumpers.
 
 **Rules.**
 - Power map table and net classes (`docs/power-map.md`), derived per skill §2.
@@ -270,7 +268,7 @@ Gate:
 - Encoder CPR, gear ratio and wheel radius.
 - Index latch on EXTI3/EXTI5 to close REQ-ODOM-005; the hardware wires it.
 - SPI1 shared by the DRV8711 and the flash: per-device prescaler and CS polarity; parameter store and bonds in flash (REQ-TUNE-007).
-- Buzzer, LED and button pins; IWDG.
+- RGB LED chain on PA7 (TIM17 + DMA) and the status LED; IWDG.
 
 ## Verification
 - `kicad-cli sch erc` and `kicad-cli pcb drc --schematic-parity`, both with zero errors, in CI.

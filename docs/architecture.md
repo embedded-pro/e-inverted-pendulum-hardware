@@ -21,7 +21,8 @@ graph LR
     MCU -->|SPI2 + DRDY| IMU[MPU-6500]
     MCU -->|RF1| MLPF[MLPF-WB55-01E3] --> PI[pi tuning DNP] --> ANT[printed IFA]
     MCU --> DBG[STDC14: SWD + VCP]
-    MCU --> UI[LEDs, button, buzzer, Qwiic]
+    MCU -->|PA7 via AHCT buffer| RGB[12 RGB LEDs on 5V0]
+    MCU --> UI[Status LED, Qwiic, EEPROM, NFC tag]
 ```
 
 Pins: `docs/pinmap.md`. Parts and stock: `bom/parts.csv`, checked by `scripts/jlc_stock.py`.
@@ -35,14 +36,14 @@ Numbers marked **A** are ASSUMPTIONS to replace with datasheet maxima during the
 | 3V3 | STM32WB55, CPU + radio (TX 0 dBm 8.8 mA, SMPS bypass) | 30 mA | DS11929 radio current table; CPU allowance **A** |
 | 3V3 | MPU-6500 accel + gyro | 3.5 mA | **A**, check the MPU-6500 datasheet |
 | 3V3 | W25Q16 program/erase peak | 25 mA | **A**, check the W25Q16JV datasheet |
-| 3V3 | 2 LEDs at 2 mA, 2 × LVC3G17 | 5 mA | design choice |
+| 3V3 | Status LED at 2 mA, 2 × LVC3G17 | 5 mA | design choice |
 | 3V3 | Qwiic allowance | 50 mA | design choice |
 | **3V3 total** | | **≈ 115 mA** | TLV75533 (500 mA): (5.0 − 3.3) × 0.115 ≈ 0.20 W |
 | 5V0 | 3V3 rail | 115 mA | above |
 | 5V0 | 2 MG310 Hall encoders | 20 mA | **ASSUMPTION**, about 10 mA each for a Hall encoder board |
-| 5V0 | Buzzer (MLT-8530 via NPN) | 90 mA peak | **A**, check the MLT-8530 datasheet |
-| **5V0 total** | | **≈ 265 mA** | TPS62933 (3 A), plenty of margin |
-| VBAT | 5V0 buck input at 9.9 V, η ≈ 0.85 | ≈ 160 mA | 5 × 0.265 / 0.85 / 9.9 |
+| 5V0 | 12 × WS2812B-2020-V6 at full white (D-035) | 432 mA | 12 mA per colour (WS2812B-2020-V6 p.1) × 3 × 12 |
+| **5V0 total** | | **≈ 567 mA** | TPS62933 (3 A), L201 peak 0.83 A at 12.6 V (`docs/design-calcs.md`) |
+| VBAT | 5V0 buck input at 9.9 V, η ≈ 0.85 | ≈ 340 mA | 5 × 0.567 / 0.85 / 9.9 |
 | VBAT | Two motors at I_trip (peak) | 2 × 2.0 A | S0 (D-027) |
 | VBAT | Two motors, continuous (rated) | 2 × 0.5 A | MG310 listing |
 | **VBAT peak** | | **≈ 4.2 A** | 4 A fuse (1206FA-4A): 1.2 A continuous is within 75 % derating; 4.2 A recovery bursts (≪ 1 s) are 105 % of rating, which the fuse holds for ≥ 4 h; it opens at 250 % within 5 s (datasheet time-current table) |

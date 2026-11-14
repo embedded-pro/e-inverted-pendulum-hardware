@@ -5,7 +5,7 @@ One JST PH 6-pin per motor carries the motor and its Hall encoder (MG310 pinout:
 Sources: docs/design-calcs.md (Encoders), SCES470D (SN74LVC3G17), SLVSBO7L (TPD4E05U06), interface-layout s2.
 """
 
-from parts import C, R, active
+from parts import C, R, active, test_points
 from sch import Sheet
 
 BUFFER = "74xGxx:74LVC3G17"
@@ -98,4 +98,8 @@ def build(project, values):
                                              "a": ("R603", "R604", "C604"), "b": ("R605", "R606", "C605")})
     side_box(sh, "R", "right", 214.63, 81.28, {"j": "J602", "snub": "C607", "esd": "U603", "buf": "U604", "byp": "C610",
                                                "a": ("R607", "R608", "C608"), "b": ("R609", "R610", "C609")})
+
+    sh.box(15.24, 223.52, 205.74, 264.16, "Test points: buffered encoder outputs")
+    test_points(sh, 30.48, 251.46, [("TP601", "ENC_L_A"), ("TP602", "ENC_L_B"), ("TP603", "ENC_R_A"),
+                                    ("TP604", "ENC_R_B"), ("TP605", "ENC_VCC"), ("TP606", "GND")], pitch=25.4)
     return sh

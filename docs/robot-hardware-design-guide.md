@@ -222,11 +222,16 @@ Gates and their criteria are in `docs/plan.md`; the user signs off each one. Thi
   | Bridge inputs | low: outputs off | Driver's internal pull-downs on AIN/BIN [SLVSC40] |
   | Driver sleep / enable | asleep | SLEEPn 10 k pull-down (no internal pull) |
   | Each SPI chip select | deselected | Active-high SCS internal pull-down; flash /CS and IMU nCS pull-ups |
-  | Buzzer and other loads | off | Base pull-down on the buzzer transistor |
+  | Buzzer, LED data and other loads | off / idle | LED data 10 k pull-down at the level shifter input (D-035) |
   | Driver fault → timer break | armed in hardware | nFAULT on TIM1_BKIN and EXTI4 (HW-DRV-003) |
 
 - **Hardware fault path.** The driver's fault output reaches a timer break input, so all bridge inputs tri-state with no firmware involved (HW-DRV-003).
-- **Coils** (buzzer, relays): flyback diode [mcu-circuit-design §11]. Check peak drive against the part's rating (e.g. `docs/design-calcs.md` computes ≈ 96 mA against the buzzer's 95 mA maximum).
+- **Coils** (buzzer, relays): flyback diode [mcu-circuit-design §11]. Check peak drive against the part's rating.
+- **Addressable LEDs** (WS2812-class):
+  - their data V_IH scales with their supply (0.55–0.7 × VDD), so a 3.3 V GPIO driving a 5 V LED has little or no margin; use a 5 V buffer with a TTL-level input (e.g. D-035: 2.75 V needed vs 2.9 V V_OH; SN74AHCT1G125);
+  - keep the data line low in reset with a pull-down at the buffer input, and terminate at the source;
+  - one 100 nF per LED at its VDD pin (part datasheet);
+  - size the supply for every LED at full white (e.g. 12 × 36 mA = 432 mA); brightness limits are a firmware choice, not a protection.
 - **Buttons:** 100 Ω series plus an input RC [mcu-circuit-design §11].
 
 ---

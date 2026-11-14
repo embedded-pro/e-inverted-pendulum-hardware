@@ -3,7 +3,7 @@
 Sources: docs/design-calcs.md (TPS62933F, TLV75533P) from TI SLUSEA4 / SBVS320A.
 """
 
-from parts import C, R, active
+from parts import C, R, active, test_points
 from sch import Sheet
 
 
@@ -67,4 +67,7 @@ def build(project, values):
         "C_IN 1 uF, C_OUT 2.2 uF (>= 0.47 uF effective,",
         "SBVS320A s6.3, s8.1.1).",
         "0.20 W at 115 mA -> +45 C (R_thJA 231 C/W)."])
+
+    sh.box(15.24, 134.62, 233.68, 175.26, "Test points")
+    test_points(sh, 30.48, 162.56, [("TP201", "+5V"), ("TP202", "+3V3"), ("TP203", "GND")], pitch=25.4)
     return sh

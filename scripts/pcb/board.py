@@ -48,7 +48,6 @@ PROJECT_LIBRARY = "e-inverted-pendulum"
 
 ORIGIN = (100.0, 150.0)
 CORNER_RADIUS = 1.0
-STAGING = (160.0, 40.0)
 
 STACKUP = [
     ("F.SilkS", "Top Silk Screen", None, None, None),
@@ -362,11 +361,9 @@ def sync_footprints(board, components, nets, pins):
             fp = replace_footprint(board, fp, comp["footprint"])
         elif fp is None:
             fp = load_footprint(board, comp["footprint"])
-            column, row = divmod(staged, 14)
-            fp.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(STAGING[0] + 9.0 * column),
-                                           pcbnew.FromMM(STAGING[1] + 9.0 * row)))
-            staged += 1
+            place_in_free_spot(board, fp)
             board.Add(fp)
+            staged += 1
         fp.SetReference(ref)
         fp.SetValue(comp["value"])
         for name, value in comp["fields"].items():
@@ -436,6 +433,41 @@ def apply_rules(script):
     if marker in text:
         text = text[:text.index(marker)].rstrip() + "\n"
     RULES.write_text(text + CUSTOM_RULES, encoding="utf-8")
+
+
+def footprint_box(fp):
+    fp.BuildCourtyardCaches()
+    box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    return box if box.GetWidth() else fp.GetBoundingBox(False)
+
+
+def place_in_free_spot(board, fp):
+    """Put a new part in the staging area at the first spot clear of every footprint already on the board.
+
+    Rows are scanned top-down from the board's top edge, 1 mm apart; along a row the scan jumps past each footprint
+    whose box overlaps the band, so new parts never land on staged or placed ones (D-032).
+    """
+    box = footprint_box(fp)
+    w, h, gap = box.GetWidth(), box.GetHeight(), pcbnew.FromMM(STAGE_GAP)
+    boxes = []
+    for other in board.GetFootprints():
+        b = footprint_box(other)
+        boxes.append((b.GetLeft() - gap, b.GetTop() - gap, b.GetRight() + gap, b.GetBottom() + gap))
+    right = to_board(placement.WIDTH / 2.0, 0.0).x
+    x_start, x_limit = right + pcbnew.FromMM(10.0), right + pcbnew.FromMM(STAGE_ROW_WIDTH)
+    y = to_board(0.0, placement.TOP_Z).y + pcbnew.FromMM(4.0)
+    while True:
+        x = x_start
+        for b in sorted((b for b in boxes if b[1] < y + h and b[3] > y), key=lambda b: b[0]):
+            if b[2] <= x:
+                continue
+            if x + w <= b[0]:
+                break
+            x = b[2]
+        if x + w <= x_limit:
+            fp.SetPosition(pcbnew.VECTOR2I(x, y) + (fp.GetPosition() - box.GetPosition()))
+            return
+        y += pcbnew.FromMM(1.0)
 
 
 STAGE_LABEL = "STAGING: "

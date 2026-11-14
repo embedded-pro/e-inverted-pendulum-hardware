@@ -56,7 +56,7 @@
 		)
 		(uuid "215e1f0b-f165-5a79-8ec4-c258433e4d35")
 	)
-	(text "Status LEDs, user button, buzzer\nQwiic I2C3 + ESD, M24C64 EEPROM\nST25DV04KC NFC tag + printed coil\nBring-up test points"
+	(text "Status LED (PB0) + 12 RGB LEDs (PA7)\nQwiic I2C3 + ESD, M24C64 EEPROM\nST25DV04KC NFC tag + printed coil\nNo buttons, no buzzer (D-035)"
 		(exclude_from_sim no)
 		(at 322.58 130.81 0)
 		(effects
@@ -123,7 +123,7 @@
 		)
 		(uuid "bdab7cc7-a6e2-5ba5-9f35-4d4b0c0547d9")
 	)
-	(text "STM32WB55RGV6 (BLE 5), pin map from\npin-data/pinmap.csv; core SMPS, HSE 32 MHz,\nLSE 32.768 kHz, NRST / BOOT0,\nSTDC14 SWD + virtual COM port"
+	(text "STM32WB55RGV6 (BLE 5), pin map from\npin-data/pinmap.csv; core SMPS, HSE 32 MHz,\nLSE 32.768 kHz, NRST / BOOT0 pads,\nSTDC14 SWD + virtual COM port"
 		(exclude_from_sim no)
 		(at 226.06 74.93 0)
 		(effects

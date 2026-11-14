@@ -65,7 +65,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/check_netlist.py` / `check_library.py`: netlist and symbol/footprint checks.
 - `python3 scripts/pcb/board.py --rules <pcb_rules.py>`: update the PCB from the schematic (footprints, nets, net classes
   from `docs/power-map.md`, JLC rules). Placement is the owner's (D-032): it never moves, reshapes or deletes what is on
-  the board, only adds missing items (new parts go to the staging area). `--stage-all` is a one-shot reset to staging.
+  the board, only adds missing items (new parts go to the first free spot in the staging area, clear of every other
+  part). `--stage-all` is a one-shot reset to staging.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

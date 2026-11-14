@@ -63,3 +63,25 @@ def active(sh, ref, mpn, lib_id, fp, x, y, rot=0, value=None, dnp=False, purpose
 def nobom(sh, ref, lib_id, value, fp, x, y, rot=0, purpose=""):
     """On the board but not in the BOM: printed antennas, net ties, test pads."""
     return sh.part(lib_id, ref, value, (x, y), rot, fp=fp, in_bom=False, **_purpose(purpose))
+
+
+TP_PAD = {"rail": "TestPoint:TestPoint_Pad_D1.5mm", "signal": "TestPoint:TestPoint_Pad_D1.0mm"}
+TP_RAILS = {"VBAT", "+5V", "+3V3", "VDDA", "ENC_VCC", "GND"}
+
+
+def test_points(sh, x0, y, points, pitch=10.16):
+    """A row of bring-up probe pads with their pins on `y` (D-035).
+
+    Rails and GND get 1.5 mm pads, signals 1.0 mm. GND pads point down to their ground symbol, the others up to their
+    label or power symbol. The Value is the net name: hidden here (the label shows it), printed on the PCB silkscreen.
+    """
+    parts = []
+    for i, (ref, net) in enumerate(points):
+        down = net == "GND"
+        tp = sh.part("Connector:TestPoint", ref, net, (x0 + pitch * i, y), 0 if down else 180,
+                     fp=TP_PAD["rail" if net in TP_RAILS else "signal"], in_bom=False, Purpose="bring-up probe point")
+        tp.hide_value = True
+        tp.fpos = (1.27, -3.81, "left") if down else (1.27, 3.81, "left")
+        sh.net(tp["1"], net)
+        parts.append(tp)
+    return parts

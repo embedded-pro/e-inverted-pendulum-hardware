@@ -4,7 +4,7 @@ Sources: TI SLVSC40 (pin table p.3-4, critical components p.4, sense p.16), docs
 S0 sizing (Rsense 50 mOhm, trip 2.0 A, D-027), power-pcb-layout s3.
 """
 
-from parts import C, R, active, nobom
+from parts import C, R, active, nobom, test_points
 from sch import Sheet
 
 NFET = "Transistor_FET:Q_Dual_NMOS_S1G1S2G2D2D2D1D1"
@@ -95,7 +95,7 @@ def build(project, values):
     sh.desc = ["DRV8711, PWMMODE 1 (indexer bypass)", "Four CSD88537ND half-bridges, SS34 clamps",
                "Rsense 50 mOhm + Kelvin taps, trip 2.0 A", "VM bulk 220 uF, charge pump, pull-ups"]
 
-    sh.box(15.24, 20.32, 200.66, 243.84, "DRV8711 gate driver (PWMMODE 1, D-002)")
+    sh.box(15.24, 20.32, 200.66, 218.44, "DRV8711 gate driver (PWMMODE 1, D-002)")
     u = sh.part("e-inverted-pendulum:DRV8711", "U501", "DRV8711", (104.14, 116.84),
                 fp="Package_SO:HTSSOP-38-1EP_4.4x9.7mm_P0.5mm_EP2.74x4.75mm_ThermalVias", lcsc="C60013",
                 mpn="DRV8711DCPR", Purpose="PWMMODE = 1 (indexer bypass), D-002")
@@ -138,4 +138,9 @@ def build(project, values):
     bridge_box(sh, "B", "right", 134.62, {"h1": ("R505", "R506", "Q503", "D503"), "h2": ("R507", "R508", "Q504", "D504"),
                                           "bulk": "C505", "hf": "C506",
                                           "sense": ("R512", "NT502", "R513", "R514", "C504")})
+
+    sh.box(15.24, 223.52, 200.66, 264.16, "Test points: motor current, phases, PWM, SPI")
+    nets = ["SENSE_A", "SENSE_B", "MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N", "DRV_AIN1", "DRV_AIN2", "DRV_BIN1",
+            "DRV_BIN2", "DRV_NFAULT", "DRV_SCS", "SPI1_SCK_BUS", "SPI1_MOSI", "SPI1_MISO", "GND", "GND"]
+    test_points(sh, 25.4, 254.0, [(f"TP{501 + i}", net) for i, net in enumerate(nets)], pitch=10.16)
     return sh

@@ -25,7 +25,10 @@ ngspice simulation suite. The firmware lives in its own repository and is the so
   (PWMMODE 1), 50 mΩ low-side shunts with Kelvin taps, 2.0 A trip, SS34 clamps on every phase node.
 - **Battery path:** XT30, 4 A fuse, back-to-back `AO4805` P-FETs for reverse polarity and switching, with a simulated
   Miller soft start; `SMBJ15A` after the FETs.
-- **Rails:** `TPS62933F` buck to 5 V (encoders, buzzer, LDO), `TLV75533P` LDO to 3.3 V, ferrite-filtered VDDA.
+- **Rails:** `TPS62933F` buck to 5 V (encoders, RGB LEDs, LDO), `TLV75533P` LDO to 3.3 V, ferrite-filtered VDDA.
+- **12 RGB LEDs** (`WS2812B-2020-V6`) on one PA7 timer/DMA pin through a 5 V `SN74AHCT1G125`: it is also a toy (D-035).
+  No buttons, no buzzer.
+- **Test pads** on every sheet (rails, motor phases and shunts, PWM, SPI, encoders, IMU, I2C), net names on the silk.
 - **Sensors and storage:** `MPU-6500` IMU on SPI2, `W25Q16JV` flash on SPI1, `M24C64` EEPROM and an `ST25DV04KC` NFC tag
   with a printed 13.56 MHz coil on I2C3, plus a Qwiic port.
 - **Encoder inputs:** ESD at the connector, 100 Ω + 1 nF, `SN74LVC3G17` Schmitt buffers with 5 V-tolerant inputs.
@@ -47,7 +50,7 @@ e-psu-hardware pattern, D-033):
 | `drive` | Gate driver, four half-bridges, current sense | `DRV8711`, `CSD88537ND` |
 | `motors_encoders` | Motor + encoder connectors, encoder conditioning | JST PH 6-pin, `TPD4E05U06`, `SN74LVC3G17` |
 | `imu_flash` | IMU and SPI flash | `MPU-6500`, `W25Q16JV` |
-| `ui` | LEDs, button, buzzer, Qwiic, EEPROM, NFC tag, test points | `M24C64`, `ST25DV04KC` |
+| `ui` | Status LED, 12 RGB LEDs, Qwiic, EEPROM, NFC tag | `WS2812B-2020-V6`, `SN74AHCT1G125`, `M24C64`, `ST25DV04KC` |
 
 ---
 

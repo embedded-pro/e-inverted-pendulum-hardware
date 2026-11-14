@@ -3,7 +3,7 @@
 Sources: docs/design-calcs.md (Power path, VBAT sense); Littelfuse SMBJ p.2; AO4805 datasheet p.1-2; S1.
 """
 
-from parts import C, R, active
+from parts import C, R, active, test_points
 from sch import Sheet
 
 PFET = "Transistor_FET:Q_Dual_PMOS_S1G1S2G2D2D2D1D1"
@@ -41,7 +41,7 @@ def build(project, values):
     sh.nc(sw["3"])
     r103 = R(sh, "R103", "1k", 129.54, 66.04, "PP_G", "PP_SS", rot=90, purpose="Miller soft start series R")
     c101 = C(sh, "C101", "47n_0603_50V_X7R", 137.16, 58.42, "PP_SS", "VBAT", rot=180,
-             purpose="Miller soft start: ~1.7 V/ms, ~0.5 A inrush (S1)")
+             purpose="Miller soft start: ~1.7 V/ms, ~0.7 A inrush (S1)")
     d102 = active(sh, "D102", "SMBJ15A", "Device:D_Zener", "Diode_SMD:D_SMB", 152.4, 58.42, 270, value="SMBJ15A",
                   purpose="TVS after the FETs: V_RWM 15 V, V_C 24.4 V")
     fv = sh.flag("VBAT", (165.1, 50.8), label=False)
@@ -64,7 +64,7 @@ def build(project, values):
         "Q101 AO4805 (D-011): FET A (drain to the battery) blocks a reversed pack; FET B switches the load.",
         "SW101 on: R102 pulls PP_G low, V_GS = -VBAT/2 (-4.5 V at 9.0 V, -6.8 V at 13.5 V); D101 keeps |V_GS| < 20 V.",
         "SW101 off: R101 holds the gates off; C102 limits the hot-plug V_GS step to -0.57 V (< |V_th| 1.0 V) (S1).",
-        "Soft start (D-021): R103 + C101 Miller integrator, ~1.7 V/ms, inrush ~0.5 A for ~7 ms (S1); turn-off tau 105 ms.",
+        "Soft start (D-021): R103 + C101 Miller integrator, ~1.7 V/ms, inrush ~0.7 A for ~7 ms (S1); turn-off tau 105 ms.",
         "D102 SMBJ15A after the FETs: V_RWM 15 V > 13.5 V, V_C 24.4 V < 30 V (AO4805) and 32 V (TPS62933).",
         "It must never sit before the FETs: a reversed pack would forward-bias it through the fuse."])
 
@@ -83,4 +83,8 @@ def build(project, values):
         ">> 20 x 5 pF C_ADC, tau 2.1 ms (DS11929 Table 73).",
         "+/-1.57 % ratio error with 1 % parts:",
         "calibrate per board against VREFINT."])
+
+    sh.box(15.24, 134.62, 182.88, 175.26, "Test points")
+    test_points(sh, 30.48, 162.56, [("TP101", "VBAT"), ("TP102", "BAT_F"), ("TP103", "PP_G"),
+                                    ("TP104", "VBAT_SENSE"), ("TP105", "GND")], pitch=25.4)
     return sh

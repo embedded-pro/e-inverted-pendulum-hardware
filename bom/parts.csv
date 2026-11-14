@@ -32,12 +32,9 @@ connector,Motor + encoder 6-pin PH side entry,S6B-PH-K-S(LF)(SN),C157920,2,MG310
 connector,Debug STDC14,FTSH-107-01-L-DV-K,C5307809,1,D-009
 connector,Qwiic I2C,SM04B-SRSS-TB(LF)(SN),C160404,1,
 ui,Power slide switch (gate control only),SS-12D10L5,C319012,1,
-ui,Tactile button,TS-1187A-B-A-B,C318884,2,user + BOOT0
-ui,Buzzer,MLT-8530,C94599,1,
-ui,NPN buzzer driver,MMBT3904,C20526,1,
-ui,Flyback diode,1N4148WS,C2128,1,
-ui,LED red 0603,KT-0603R,C2286,1,fault LED (PB1)
 ui,LED green 0603,KT-0603G,C12624,1,status LED (PB0)
+ui,Addressable RGB LED 2020 (WS2812B protocol),WS2812B-2020-V6,C52917434,12,D-035; chain on +5V
+ui,Single buffer 5 V TTL-input (LED data level shift),SN74AHCT1G125DBVR,C7484,1,D-035; PA7 -> LED chain
 passive,10 k 0603 1 %,0603WAF1002T5E,C25804,20,pull-ups/pull-downs
 passive,100 k 0603 1 %,0603WAF1003T5E,C25803,4,
 passive,27 k 0603 1 %,0603WAF2702T5E,C22967,1,VBAT divider

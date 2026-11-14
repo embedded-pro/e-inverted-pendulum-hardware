@@ -104,6 +104,7 @@ class Part:
         self.on_board = not self.is_power and not ref.startswith("#")
         self.uuid = uid(sheet.name, ref, unit)
         self.fpos = None
+        self.hide_value = False
 
     def _xf(self, x, y):
         rx, ry = rot_vec(x, y, self.rot)
@@ -341,7 +342,7 @@ class Project:
             if (p.rot + fa) % 360 == 180:
                 jj = {"left": "right", "right": "left"}.get(jj, jj)
             node.append(self._prop("Reference", p.ref, p.x + dx, p.y + dy, fa, jj))
-            node.append(self._prop("Value", p.value, p.x + dx, p.y + dy + 2.54, fa, jj))
+            node.append(self._prop("Value", p.value, p.x + dx, p.y + dy + 2.54, fa, jj, hide=p.hide_value))
         elif p.is_power:
             o = (0, 1) if p.value.startswith("GND") else (0, -1)
             rx, ry = rot_vec(o[0], -o[1], p.rot)
@@ -355,7 +356,7 @@ class Project:
             xr = snap(bx1 + 1.27)
             j = "left" if (p.rot + fa) % 360 == 0 else "right"
             node.append(self._prop("Reference", p.ref, xr, p.y - 1.27, fa, j))
-            node.append(self._prop("Value", p.value, xr, p.y + 1.27, fa, j))
+            node.append(self._prop("Value", p.value, xr, p.y + 1.27, fa, j, hide=p.hide_value))
         elif npins <= 3 and (by1 - by0) <= 5.2:
             node.append(self._prop("Reference", p.ref, p.x, by0 - 1.27, fa))
             node.append(self._prop("Value", p.value, p.x, by1 + 2.2, fa))
@@ -395,7 +396,7 @@ class Project:
         items, extra_parts = [], []
         segs, seg_net = [], []
         pin_pts, bboxes = [], []
-        named = set()
+        label_pts = []
         for p in sh.parts:
             bboxes.append((p, p.screen_bbox()))
             for q in p.unit_pins():
@@ -411,7 +412,7 @@ class Project:
 
         def put_label(net, x, y, out):
             x, y = r3(x), r3(y)
-            named.add(net)
+            label_pts.append((net, x, y))
             if net in POWER_SYMS:
                 extra_parts.append(self._power_part(sh, net, x, y, out))
                 return
@@ -596,23 +597,44 @@ class Project:
             seg(pr.pos, e, net)
             put_label(net, e[0], e[1], pr.out)
 
+        def on_seg(pt, sg):
+            x1, y1, x2, y2 = sg
+            return (min(x1, x2) - 1e-3 <= pt[0] <= max(x1, x2) + 1e-3 and
+                    min(y1, y2) - 1e-3 <= pt[1] <= max(y1, y2) + 1e-3)
+
         for net in dict.fromkeys(seg_net):
-            if net in named:
-                continue
-            mine = [s for s, n in zip(segs, seg_net) if n == net]
-            need = len(net) * 1.1 + 1.27
-            flat = [s for s in mine if s[1] == s[3]]
-            fits = [s for s in flat if abs(s[2] - s[0]) >= need]
-            if fits or flat:
-                x1, y1, x2, y2 = max(fits or flat, key=lambda s: abs(s[2] - s[0]))
-                span = abs(x2 - x1)
-                x = min(x1, x2) + (snap((span - need) / 2) if span > need else 0)
-                put_label(net, x, y1, (1, 0))
-            else:
-                x1, y1, x2, y2 = max(mine, key=lambda s: abs(s[3] - s[1]))
-                span = abs(y2 - y1)
-                y = max(y1, y2) - (snap((span - need) / 2) if span > need else 0)
-                put_label(net, x1, y, (0, -1))
+            mine = [sg for sg, n in zip(segs, seg_net) if n == net]
+            group = list(range(len(mine)))
+
+            def root(i):
+                while group[i] != i:
+                    group[i] = group[group[i]]
+                    i = group[i]
+                return i
+            for i, a in enumerate(mine):
+                for j in range(i + 1, len(mine)):
+                    b = mine[j]
+                    if any(on_seg(pt, b) for pt in (a[:2], a[2:])) or any(on_seg(pt, a) for pt in (b[:2], b[2:])):
+                        group[root(i)] = root(j)
+            components = {}
+            for i, sg in enumerate(mine):
+                components.setdefault(root(i), []).append(sg)
+            for comp in components.values():
+                if any(n == net and any(on_seg((x, y), sg) for sg in comp) for n, x, y in label_pts):
+                    continue
+                need = len(net) * 1.1 + 1.27
+                flat = [sg for sg in comp if sg[1] == sg[3]]
+                fits = [sg for sg in flat if abs(sg[2] - sg[0]) >= need]
+                if fits or flat:
+                    x1, y1, x2, y2 = max(fits or flat, key=lambda sg: abs(sg[2] - sg[0]))
+                    span = abs(x2 - x1)
+                    x = min(x1, x2) + (snap((span - need) / 2) if span > need else 0)
+                    put_label(net, x, y1, (1, 0))
+                else:
+                    x1, y1, x2, y2 = max(comp, key=lambda sg: abs(sg[3] - sg[1]))
+                    span = abs(y2 - y1)
+                    y = max(y1, y2) - (snap((span - need) / 2) if span > need else 0)
+                    put_label(net, x1, y, (0, -1))
 
         for (x1, y1, x2, y2) in segs:
             lx0, ly0, lx1, ly1 = min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)

@@ -137,19 +137,6 @@ FOOTPRINTS = {
            "hole diameter not given, Ø1.7 chosen to clear the 1.53 mm pin diagonal",
         "through_hole", (-1.8, -3.4, 11.2, 3.4), (-2.05, -3.65, 11.45, 3.65),
         [tht("1", 0, 0, 2.6, 1.7, n, square=True), tht("2", 4.7, 0, 2.6, 1.7, n), tht("3", 9.4, 0, 2.6, 1.7, n)]),
-    "Buzzer_MLT-8530_8.5x8.5mm": lambda n: footprint(
-        n, "Jiangsu Huaneng MLT-8530 SMD magnetic transducer, 4 pads 2.3 x 2.3 mm on a 7.1 mm square "
-           "(datasheet p.2, p.4 s5.2): + top-left, - bottom-left, right pads mechanical",
-        "smd", (-4.35, -4.35, 4.35, 4.35), (-4.85, -4.85, 4.85, 4.85),
-        [smd("1", -3.55, -3.55, 2.3, 2.3, n), smd("2", -3.55, 3.55, 2.3, 2.3, n),
-         smd("", 3.55, -3.55, 2.3, 2.3, n), smd("", 3.55, 3.55, 2.3, 2.3, n)],
-        [label("+", -3.55, -5.4, "F.SilkS", n, "plus")], silk=False),
-    "SW_Push_TS-1187A_5.1x5.1mm": lambda n: footprint(
-        n, "XKB TS-1187A-B-A-B 5.1 x 5.1 mm SMD tact switch; pads 1.0 x 0.75 mm at 6.0 x 3.75 mm centres; "
-           "A-B (pad 1) and C-D (pad 2) internally joined (datasheet page 1)",
-        "smd", (-2.55, -2.55, 2.55, 2.55), (-3.75, -2.8, 3.75, 2.8),
-        [smd("1", -3.0, -1.875, 1.0, 0.75, n), smd("1", 3.0, -1.875, 1.0, 0.75, n),
-         smd("2", -3.0, 1.875, 1.0, 0.75, n), smd("2", 3.0, 1.875, 1.0, 0.75, n)], silk=False),
     "MountingHole_M3_NPTH_KeepOut7mm": lambda n: mechanical(
         n, "M3 NPTH hole, 3.2 mm drill, outer-layer copper keep-out to 7 mm (M3 washer); inner layers 0.5 mm hole clearance (project rule); docs/mechanical.md",
         3.2, 3.2, 7.0),

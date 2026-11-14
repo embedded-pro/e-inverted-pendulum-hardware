@@ -29,9 +29,7 @@ SWDIO,PA13,af,SYS_JTMS-SWDIO,,SWDIO,STDC14
 SWCLK,PA14,af,SYS_JTCK-SWCLK,,SWCLK,STDC14
 FLASH_CS,PA15,gpio_out,GPIO,,FLASH_NCS,new; 10k pull-up; JTDI must be released (SWD-only debug)
 VBAT_SENSE,PC1,adc,ADC1_IN2,,VBAT_SENSE,new; 100k/27k divider with charge-bucket capacitor
-BUZZER,PA7,af,TIM17_CH1,,BUZZER_PWM,new; NPN driver
-LED_FAULT,PB1,gpio_out,GPIO,,LED_RED,new
-USER_BUTTON,PD0,exti,EXTI0,,BTN_USER,new; same pin as NUCLEO SW2
+LED_RGB,PA7,af,TIM17_CH1,,LED_DATA,new (D-035); WS2812B chain through an AHCT buffer; TIM17 PWM + DMA
 I2C3_SCL,PB10,af,I2C3_SCL,,QWIIC_SCL,new; Qwiic expansion
 I2C3_SDA,PB11,af,I2C3_SDA,,QWIIC_SDA,new; Qwiic expansion
 DRV_STALLN,PB2,gpio_in,GPIO,,DRV_NSTALL,new; optional; open-drain with 10k pull-up
