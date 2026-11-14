@@ -61,12 +61,15 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 
 ## PCB (Phase 3, `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb`)
 
-- 85 × 130 mm, 4 layers JLC04161H-7628, 1 oz outer / 0.5 oz inner. L1 parts and RF, L2 solid GND (never cut), L3
-  power pours, L4 signals + GND fill.
-- Net classes from `docs/power-map.md`; JLC rules from the `pcb-design-rules` skill; custom DRC rules for the RF1
-  trace, keep-outs and the bracket strip.
+- 85 × 130 mm, 4 layers, 1 oz outer / 0.5 oz inner: JLC04161H-7628, or Seeed's standard 0.2 mm prepreg. L1 parts
+  and RF, L2 solid GND (never cut), L3 power pours, L4 signals + GND fill.
+- Net classes from `docs/power-map.md`; fab rules are the strictest of JLCPCB and Seeed (`pcb-design-rules` skill,
+  D-034); custom DRC rules for the RF1 trace, keep-outs and the bracket strip. The 50 Ω GCPW (0.25 / 0.15 mm) is
+  49.1–51.5 Ω at both fabs.
+- Silkscreen shows references only; test pads show their net name (D-035).
 - **Placement belongs to the owner (D-032).** The board has the outline, rule areas and bracket holes; every part sits
-  in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves, reshapes or deletes.
+  in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
+  parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.
 
 ## Still to check or do

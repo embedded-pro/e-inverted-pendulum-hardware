@@ -175,8 +175,12 @@ python3 scripts/pcb/board.py --rules <path to pcb_rules.py from the pcb-design-r
 1. Finish Phase 3: placement (owner), routing, DRC clean with schematic parity, the `power-pcb-layout` §7 and
    `rf-layout` §12 checklists ([docs/plan.md](docs/plan.md)).
 2. Re-run the stock check; every line must be in stock for the order quantity.
-3. JLCPCB options: 4 layers, JLC04161H-7628, 1.6 mm, 1 oz outer / 0.5 oz inner; check every CPL rotation in the
-   preview.
+3. Fab options (the design rules already meet both fabs, D-034):
+   - **JLCPCB** (PCB + assembly): 4 layers, JLC04161H-7628, 1.6 mm, 1 oz outer / 0.5 oz inner; check every CPL rotation
+     in the preview (the WS2812B-2020 footprint is the datasheet pattern turned 180°).
+   - **Seeed Studio** (bare PCB): 4 layers, standard 0.2 mm prepreg, 1.6 mm; select the 0.1 mm solder-mask web option
+     for the 0.4 mm-pitch QFN.
+   - Either fab: impedance control, 50 Ω ±10 % on the L1 GCPW over L2 (0.25 / 0.15 mm, `docs/rf.md`).
 4. Leave the DNP parts off: pi tuning C401/C402, U.FL J401 + R402, NFC trim C804, sense filters C501/C504, motor
    snubbers C603/C607, encoder pull-ups, R602.
 

@@ -42,7 +42,7 @@ COIL = {"width": 25.0, "height": 21.0, "trace": 0.15, "gap": 0.15, "copper_t": 0
 NAME = "NFC_Coil_25x21mm"
 LEAD = 1.0
 INNER_STUB = 1.0
-VIA = {"size": 0.6, "drill": 0.3}
+VIA = {"size": 0.65, "drill": 0.3}  # 0.175 mm ring >= Seeed PTH ring 0.152 mm and JLC 0.15 mm (D-034)
 
 
 def spiral(turns, width, height, pitch):

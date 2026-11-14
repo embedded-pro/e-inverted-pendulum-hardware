@@ -10,19 +10,20 @@
 		(uuid "99ac81ec-a20b-54f0-8c06-6e7d72705a36")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)
 	(property "Value" "MountingSlot_M3_10mm_NPTH_KeepOut7mm"
 		(at 0 4.5 0)
 		(layer "F.Fab")
+		(hide yes)
 		(uuid "498bfc23-49f6-5def-ae72-d3a3143ad9c4")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)

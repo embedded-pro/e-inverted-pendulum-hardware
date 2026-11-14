@@ -41,13 +41,31 @@
   ],
   "chosen": {
     "gap_mm": 0.15,
-    "width_mm": 0.27,
-    "z0": 49.81136854432084,
-    "e_eff": 2.901635791225308,
-    "corners": "width +/-0.03 mm, gap -/+0.03 mm, h -/+10 %, er +/-5 % (ASSUMPTION fab tolerances)",
-    "z0_low_corner": 42.71378716621476,
-    "z0_high_corner": 57.31162787926109,
+    "width_mm": 0.25,
+    "per_fab": {
+      "JLC04161H-7628 L1 over L2": 51.544447495754106,
+      "Seeed Fusion standard 4-layer, L1 over L2, Dk 4.2": 51.54159543789647,
+      "Seeed Fusion standard 4-layer, L1 over L2, Dk 4.45": 50.29587603192864,
+      "Seeed Fusion standard 4-layer, L1 over L2, Dk 4.7": 49.13632359311176
+    },
+    "jlc_only_width_mm": 0.27,
+    "z0": 51.544447495754106,
+    "e_eff": 2.882370626687033,
+    "corners": "both fabs, plus width +/-0.03 mm, gap -/+0.03 mm, h -/+10 %, er +/-5 % (ASSUMPTION fab tolerances)",
+    "z0_low_corner": 42.00974363265022,
+    "z0_high_corner": 59.476362630309424,
+    "seeed_stack": {
+      "name": "Seeed Fusion standard 4-layer, L1 over L2",
+      "h_mm": 0.2,
+      "t_mm": 0.035,
+      "er_range": [
+        4.2,
+        4.45,
+        4.7
+      ],
+      "source": "Seeed KB 'What is the stack up of 4/6/8 layers boards?': prepreg 0.2 mm, fixed; Fusion PCB specification: FR-4 Dk 4.2-4.7, outer copper 0.035 mm (1 oz)"
+    },
     "microstrip_limit_width_mm": 0.4022552102549852,
-    "worst_return_loss_db": 22.092849368537635
+    "worst_return_loss_db": 21.22546213503385
   }
 }

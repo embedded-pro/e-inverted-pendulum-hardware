@@ -10,19 +10,20 @@
 		(uuid "22ae7029-d127-5a12-8386-e70f0b29a6c2")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)
 	(property "Value" "AMASS_XT30UPB-F_1x02_P5.00mm_Vertical"
 		(at 2.5 4.05 0)
 		(layer "F.Fab")
+		(hide yes)
 		(uuid "76489d1d-61ed-50d5-a8e1-f6a539da65bb")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -93,8 +94,8 @@
 		(uuid "7991af4b-9560-575d-87fd-2288b96e650f")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -104,8 +105,8 @@
 		(uuid "12a65de8-69d1-58fb-9580-ed4fe2b7a18b")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)

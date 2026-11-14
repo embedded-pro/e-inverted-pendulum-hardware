@@ -10,19 +10,20 @@
 		(uuid "a4dcda7c-9211-5e26-8bd7-87aa327c33d2")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)
 	(property "Value" "SW_Slide_SPDT_SS-12D10L5_P4.70mm"
 		(at 4.7 4.65 0)
 		(layer "F.Fab")
+		(hide yes)
 		(uuid "c8f47656-f16a-56e1-939a-ca92e4ff8df2")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)

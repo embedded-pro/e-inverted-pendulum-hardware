@@ -15,7 +15,7 @@ import tempfile
 
 import cairosvg
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 BOARD = ROOT / "hardware" / "e-inverted-pendulum" / "e-inverted-pendulum.kicad_pcb"
 
 VIEWS = {

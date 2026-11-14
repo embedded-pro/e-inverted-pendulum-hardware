@@ -2,14 +2,17 @@
 """Create or update hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb from the schematic: a scripted "Update PCB from Schematic".
 
 Placement belongs to the owner (D-032): the .kicad_pcb is the source of truth for where parts are and for the
-board geometry. This script never moves, reshapes or deletes anything that already exists on the board. It:
+board geometry. This script never moves or reshapes anything that already exists on the board. It:
   - creates what is missing: the 85 x 130 mm outline, the rule areas and reference drawings from placement.py, and the
     bracket holes (placement.MECHANICAL), each only if absent;
   - syncs the schematic: one footprint per symbol with its fields, sheet path, DNP/BOM flags and pad nets; a footprint
-    whose library entry changed is swapped in place (position, rotation and lock kept); new parts go to the staging
-    area right of the board; parts removed from the schematic are deleted (board-only footprints are never deleted);
-  - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the JLC rules
-    (pcb-design-rules skill, pcb_rules.py) plus the project rules below.
+    whose library entry changed is swapped in place (position, rotation and lock kept); new parts go to the first
+    free spot in the staging area right of the board; parts removed from the schematic are deleted (board-only
+    footprints are never deleted);
+  - shows only the reference on the silkscreen, at the fab's minimum text size; test pads show their net name instead
+    (label_fields, D-035);
+  - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the fab rules, the
+    strictest of JLCPCB and Seeed (pcb-design-rules skill, pcb_rules.py, D-034), plus the project rules below.
 
 --stage-all (one-shot) moves every unlocked footprint except the bracket holes off the board into the staging area,
 one column per schematic sheet, packed by courtyard so nothing overlaps, with the sheet name on Cmts.User.
@@ -78,7 +81,7 @@ NET_CLASSES = {
                "patterns": ["*/BUCK_SW", "*/SMPS_LX", "*/SMPS_MID"]},
     "SUPPLY": {"track_width": 0.5, "clearance": 0.15,
                "patterns": ["+5V", "+3V3", "VDDA", "*/ENC_VCC", "*/DRV_V5", "*/DRV_VINT", "*/DRV_VCP"]},
-    "RF": {"track_width": 0.27, "clearance": 0.15,
+    "RF": {"track_width": 0.25, "clearance": 0.15,
            "patterns": ["RF1", "*/RF_50", "*/RF_ANT", "*/RF_UFL"]},
     "NFC": {"track_width": 0.25, "clearance": 0.15,
             "patterns": ["*/NFC_AC0", "*/NFC_AC1"]},
@@ -87,14 +90,15 @@ NET_CLASSES = {
 }
 DEFAULT_CLASS = {"track_width": 0.2, "clearance": 0.15}
 
+FABS = "jlcpcb,seeed"
 CUSTOM_RULES = """
 # Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
 
 (rule "RF1 matching trace: DS12804 Fig. 13 copies a 104 um gap (docs/rf.md)"
   (condition "A.NetName == 'RF1'")
-  (constraint clearance (min 0.1mm)))
+  (constraint clearance (min 0.104mm)))
 
-(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
+(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (via ring: JLC 0.05, Seeed 0.10 mm)"
   (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
   (constraint annular_width (min 0.1mm)))
 """
@@ -315,6 +319,35 @@ def replace_footprint(board, fp, lib_id):
     return fresh
 
 
+SILK_TEXT_MIN = (1.0, 0.15)
+
+
+def label_fields(fp):
+    """Only the reference is shown on the board; test pads show their net name instead (D-035).
+
+    Net ties keep their reference hidden. Silkscreen text is raised to the fab minimum (JLCPCB 1.0 mm high, 0.15 mm
+    line; Seeed allows less) and never lowered. A test pad's label is moved onto the silkscreen once; after that its
+    position is the owner's.
+    """
+    reference, value = fp.Reference(), fp.Value()
+    lib_id = fp.GetFPIDAsString()
+    if lib_id.startswith("TestPoint:"):
+        reference.SetVisible(False)
+        if not value.IsVisible() or value.GetLayer() != pcbnew.F_SilkS:
+            value.SetLayer(pcbnew.F_SilkS)
+            value.SetPosition(reference.GetPosition())
+            value.SetVisible(True)
+    else:
+        value.SetVisible(False)
+        reference.SetVisible(not lib_id.startswith("NetTie:"))
+    height, thickness = (pcbnew.FromMM(v) for v in SILK_TEXT_MIN)
+    for item in [reference, value] + [g for g in fp.GraphicalItems() if g.GetClass() == "PCB_TEXT"]:
+        if item.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            size = item.GetTextSize()
+            item.SetTextSize(pcbnew.VECTOR2I(max(size.x, height), max(size.y, height)))
+            item.SetTextThickness(max(item.GetTextThickness(), thickness))
+
+
 def ensure_mechanical(board, existing):
     for item in placement.MECHANICAL:
         fp = existing.get(item["ref"])
@@ -427,7 +460,7 @@ def write_net_classes():
 
 
 def apply_rules(script):
-    subprocess.run([sys.executable, str(script), "apply", str(PROJECT), "--fab", "jlcpcb", "--netclasses"], check=True)
+    subprocess.run([sys.executable, str(script), "apply", str(PROJECT), "--fab", FABS, "--netclasses"], check=True)
     text = RULES.read_text(encoding="utf-8")
     marker = "# Project rules ("
     if marker in text:
@@ -529,12 +562,14 @@ def build_board(stage=False):
     block.SetTitle("e-inverted-pendulum: chassis PCB")
     block.SetCompany("embedded-pro")
     block.SetRevision("A (draft)")
-    block.SetComment(0, "JLC04161H-7628, 4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner (D-008)")
+    block.SetComment(0, "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 or Seeed 0.2 mm prepreg (D-008, D-034)")
     block.SetComment(1, "Outline 85 x 130 mm (D-024); see docs/mechanical.md and docs/rf.md")
 
     ensure_outline(board)
     footprints = sync_footprints(board, components, nets, pins)
     ensure_mechanical(board, footprints)
+    for fp in board.GetFootprints():
+        label_fields(fp)
     ensure_rule_areas(board)
     ensure_drawings(board)
     staged = stage_all(board) if stage else 0

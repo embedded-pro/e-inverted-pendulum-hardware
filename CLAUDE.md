@@ -37,10 +37,10 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - Every number needs a source: a datasheet (ID and section), app note, firmware file and line,
   or a script in `simulation/` that reproduces it. Unsourced numbers are marked
   **ASSUMPTION** and listed in the doc's open-items section.
-- JLCPCB is the fab and assembler. Prefer parts in stock, basic before extended; footprints
-  must match the LCSC part's package exactly.
-- Stack-up: JLC04161H-7628, 4-layer 1.6 mm, 1 oz outer / 0.5 oz inner. L2 is solid GND and is
-  never cut.
+- JLCPCB is the assembler; bare boards must also be buildable at Seeed Studio (D-034). Prefer parts in stock, basic
+  before extended; footprints must match the LCSC part's package exactly.
+- Stack-up: JLC04161H-7628 (or Seeed's standard 4-layer, 0.2 mm prepreg), 1.6 mm, 1 oz outer / 0.5 oz inner.
+  L2 is solid GND and is never cut. Design rules are the strictest of JLCPCB and Seeed (D-034).
 - Phases have gates (`docs/plan.md`). Do not start a phase before the previous gate is
   signed off by the user.
 - Layout: the user places the anchors and they are never moved (`power-pcb-layout` §1).
@@ -64,9 +64,10 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   run it after any drawing-only change. `scripts/schgen/render.sh`: build, check, `docs/schematic.pdf`, sheet PNGs.
 - `python3 scripts/check_netlist.py` / `check_library.py`: netlist and symbol/footprint checks.
 - `python3 scripts/pcb/board.py --rules <pcb_rules.py>`: update the PCB from the schematic (footprints, nets, net classes
-  from `docs/power-map.md`, JLC rules). Placement is the owner's (D-032): it never moves, reshapes or deletes what is on
-  the board, only adds missing items (new parts go to the first free spot in the staging area, clear of every other
-  part). `--stage-all` is a one-shot reset to staging.
+  from `docs/power-map.md`, the strictest of the JLCPCB and Seeed rules, D-034). Placement is the owner's (D-032): it never
+  moves or reshapes what is on the board; it adds missing items (new parts go to the first free spot in the staging
+  area) and removes parts deleted from the schematic. Only references show on the silkscreen; test pads show their net
+  (D-035). `--stage-all` is a one-shot reset to staging.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

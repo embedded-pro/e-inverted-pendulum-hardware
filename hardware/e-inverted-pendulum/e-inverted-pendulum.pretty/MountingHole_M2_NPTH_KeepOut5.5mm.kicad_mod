@@ -10,19 +10,20 @@
 		(uuid "4d7e467c-b376-5fc2-9d50-a8bfce6c48c4")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)
 	(property "Value" "MountingHole_M2_NPTH_KeepOut5.5mm"
 		(at 0 3.75 0)
 		(layer "F.Fab")
+		(hide yes)
 		(uuid "ef126dd3-6db6-5c92-b93f-65afc8e16788")
 		(effects
 			(font
-				(size 0.8 0.8)
-				(thickness 0.12)
+				(size 1 1)
+				(thickness 0.15)
 			)
 		)
 	)

@@ -19,10 +19,14 @@ def uid(*parts):
     return Str(str(uuid.uuid5(NAMESPACE, "/".join(map(str, parts)))))
 
 
+SILK_TEXT = [Sym("font"), [Sym("size"), 1.0, 1.0], [Sym("thickness"), 0.15]]
+
+
 def text(kind, value, x, y, layer, name):
-    return [Sym("property"), Str(kind), Str(value), [Sym("at"), x, y, 0], [Sym("layer"), Str(layer)],
-            [Sym("uuid"), uid(name, kind)],
-            [Sym("effects"), [Sym("font"), [Sym("size"), 0.8, 0.8], [Sym("thickness"), 0.12]]]]
+    """Reference shown on the silkscreen at the fab minimum (1.0 / 0.15 mm, JLCPCB); the Value is kept but hidden."""
+    hide = [[Sym("hide"), Sym("yes")]] if kind == "Value" else []
+    return [Sym("property"), Str(kind), Str(value), [Sym("at"), x, y, 0], [Sym("layer"), Str(layer)]] + hide + [
+            [Sym("uuid"), uid(name, kind)], [Sym("effects"), SILK_TEXT]]
 
 
 def hidden(kind, value, name):
@@ -39,8 +43,7 @@ def rect(x0, y0, x1, y1, layer, width, name, tag):
 
 def label(value, x, y, layer, name, tag):
     return [Sym("fp_text"), Sym("user"), Str(value), [Sym("at"), x, y, 0], [Sym("layer"), Str(layer)],
-            [Sym("uuid"), uid(name, tag)],
-            [Sym("effects"), [Sym("font"), [Sym("size"), 0.8, 0.8], [Sym("thickness"), 0.12]]]]
+            [Sym("uuid"), uid(name, tag)], [Sym("effects"), SILK_TEXT]]
 
 
 def smd(number, x, y, w, h, name, mask=None, paste=None, shape="rect"):
