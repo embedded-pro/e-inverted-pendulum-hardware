@@ -4,10 +4,13 @@ name: kicad-bot
 # Runs ERC/DRC, BOM availability checks and visual diffs via embedded-pro/kicad-bot.
 # https://github.com/embedded-pro/kicad-bot
 
-# Manual runs only for now: kicad-bot v0.1.3 installs KiCad 9.0.8 even with kicad-version "10", and KiCad 9
-# can't open this KiCad 10 project ("Failed to load schematic"). hardware.yml runs ERC with KiCad 10.0.8 meanwhile.
-# Restore the push and pull_request triggers once kicad-bot installs KiCad 10.
+# kicad-bot >= v0.1.5 installs the requested KiCad on Ubuntu 26.04 runners (it pins the KiCad PPA to amd64) and fails
+# if kicad-cli is another major. It runs without KiCad's libraries, so its ERC lists library-lookup warnings;
+# hardware.yml (KiCad 10 container with libraries) is the library check.
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -30,11 +33,11 @@ jobs:
           fetch-depth: 0
 
       - name: Run kicad-bot
-        uses: embedded-pro/kicad-bot@dbe30bb6e70872d2a0dbf5b006e42442ce434c95 # v0.1.3
+        uses: embedded-pro/kicad-bot@693908db94231f662dde94b19cf5d282210c3a93 # v0.1.5
         with:
           project-dir: "hardware/${{ matrix.board }}"   # one KiCad project per board
           kicad-version: "10"     # the project is saved by KiCad 10 (action default is 9)
-          run-verify: "true"      # ERC + DRC — the only phase implemented in v0.1.3
+          run-verify: "true"      # ERC + DRC
           run-bom-check: "false"  # BOM/distributor check not available yet (kicad-bot Phase 2)
           run-diff: "false"       # visual schematic/PCB diff not available yet (Phase 3)
           # Reported, not enforced: the board is not routed yet. Flips to "true" once it is.

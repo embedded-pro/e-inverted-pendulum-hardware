@@ -30,12 +30,12 @@ jobs:
         run: git worktree add ../base ${{ github.event.pull_request.base.sha }}
 
       - name: Install KiCad CLI + imaging deps
-        # KiCad 10 stable PPA, the same major version as kicad-bot and hardware.yml.
+        # KiCad 10 stable PPA, the same major version as kicad-bot and hardware.yml. The script pins the PPA on
+        # Ubuntu 26.04 (amd64v3) runners and fails unless kicad-cli is 10.x: before it, this job silently got
+        # Ubuntu's KiCad 9 and rendered nothing ("Failed to load schematic").
         run: |
           set -euo pipefail
-          sudo add-apt-repository --yes ppa:kicad/kicad-10.0-releases
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends kicad python3-pip
+          bash scripts/install_kicad.sh 10 --no-install-recommends kicad python3-pip
           python3 -m pip install --break-system-packages --quiet pymupdf pillow numpy
 
       - name: Render visual diff

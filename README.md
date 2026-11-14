@@ -188,10 +188,13 @@ python3 scripts/pcb/board.py --rules <path to pcb_rules.py from the pcb-design-r
 - [`hardware.yml`](.github/workflows/hardware.yml): pin map, regenerate the schematic with no diff, netlist against
   the generator's intent, ERC, netlist and symbol/footprint checks.
 - [`kicad-bot.yml`](.github/workflows/kicad-bot.yml): [kicad-bot](https://github.com/embedded-pro/kicad-bot) ERC/DRC
-  with schematic parity; DRC does not fail the build until the board is routed. **Manual runs only for now:**
-  kicad-bot v0.1.3 installs KiCad 9.0.8, which can't open this KiCad 10 project. The release workflow's fab bundle
-  depends on it too.
+  with schematic parity, on pushes to `main` and on pull requests; DRC does not fail the build until the board is
+  routed. kicad-bot runs without KiCad's libraries, so its ERC shows library-lookup warnings; `hardware.yml` is the
+  library check.
 - [`kicad-diff.yml`](.github/workflows/kicad-diff.yml): red/green visual diff of schematic and board on pull requests.
+- KiCad on GitHub runners: `scripts/install_kicad.sh 10` (and kicad-bot ≥ v0.1.5) pins the KiCad PPA to `amd64`.
+  Ubuntu 26.04 runners otherwise install Ubuntu's KiCad 9, which can't open this project; the script fails if
+  `kicad-cli` isn't 10.x.
 - [`release.yml`](.github/workflows/release.yml): [release-please](https://github.com/googleapis/release-please) from
   Conventional Commits; each release attaches the fabrication bundle from `scripts/export_release.py`.
 
