@@ -13212,7 +13212,7 @@
 				)
 			)
 		)
-		(property "Value" "TPD4E05U06DQAR"
+		(property "Value" "TPD4E05U06QDQARQ1"
 			(at 0.01829 2.5 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13250,7 +13250,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138714"
+		(property "LCSC" "C81353"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -13262,7 +13262,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPD4E05U06DQAR"
+		(property "MPN" "TPD4E05U06QDQARQ1"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -27876,7 +27876,7 @@
 				)
 			)
 		)
-		(property "Value" "TPD4E05U06DQAR"
+		(property "Value" "TPD4E05U06QDQARQ1"
 			(at 0.01829 2.5 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -27914,7 +27914,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138714"
+		(property "LCSC" "C81353"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -27926,7 +27926,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPD4E05U06DQAR"
+		(property "MPN" "TPD4E05U06QDQARQ1"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -31162,7 +31162,7 @@
 				)
 			)
 		)
-		(property "Value" "TPD4E05U06DQAR"
+		(property "Value" "TPD4E05U06QDQARQ1"
 			(at 0.01829 2.5 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -31200,7 +31200,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138714"
+		(property "LCSC" "C81353"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -31212,7 +31212,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPD4E05U06DQAR"
+		(property "MPN" "TPD4E05U06QDQARQ1"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)

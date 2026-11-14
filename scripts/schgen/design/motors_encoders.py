@@ -2,7 +2,7 @@
 
 One JST PH 6-pin per motor carries the motor and its Hall encoder (MG310 pinout: 1 M-, 2 encoder VCC, 3 A, 4 B,
 5 GND, 6 M+). The MG310 has no index, so the buffer's third input is grounded and the index pins read low.
-Sources: docs/design-calcs.md (Encoders), SCES470D (SN74LVC3G17), SLVSBO7L (TPD4E05U06), interface-layout s2.
+Sources: docs/design-calcs.md (Encoders), SCES470D (SN74LVC3G17), SLVSCO7A (TPD4E05U06-Q1), interface-layout s2.
 """
 
 from parts import C, R, active, test_points
@@ -42,7 +42,7 @@ def side_box(sh, side, name, x0, y0, refs):
                 "6": f"MOT_{side}_P"})
     snub = C(sh, refs["snub"], "100n_0603_50V_X7R", x0 + 12.7, y0 + 58.42, f"MOT_{side}_P", f"MOT_{side}_N", dnp=True,
              purpose="optional motor-terminal suppression (fit at the motor preferably)")
-    esd = active(sh, refs["esd"], "TPD4E05U06DQAR", "Power_Protection:TPD4E05U06DQA",
+    esd = active(sh, refs["esd"], "TPD4E05U06QDQARQ1", "Power_Protection:TPD4E05U06DQA",
                  "Package_SON:USON-10_2.5x1.0mm_P0.5mm", x0 + 45.72, y0 + 88.9,
                  purpose="ESD at the connector, pass-through routing")
     esd.fpos = (-12.7, -13.97, "left")

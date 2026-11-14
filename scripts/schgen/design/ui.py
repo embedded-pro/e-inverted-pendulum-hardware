@@ -107,7 +107,7 @@ def qwiic_eeprom(sh):
     sh.rail("+3V3", 116.84 + DY, [r808["2"], r809["2"]], tap=(76.2, (0, -1)))
     sh.rail("QWIIC_SDA", 132.08 + DY, [j["3"], r808["1"]], label="right", ext=25.4)
     sh.rail("QWIIC_SCL", 134.62 + DY, [j["4"], r809["1"]], label="right", ext=12.7)
-    esd = active(sh, "U801", "TPD4E05U06DQAR", "Power_Protection:TPD4E05U06DQA", "Package_SON:USON-10_2.5x1.0mm_P0.5mm",
+    esd = active(sh, "U801", "TPD4E05U06QDQARQ1", "Power_Protection:TPD4E05U06DQA", "Package_SON:USON-10_2.5x1.0mm_P0.5mm",
                  53.34, 157.48 + DY, purpose="Qwiic ESD")
     esd.fpos = (-12.7, -13.97, "left")
     sh.nets(esd, {"1": "QWIIC_SDA", "2": "QWIIC_SCL", "4": "+3V3", "5": None, "3": "GND", "8": "GND",

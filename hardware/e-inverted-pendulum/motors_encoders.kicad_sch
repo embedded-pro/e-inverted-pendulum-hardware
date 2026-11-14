@@ -8383,7 +8383,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "TPD4E05U06DQAR"
+		(property "Value" "TPD4E05U06QDQARQ1"
 			(at 247.65 158.75 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8426,7 +8426,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138714"
+		(property "LCSC" "C81353"
 			(at 260.35 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -8437,7 +8437,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPD4E05U06DQAR"
+		(property "MPN" "TPD4E05U06QDQARQ1"
 			(at 260.35 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -8861,7 +8861,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "TPD4E05U06DQAR"
+		(property "Value" "TPD4E05U06QDQARQ1"
 			(at 48.26 158.75 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8904,7 +8904,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138714"
+		(property "LCSC" "C81353"
 			(at 60.96 170.18 0)
 			(hide yes)
 			(show_name no)
@@ -8915,7 +8915,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPD4E05U06DQAR"
+		(property "MPN" "TPD4E05U06QDQARQ1"
 			(at 60.96 170.18 0)
 			(hide yes)
 			(show_name no)

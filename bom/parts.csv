@@ -14,7 +14,7 @@ drive,Sense resistor 50 mOhm 1206 1 W 75 ppm,HoLR1206-1W-50mR-1%-75ppm,C601102,2
 drive,Bulk capacitor 220 uF 35 V,EEEFK1V221P,C178562,1,size confirmed in S1/S2
 sensing,IMU,MPU-6500,C50278,1,D-004
 sensing,Encoder Schmitt buffer x3,SN74LVC3G17DCTR,C18213,2,D-012
-sensing,Connector ESD (encoders + Qwiic),TPD4E05U06DQAR,C138714,3,one per encoder connector and one for Qwiic
+sensing,Connector ESD (encoders + Qwiic),TPD4E05U06QDQARQ1,C81353,3,one per encoder connector and one for Qwiic; alternate TPD4E05U06DQAR C138714 (same pinout and footprint)
 memory,SPI NOR flash 2 MB,W25Q16JVSSIQ,C131025,1,D-005
 memory,I2C EEPROM 64 Kbit,M24C64-RMN6TP,C79988,1,D-031; I2C3 at 0x50
 rf,NFC Type 5 tag with I2C,ST25DV04KC-IE8S3,C5221752,1,D-030; I2C3 at 0x53/0x57; GPO on PA2

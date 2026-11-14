@@ -6140,7 +6140,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "TPD4E05U06DQAR"
+		(property "Value" "TPD4E05U06QDQARQ1"
 			(at 40.64 173.99 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6183,7 +6183,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138714"
+		(property "LCSC" "C81353"
 			(at 53.34 185.42 0)
 			(hide yes)
 			(show_name no)
@@ -6194,7 +6194,7 @@
 				)
 			)
 		)
-		(property "MPN" "TPD4E05U06DQAR"
+		(property "MPN" "TPD4E05U06QDQARQ1"
 			(at 53.34 185.42 0)
 			(hide yes)
 			(show_name no)

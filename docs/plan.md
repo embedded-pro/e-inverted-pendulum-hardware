@@ -75,7 +75,7 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | Motor connectors ×2 | JST S2B-XH-A (side entry, 3 A) | C157931 | 70k |
 | Encoder connectors ×2 | JST S5B-PH-K-S (side entry) | C157923 | 59k |
 | Encoder buffers ×2 (A/B/Z each) | SN74LVC3G17DCTR (Schmitt, 5 V-tolerant inputs, I_off) | C18213 | 8.9k |
-| Encoder ESD | TPD4E05U06DQAR | C138714 | 130k |
+| Encoder ESD | TPD4E05U06QDQARQ1 (SLVSCO7A; alternate TPD4E05U06DQAR C138714, same pinout and footprint) | C81353 | 2.4k (2026-11-14) |
 | SPI flash | W25Q16JVSSIQ, 2 MB, SOIC-8 208 mil (alternative: W25Q80DVSSIG, 1 MB, C98163, 29.7k, same footprint) | C131025 | 8.4k |
 | Debug | FTSH-107-01-L-DV-K (STDC14) | C5307809 | 616 |
 | Antenna test port (DNP) | BWU.FL-IPEX1 | C5137195 | 617k |
