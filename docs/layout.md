@@ -22,10 +22,10 @@ anything on the board.
 |---|---|---|
 | Outline | 85 × 130 mm, 1 mm corner radii | D-024 |
 | Coordinates | Grid origin on the wheel axle at the centre line (x = 0, z = 0); the bottom edge is z −12.5, the top edge z 117.5 (KiCad Y = 150 − z) | D-026 |
-| Stack-up | JLC04161H-7628: L1 0.035 / 7628 0.2104 / L2 0.0152 / core 1.065 / L3 0.0152 / 7628 0.2104 / L4 0.035 mm (Seeed: 0.2 mm prepreg, same RF line, D-034) | D-008 |
+| Stack-up | JLC04161H-7628: L1 0.035 / 7628 0.2104 / L2 0.0152 / core 1.065 / L3 0.0152 / 7628 0.2104 / L4 0.035 mm | D-008 |
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut · L3 VBAT/5V0/3V3 pours, slow signals · L4 signals + GND fill | `docs/plan.md` |
-| Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.25 / 0.15 gap, NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
-| Fab rules | Strictest of JLCPCB and Seeed: track / space 0.1016 (inner track 0.15), via 0.20 / 0.40, via ring 0.10, PTH ring 0.152, hole-to-hole 0.30, hole-to-copper 0.3048, edge 0.30, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-034, `pcb-design-rules` profiles |
+| Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.27 / 0.15 gap, NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
+| Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
 | Silkscreen | References only; test pads show their net name; net ties unlabelled | D-035, `scripts/pcb/board.py` |
 | Page | A3, so the staging area fits on the sheet | — |
 
@@ -40,7 +40,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 | `BRACKET_STRIP` | bottom 25 mm, front and back | **no footprints** except the bracket holes MB1–MB8 (project rule) | Chassis attachment (D-026) |
 | `BRACKET_BASE_CONTACT` | bottom 25 mm, B.Cu | no tracks, vias or pour | The steel bracket base sits on the back |
 | `BATTERY_BACK` | x ±38.5, z 39–76, B.Cu | **no through-hole pins** (project rule; NPTH holes allowed) | The battery lies on the back (D-025) |
-| project rule | RF1 net | 0.104 mm clearance | DS12804 Fig. 13 matching trace (≥ Seeed's 0.1016 mm floor) |
+| project rule | RF1 net | 0.104 mm clearance | DS12804 Fig. 13 matching trace |
 | project rule | NPTH holes | 0.5 mm hole-to-copper | Screw threads touch the hole wall |
 
 ## Placement guidance (from the design docs)
@@ -48,7 +48,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 - **RF (`docs/rf.md`):**
   - MLPF FL401 IN must sit 1.5 mm from the MCU's RF1 pad (pin 31), on a 200 µm trace with 104 µm gaps.
   - RF1 is on the package's bottom edge at rot 0, so rotate the MCU so it faces the antenna.
-  - MLPF OUT → pi (C401, R401, C402) → AE401 feed: one short 50 Ω GCPW (0.25 / 0.15 mm), L1 only, no vias.
+  - MLPF OUT → pi (C401, R401, C402) → AE401 feed: one short 50 Ω GCPW (0.27 / 0.15 mm), L1 only, no vias.
   - U.FL J401 hangs off RF_50 through R402.
   - HSE Y301 goes at pins 34/35; SMPS L301/L302 at pins 41–44; LSE Y302 at pins 3/4.
 - **IMU (U701):** next to the MCU's SPI2 pins (PB12–PB15, PC6). If it sits far from the axle, report its position for the

@@ -26,7 +26,7 @@ come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way 
 | +5V | supply | 0.3 A / 0.6 A | 5.0 V | Pour on L3 or 0.5 mm | `SUPPLY` |
 | +3V3, VDDA, ENC_VCC, DRV_V5, DRV_VINT, DRV_VCP | supply | ≤ 0.2 A | 3.3–24 V | 0.5 mm or a pour on L3; decoupling at each pin with its own via | `SUPPLY` |
 | DRV_CP1, DRV_CP2 | charge-pump switch node | mA | 24 V | Flying cap at the pins, short | `GATE` |
-| RF1, RF_50, RF_ANT, RF_UFL | RF 50 Ω | — | — | GCPW 0.25 / 0.15 mm, valid at JLCPCB and Seeed (RF1 trace 0.2 / 0.104 mm per DS12804); L1 only, no vias; via fence 1.0–1.3 mm (`docs/rf.md`) | `RF` |
+| RF1, RF_50, RF_ANT, RF_UFL | RF 50 Ω | — | — | GCPW 0.27 / 0.15 mm (RF1 trace 0.2 / 0.104 mm per DS12804); L1 only, no vias; via fence 1.0–1.3 mm (`docs/rf.md`) | `RF` |
 | HSE_IN/OUT, OSC32_IN/OUT | crystal | µA | 3.3 V | At the pins, short and symmetric, GND guard, no vias | `CRYSTAL` |
 | ENC_* (raw, filtered, buffered) | off-board digital input | mA | 5 V | Away from MOT_* on every layer; ESD part at the connector, pass-through | Default |
 | GND | plane | — | — | L2 solid and never cut; GND fill on L1/L4; stitching about every 5 mm | — |
@@ -41,9 +41,8 @@ come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way 
 | `SENSE` | 0.20 | 0.15 | 0.30 / 0.60 | 0.20 / 0.20 |
 | `SWITCH` | 0.50 | 0.15 | 0.30 / 0.60 | — |
 | `SUPPLY` | 0.50 | 0.15 | 0.30 / 0.60 | — |
-| `RF` | 0.25 | 0.15 | — (no vias on the line) | — |
+| `RF` | 0.27 | 0.15 | — (no vias on the line) | — |
 | `CRYSTAL` | 0.20 | 0.15 | — | — |
 
 The RF1 matching trace (200 µm wide, 104 µm gap, 1.5 mm long, DS12804 Fig. 13) is below the class values. A custom
-rule in `e-inverted-pendulum.kicad_dru` allows 0.104 mm clearance on RF1 only. That is above both fabs' floors (JLCPCB
-0.09 mm, Seeed 0.1016 mm; D-034).
+rule in `e-inverted-pendulum.kicad_dru` allows 0.104 mm clearance on RF1 only. That is above JLC's 0.09 mm floor.

@@ -11,7 +11,7 @@
 		(title "e-inverted-pendulum: chassis PCB")
 		(rev "A (draft)")
 		(company "embedded-pro")
-		(comment 1 "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 or Seeed 0.2 mm prepreg (D-008, D-034)")
+		(comment 1 "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 (D-008, D-036)")
 		(comment 2 "Outline 85 x 130 mm (D-024); see docs/mechanical.md and docs/rf.md")
 	)
 	(layers

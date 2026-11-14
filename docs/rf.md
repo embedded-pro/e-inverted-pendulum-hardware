@@ -16,11 +16,11 @@ conducted test port. The `rf-layout` skill governs this document; its section nu
 
 | Item | Value | Source |
 |---|---|---|
-| Stack-up | JLC04161H-7628, 1.6 mm, L1 over a solid L2 GND; or Seeed's standard 4-layer (D-034) | D-008, D-034 |
-| L1 → L2 | JLC: 0.2104 mm 7628 prepreg, Dk 4.4. Seeed: 0.2 mm prepreg (fixed), FR-4 Dk 4.2–4.7 (≤ 0.8 mm per rf-layout §2) | JLCPCB stack-up; Seeed KB "stack up of 4/6/8 layer boards", Fusion PCB specification |
+| Stack-up | JLC04161H-7628, 1.6 mm, L1 over a solid L2 GND; JLCPCB only (D-036) | D-008, D-036 |
+| L1 → L2 | 0.2104 mm 7628 prepreg, Dk 4.4 (≤ 0.8 mm per rf-layout §2) | JLCPCB stack-up |
 | Line type | GCPW (rf-layout §2: less sensitive to thickness, isolates better) | AN928.2, AN91445 |
-| **50 Ω GCPW** | **0.25 mm track, 0.15 mm gap** to top-layer GND: 51.5 Ω at JLC, 49.1–51.5 Ω at Seeed (worst 1.5 Ω off 50; the JLC-only optimum, 0.27 mm, would be 47.4 Ω at Seeed's Dk 4.7) | `scripts/gcpw.py` |
-| Tolerance corners | 42.0–59.5 Ω over both fabs (width ±0.03 mm, h ±10 %, Dk ±5 %): return loss ≥ 21 dB | `scripts/gcpw.py` |
+| **50 Ω GCPW** | **0.27 mm track, 0.15 mm gap** to top-layer GND (49.8 Ω; solder mask, ignored by the model, lowers it by about 1–2 Ω) | `scripts/gcpw.py` |
+| Tolerance corners | 42.7–57.3 Ω (width ±0.03 mm, h ±10 %, Dk ±5 %): return loss ≥ 22 dB | `scripts/gcpw.py` |
 | Guided wavelength | λg ≈ 72 mm at 2.45 GHz (ε_eff 2.90) | `scripts/gcpw.py` |
 
 **Calculator check.** `gcpw.py` reproduces ST's own line: DS12804 Fig. 13 OUT, 450 µm with 106.4 µm gaps on the
@@ -39,15 +39,15 @@ from RF1 is copied (next section).
 - Via fence on both sides: 0.3 mm drill / 0.6 mm pad, 0.3 mm from the gap edge, **pitch 1.0–1.3 mm**.
 - Solder mask stays on the line (it lowers Z0 by about 1–2 Ω and keeps paste out of the 0.15 mm gaps). Pads are
   mask-defined per DS12804.
-- Order with impedance control (50 Ω ±10 % on the L1 GCPW over L2) at either fab; the fab adjusts the width to its
-  stack-up (open item 2).
+- Confirm with JLC's impedance calculator, and order with impedance control (50 Ω ±10 % on the L1 GCPW over L2); JLC
+  adjusts the width to its stack-up (open item 2).
 
 ## MLPF-WB55-01E3 and the matching trace
 
 The IPD is both the match and the harmonic filter (rf-layout §3). Copy FL401's surroundings **geometrically** from DS12804 Fig. 13:
 - **IN (A3) is 1.5 mm from the RF1 pad** (pin 31), along a 200 µm trace with 104 µm gaps. This trace is part of the match.
   On our stack-up it is 52.1 Ω instead of 58.6 Ω, over 1.5 mm (0.02 λg). The shift is small, and the VNA tuning covers it.
-- **OUT (A1)** starts the 50 Ω GCPW (0.25 / 0.15 mm), tapered from the 300 µm pad.
+- **OUT (A1)** starts the 50 Ω GCPW (0.27 / 0.15 mm), tapered from the 300 µm pad.
 - **GND1–GND4** (A2, B1–B3): pads 200 µm on a 500 × 587 µm grid, each with its own via to L2. The top pour stays
   about 0.3–0.6 mm away from the IN and OUT pads (rf-layout §3).
 - The direction mark (IN toward the MCU) is on the silkscreen; the part is asymmetric (rf-layout §11 item 7).
@@ -102,6 +102,5 @@ The IPD is both the match and the harmonic filter (rf-layout §3). Copy FL401's 
 ## Open items
 
 1. Check this document against ST AN5165 (RF hardware for STM32WB) and AN2867 (oscillators) once they can be read.
-2. Confirm 0.25 / 0.15 mm with the fab's impedance calculator (JLC04161H-7628 at JLCPCB; the standard 0.2 mm prepreg
-   at Seeed) and enable impedance control on the order.
+2. Confirm 0.27 / 0.15 mm with JLC's impedance calculator for JLC04161H-7628 and enable impedance control on the order.
 3. VNA-tune the pi network on the assembled robot. If resonance is off by more than the pi can fix, trim the antenna.

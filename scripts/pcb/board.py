@@ -12,7 +12,7 @@ board geometry. This script never moves or reshapes anything that already exists
   - shows only the reference on the silkscreen, at the fab's minimum text size; test pads show their net name instead
     (label_fields, D-035);
   - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the fab rules, the
-    strictest of JLCPCB and Seeed (pcb-design-rules skill, pcb_rules.py, D-034), plus the project rules below.
+    JLCPCB's (pcb-design-rules skill, pcb_rules.py, D-036), plus the project rules below.
 
 --stage-all (one-shot) moves every unlocked footprint except the bracket holes off the board into the staging area,
 one column per schematic sheet, packed by courtyard so nothing overlaps, with the sheet name on Cmts.User.
@@ -81,7 +81,7 @@ NET_CLASSES = {
                "patterns": ["*/BUCK_SW", "*/SMPS_LX", "*/SMPS_MID"]},
     "SUPPLY": {"track_width": 0.5, "clearance": 0.15,
                "patterns": ["+5V", "+3V3", "VDDA", "*/ENC_VCC", "*/DRV_V5", "*/DRV_VINT", "*/DRV_VCP"]},
-    "RF": {"track_width": 0.25, "clearance": 0.15,
+    "RF": {"track_width": 0.27, "clearance": 0.15,
            "patterns": ["RF1", "*/RF_50", "*/RF_ANT", "*/RF_UFL"]},
     "NFC": {"track_width": 0.25, "clearance": 0.15,
             "patterns": ["*/NFC_AC0", "*/NFC_AC1"]},
@@ -90,7 +90,7 @@ NET_CLASSES = {
 }
 DEFAULT_CLASS = {"track_width": 0.2, "clearance": 0.15}
 
-FABS = "jlcpcb,seeed"
+FABS = "jlcpcb"
 CUSTOM_RULES = """
 # Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
 
@@ -98,7 +98,7 @@ CUSTOM_RULES = """
   (condition "A.NetName == 'RF1'")
   (constraint clearance (min 0.104mm)))
 
-(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (via ring: JLC 0.05, Seeed 0.10 mm)"
+(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
   (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
   (constraint annular_width (min 0.1mm)))
 """
@@ -325,8 +325,8 @@ SILK_TEXT_MIN = (1.0, 0.15)
 def label_fields(fp):
     """Only the reference is shown on the board; test pads show their net name instead (D-035).
 
-    Net ties keep their reference hidden. Silkscreen text is raised to the fab minimum (JLCPCB 1.0 mm high, 0.15 mm
-    line; Seeed allows less) and never lowered. A test pad's label is moved onto the silkscreen once; after that its
+    Net ties keep their reference hidden. Silkscreen text is raised to JLCPCB's minimum (1.0 mm high, 0.15 mm line) and
+    never lowered. A test pad's label is moved onto the silkscreen once; after that its
     position is the owner's.
     """
     reference, value = fp.Reference(), fp.Value()
@@ -562,7 +562,7 @@ def build_board(stage=False):
     block.SetTitle("e-inverted-pendulum: chassis PCB")
     block.SetCompany("embedded-pro")
     block.SetRevision("A (draft)")
-    block.SetComment(0, "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 or Seeed 0.2 mm prepreg (D-008, D-034)")
+    block.SetComment(0, "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 (D-008, D-036)")
     block.SetComment(1, "Outline 85 x 130 mm (D-024); see docs/mechanical.md and docs/rf.md")
 
     ensure_outline(board)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""50 ohm grounded coplanar waveguide (GCPW) for the RF path, valid on JLC04161H-7628 and on Seeed's 4-layer (D-034).
+"""50 ohm grounded coplanar waveguide (GCPW) for the RF path on JLC04161H-7628.
 
 Model: conformal mapping for coplanar waveguide with a lower ground plane (Wadell, Transmission
 Line Design Handbook, 1991, s3.4; Simons, Coplanar Waveguide Circuits, 2001, s2.4), with the
@@ -9,9 +9,6 @@ part of the field grows with t / gap. Solder mask is ignored (it lowers Z0 by ab
 
 Self-check: ST's MLPF-WB55-01E3 output line (DS12804 Fig. 13: 450 um strip, 106.4 um gaps, on
 the Fig. 14 stack-up of 1507 um FR-4 and 48 um copper) must come out near 50 ohm.
-
-Portable choice: with the gap fixed at the RF class clearance (0.15 mm), the width is the one on a 0.01 mm grid that
-minimises the worst |Z0 - 50| over both fabs' stack-ups (Seeed publishes a Dk range, so all of it is covered).
 
 Run: python3 scripts/gcpw.py  -> table on stdout and simulation/results/gcpw.json
 """
@@ -30,13 +27,6 @@ JLC04161H_7628 = {
     "h_mm": 0.2104, "t_mm": 0.035, "er": 4.4,
     "source": "JLCPCB stack-up JLC04161H-7628: 7628 prepreg 0.2104 mm, Dk 4.4; 1 oz outer copper (D-008)",
 }
-SEEED_4L = {
-    "name": "Seeed Fusion standard 4-layer, L1 over L2",
-    "h_mm": 0.200, "t_mm": 0.035, "er_range": (4.2, 4.45, 4.7),
-    "source": "Seeed KB 'What is the stack up of 4/6/8 layers boards?': prepreg 0.2 mm, fixed; Fusion PCB "
-              "specification: FR-4 Dk 4.2-4.7, outer copper 0.035 mm (1 oz)",
-}
-GAP_MM = 0.15
 ST_MLPF_REFERENCE = {
     "name": "DS12804 Fig. 14 reference (2-layer)",
     "h_mm": 1.507, "t_mm": 0.048, "er": 4.4,
@@ -98,33 +88,22 @@ def main():
         rows.append({"gap_mm": gap, "width_mm": w, "e_eff": e_eff, "lambda_g_mm": lam})
         print(f"{gap:7.3f} {w:9.3f} {e_eff:6.2f} {lam:11.1f}")
     results["table"] = rows
-    fabs = [(JLC04161H_7628["name"], JLC04161H_7628["h_mm"], JLC04161H_7628["er"])]
-    fabs += [(f"{SEEED_4L['name']}, Dk {er}", SEEED_4L["h_mm"], er) for er in SEEED_4L["er_range"]]
-
-    def spread(width):
-        return [gcpw(width, GAP_MM, h, JLC04161H_7628["t_mm"], er)[0] for _, h, er in fabs]
-    widths = [round(0.20 + 0.01 * i, 2) for i in range(16)]
-    best = min(widths, key=lambda w: max(abs(z - 50.0) for z in spread(w)))
-    chosen = {"gap_mm": GAP_MM, "width_mm": best, "per_fab": {n: z for (n, _, _), z in zip(fabs, spread(best))},
-              "jlc_only_width_mm": round(width_for(50.0, GAP_MM, JLC04161H_7628), 2)}
-    print(f"\nportable width (gap {GAP_MM} mm), Z0 in ohm per case: " + "; ".join(n for n, _, _ in fabs))
-    for w in (chosen["jlc_only_width_mm"], best):
-        print(f"  {w:.2f} mm: " + ", ".join(f"{z:.1f}" for z in spread(w)))
-    z_chosen, e_chosen = gcpw(best, GAP_MM, JLC04161H_7628["h_mm"], JLC04161H_7628["t_mm"], JLC04161H_7628["er"])
-    z_lo = min(gcpw(best + 0.03, GAP_MM - 0.03, h * 0.9, JLC04161H_7628["t_mm"], er * 1.05)[0] for _, h, er in fabs)
-    z_hi = max(gcpw(best - 0.03, GAP_MM + 0.03, h * 1.1, JLC04161H_7628["t_mm"], er * 0.95)[0] for _, h, er in fabs)
+    chosen = {"gap_mm": 0.15, "width_mm": round(width_for(50.0, 0.15, JLC04161H_7628), 2)}
+    z_chosen, e_chosen = gcpw(chosen["width_mm"], chosen["gap_mm"], JLC04161H_7628["h_mm"],
+                              JLC04161H_7628["t_mm"], JLC04161H_7628["er"])
+    z_lo, _ = gcpw(chosen["width_mm"] + 0.03, chosen["gap_mm"] - 0.03, JLC04161H_7628["h_mm"] * 0.9,
+                   JLC04161H_7628["t_mm"], JLC04161H_7628["er"] * 1.05)
+    z_hi, _ = gcpw(chosen["width_mm"] - 0.03, chosen["gap_mm"] + 0.03, JLC04161H_7628["h_mm"] * 1.1,
+                   JLC04161H_7628["t_mm"], JLC04161H_7628["er"] * 0.95)
     chosen.update({"z0": z_chosen, "e_eff": e_chosen,
-                   "corners": "both fabs, plus width +/-0.03 mm, gap -/+0.03 mm, h -/+10 %, er +/-5 % "
-                              "(ASSUMPTION fab tolerances)",
-                   "z0_low_corner": z_lo, "z0_high_corner": z_hi, "seeed_stack": SEEED_4L,
+                   "corners": "width +/-0.03 mm, gap -/+0.03 mm, h -/+10 %, er +/-5 % (ASSUMPTION fab tolerances)",
+                   "z0_low_corner": z_lo, "z0_high_corner": z_hi,
                    "microstrip_limit_width_mm": microstrip_w(50.0, JLC04161H_7628)})
     results["chosen"] = chosen
     gamma = max(abs(z - 50.0) / (z + 50.0) for z in (z_lo, z_hi))
     chosen["worst_return_loss_db"] = -20.0 * math.log10(gamma)
-    worst = max(abs(z - 50.0) for z in chosen["per_fab"].values())
-    print(f"\nchosen: width {best} mm, gap {GAP_MM} mm -> {z_chosen:.1f} ohm on JLC, worst {worst:.1f} ohm off 50 "
-          f"across both fabs; tolerance corners {z_lo:.1f}-{z_hi:.1f} ohm (return loss >= "
-          f"{chosen['worst_return_loss_db']:.0f} dB)")
+    print(f"\nchosen: width {chosen['width_mm']} mm, gap {chosen['gap_mm']} mm -> {z_chosen:.1f} ohm; "
+          f"tolerance corners {z_lo:.1f}-{z_hi:.1f} ohm (return loss >= {chosen['worst_return_loss_db']:.0f} dB)")
     print(f"microstrip limit (Hammerstad) for the same stack-up: {chosen['microstrip_limit_width_mm']:.3f} mm")
 
     out = ROOT / "simulation" / "results" / "gcpw.json"
