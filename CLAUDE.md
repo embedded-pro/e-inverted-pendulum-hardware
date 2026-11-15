@@ -93,6 +93,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   with their encoder chains and supply (D-042, D-044); `imu_memory` = the IMU on the centre line, the flash and the
   EEPROM left of the MCU (D-043). The tables hold the owner's positions from KiCad (D-047): after moving parts, update
   them so `--replace` changes nothing; parts parked off the board are not in them.
+- `python3 scripts/pcb/mcu_escape.py --fanout | --decoupling`: a 0.2 mm stub and a 0.15 / 0.25 mm via from every MCU pin
+  another part uses, staggered in two rows, clear of the crystals and the RF nets; then the MCU decoupling caps at ST's
+  lands, the Nucleo's spots or the nearest free spot to their pin, top side (D-048). One shot each; no-op when done.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

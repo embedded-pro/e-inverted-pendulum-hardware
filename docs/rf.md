@@ -197,3 +197,6 @@ as copied (D-037). Its routing is the owner's.
 8. **Owner's GND via at (−19.3, 105.2)** is 0.18 mm hole-to-copper from RF_50; JLCPCB's floor is 0.20 mm (DRC error).
 9. The MCU decoupling C302–C307, C309, C317, C318 and R301 are parked off the board (owner, D-047): place them back at
    their pins (table above) before routing.
+10. **U301's exposed pad has no ground vias** since the owner removed ST's ground field (D-047): ST had 50 there. Put
+    vias back (rf-layout §5: as many as the rules allow); the fan-out vias (D-048) stop 0.30 mm past the pad tips and
+    leave the pad free.

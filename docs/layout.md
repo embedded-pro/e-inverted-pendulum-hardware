@@ -66,8 +66,14 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
 
   Its position on the outline (the tab) is part of the copy. Still yours:
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
-  - route the MCU's other pins out of the corner;
+  - route the MCU's signals on from the fan-out vias (below);
+  - put ground vias back in U301's exposed pad: ST's 50 were removed with the ground field (D-047), and the pad is the
+    MCU's ground and heat path (rf-layout §5: as many vias as the rules allow);
   - pour the board-wide ground.
+- **MCU fan-out (D-048, `scripts/pcb/mcu_escape.py --fanout`): done.** Each of the 38 U301 pins another part uses
+  has a 0.2 mm stub on F.Cu to a 0.15 / 0.25 mm via, 0.30 or 0.75 mm past the pad (0.40 mm for pins 6 and 16),
+  alternating rows. Route on from the vias on any layer; the via size is in the project's via list. Power, ground and
+  the copy's own nets (crystals, RF1, SMPS) have no fan-out: they stay with their parts on top.
 - **IMU, flash and EEPROM (D-043, D-047, `scripts/pcb/place_block.py imu_memory`): placed by the owner.**
   - U701 (MPU-6500) on the centre line at (0, 78), rotation 0: its position and axes are published
     (`docs/firmware-interface.md`). C701 / C702 / C703 at VDD / VDDIO / REGOUT, R701 (nCS pull-up) above it.
