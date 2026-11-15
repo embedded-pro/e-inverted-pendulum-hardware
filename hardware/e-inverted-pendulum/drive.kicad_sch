@@ -2567,7 +2567,7 @@
 		)
 		(uuid "0a68d3ba-956d-57ef-adb1-fa71accc1075")
 	)
-	(text "Bridge B: right MG310 (MOT_R_P / MOT_R_N)"
+	(text "Bridge B: left MG310 (MOT_L_P / MOT_L_N)"
 		(exclude_from_sim no)
 		(at 207.01 138.43 0)
 		(effects
@@ -2579,7 +2579,7 @@
 		)
 		(uuid "15ef3fed-9039-510a-8b75-bbf7b9ee99e4")
 	)
-	(text "Bridge A: left MG310 (MOT_L_P / MOT_L_N)"
+	(text "Bridge A: right MG310 (MOT_R_P / MOT_R_N)"
 		(exclude_from_sim no)
 		(at 207.01 24.13 0)
 		(effects
@@ -5226,7 +5226,7 @@
 			)
 		)
 	)
-	(global_label "MOT_L_N"
+	(global_label "MOT_R_N"
 		(shape bidirectional)
 		(at 342.9 59.69 0)
 		(fields_autoplaced yes)
@@ -5249,7 +5249,7 @@
 			)
 		)
 	)
-	(global_label "MOT_R_N"
+	(global_label "MOT_L_N"
 		(shape bidirectional)
 		(at 342.9 173.99 0)
 		(fields_autoplaced yes)
@@ -5341,7 +5341,7 @@
 			)
 		)
 	)
-	(global_label "MOT_L_P"
+	(global_label "MOT_R_P"
 		(shape bidirectional)
 		(at 130.81 104.14 0)
 		(fields_autoplaced yes)
@@ -5364,7 +5364,7 @@
 			)
 		)
 	)
-	(global_label "MOT_R_N"
+	(global_label "MOT_L_N"
 		(shape bidirectional)
 		(at 130.81 134.62 0)
 		(fields_autoplaced yes)
@@ -5525,7 +5525,7 @@
 			)
 		)
 	)
-	(global_label "MOT_L_N"
+	(global_label "MOT_R_N"
 		(shape bidirectional)
 		(at 130.81 111.76 0)
 		(fields_autoplaced yes)
@@ -5640,7 +5640,7 @@
 			)
 		)
 	)
-	(global_label "MOT_L_P"
+	(global_label "MOT_R_P"
 		(shape bidirectional)
 		(at 274.32 59.69 0)
 		(fields_autoplaced yes)
@@ -5916,7 +5916,7 @@
 			)
 		)
 	)
-	(global_label "MOT_R_P"
+	(global_label "MOT_L_P"
 		(shape bidirectional)
 		(at 130.81 127 0)
 		(fields_autoplaced yes)
@@ -6008,7 +6008,7 @@
 			)
 		)
 	)
-	(global_label "MOT_R_P"
+	(global_label "MOT_L_P"
 		(shape bidirectional)
 		(at 274.32 173.99 0)
 		(fields_autoplaced yes)

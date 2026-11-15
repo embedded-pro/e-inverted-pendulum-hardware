@@ -25,7 +25,7 @@ Verification methods:
 
 | ID | Requirement | Source | Verify |
 |---|---|---|---|
-| HW-DRV-001 | One DRV8711 shall drive two brushed DC motors, bridge A = left and bridge B = right, through its xIN inputs with the indexer bypassed. | REQ-DRIVE-002, `motion-actuation.md` Part A | R |
+| HW-DRV-001 | One DRV8711 shall drive two brushed DC motors, bridge B = left and bridge A = right (D-042), through its xIN inputs with the indexer bypassed. | REQ-DRIVE-002, `motion-actuation.md` Part A | R |
 | HW-DRV-002 | The four bridge inputs AIN1/AIN2/BIN1/BIN2 shall connect to PA8/PA9/PA10/PA11 (TIM1 CH1–CH4). | `MotorDriverStm.cpp:19-28` | R (`check_pinmap.py`) |
 | HW-DRV-003 | DRV8711 nFAULT shall connect to both PA6 (TIM1_BKIN) and PC4 (EXTI4), so a fault tri-states all four inputs in hardware. | REQ-DRIVE-004, REQ-SAFE-006, `MotorDriverStm.hpp:34-35` | R, B |
 | HW-DRV-004 | The DRV8711 shall be configurable and readable over SPI1 (PB3/PB4/PB5, CS PA4 active-high). SLEEPn = PB8, RESET = PB9. | REQ-DRIVE-001, REQ-SYS-003 | R, B |

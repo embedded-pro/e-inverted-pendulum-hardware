@@ -4028,7 +4028,7 @@
 		)
 		(uuid "8799f739-1e9c-596c-b5d5-97c914adcb4f")
 	)
-	(text "DRV_AIN1\nDRV_AIN2\nDRV_BIN1\nDRV_BIN2\nDRV_NFAULT\nDRV_NFAULT\nSPI1_SCK\nSPI1_MISO\nSPI1_MOSI\nDRV_SCS\nDRV_NSLEEP\nDRV_RESET\nIMU_SCK\nIMU_MISO\nIMU_MOSI\nIMU_NCS\nIMU_INT\nENC_L_A\nENC_L_B"
+	(text "DRV_BIN1\nDRV_BIN2\nDRV_AIN1\nDRV_AIN2\nDRV_NFAULT\nDRV_NFAULT\nSPI1_SCK\nSPI1_MISO\nSPI1_MOSI\nDRV_SCS\nDRV_NSLEEP\nDRV_RESET\nIMU_SCK\nIMU_MISO\nIMU_MOSI\nIMU_NCS\nIMU_INT\nENC_L_A\nENC_L_B"
 		(exclude_from_sim no)
 		(at 326.39 158.75 0)
 		(effects
@@ -6554,7 +6554,7 @@
 			)
 		)
 	)
-	(global_label "DRV_BIN1"
+	(global_label "DRV_AIN1"
 		(shape bidirectional)
 		(at 246.38 124.46 0)
 		(fields_autoplaced yes)
@@ -6876,7 +6876,7 @@
 			)
 		)
 	)
-	(global_label "DRV_BIN2"
+	(global_label "DRV_AIN2"
 		(shape bidirectional)
 		(at 246.38 127 0)
 		(fields_autoplaced yes)
@@ -6899,7 +6899,7 @@
 			)
 		)
 	)
-	(global_label "DRV_AIN2"
+	(global_label "DRV_BIN2"
 		(shape bidirectional)
 		(at 246.38 121.92 0)
 		(fields_autoplaced yes)
@@ -7083,7 +7083,7 @@
 			)
 		)
 	)
-	(global_label "DRV_AIN1"
+	(global_label "DRV_BIN1"
 		(shape bidirectional)
 		(at 246.38 119.38 0)
 		(fields_autoplaced yes)

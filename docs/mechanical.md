@@ -45,7 +45,7 @@ Front view (component side):
    │                                                    │ z ~76
    │       (battery behind this band: SMD parts only)   │ ◄ STDC14 at the middle of the right edge
    │                                                    │ z ~40
-   │► motor L (PH6)       DRV8711 + bridges     motor R ◄│
+   │◄J601 (L)   bridge B   DRV8711   bridge A   J602 (R)►│ PH6 plugs enter from the side edges (D-042)
    ├──────────────────────────────────────────────────┤ z 12.5
    │ ○M3  ∘M2     bracket strip: no parts        ∘M2  ○M3│ (axle z 0)
    └──────────────────────────────────────────────────┘ z −12.5
@@ -129,3 +129,6 @@ Result (S0, `simulation/results/sizing_summary.json`):
    so the cradle should have a lip that takes the impact.
 4. Bumpers (HW-MEC-004): MH1 top-left and MH2 on the right edge below the NFC coil (coil bottom z 76.5). Use nylon
    hardware, and keep metal at least ST's 4.4 mm pour gap from the coil (`docs/nfc.md`).
+5. Motor plugs (D-042): J601 / J602 face sits 0.55 mm inside the side edge (**ASSUMPTION**: the footprint's silk keeps
+   JLCPCB's clearance to the edge). Check the PH plug, its latch and the cable bend against the bracket legs (x ±51,
+   behind the board) and the wheels on the assembled robot.

@@ -18,7 +18,7 @@ DRV_NETS = {
     "17": "SPI1_MISO", "10": "DRV_AIN1", "11": "DRV_AIN2", "12": "DRV_BIN1", "13": "DRV_BIN2",
     "18": "DRV_NFAULT", "19": "DRV_NSTALL", "20": "DRV_BEMF", "6": "DRV_V5", "7": "DRV_VINT",
     "3": "DRV_VCP", "1": "DRV_CP1", "2": "DRV_CP2",
-    "37": "MOT_L_P", "30": "MOT_L_N", "28": "MOT_R_P", "21": "MOT_R_N",
+    "37": "MOT_R_P", "30": "MOT_R_N", "28": "MOT_L_P", "21": "MOT_L_N",
     "36": "A1HS", "35": "A1LS", "31": "A2HS", "32": "A2LS",
     "27": "B1HS", "26": "B1LS", "22": "B2HS", "23": "B2LS",
     "34": "DRV_AISENP", "33": "DRV_AISENN", "25": "DRV_BISENP", "24": "DRV_BISENN",
@@ -72,7 +72,7 @@ def sense(sh, bridge, x, y, r_sense, nt_p, nt_n, c_f):
 def bridge_box(sh, bridge, motor, y0, refs):
     """One H-bridge: two half-bridges (the second mirrored, as TI's), bulk + HF caps on the drains, Rsense and TI's
     Kelvin net ties."""
-    side = "L" if bridge == "A" else "R"
+    side = "L" if motor == "left" else "R"
     sh.box(205.74, y0, 405.13, y0 + 109.22, f"Bridge {bridge}: {motor} MG310 (MOT_{side}_P / MOT_{side}_N)")
     y = y0 + 30.48
     drain1, source1 = half_bridge(sh, f"{bridge}1", f"MOT_{side}_P", 243.84, y, *refs["h1"])
@@ -144,9 +144,9 @@ def build(project, values):
         "PWMMODE 1: TIM1 drives AIN1/AIN2/BIN1/BIN2 directly (indexer bypassed).  Firmware: IDRIVE 00,",
         "TBLANK >= 1.2 us, SCLK <= 4 MHz, SCS active high.  Trip 2.0 A: ISGAIN 20, TORQUE 186 (D-027, S0)."])
 
-    bridge_box(sh, "A", "left", 20.32, {"h1": ("Q501", "D501"), "h2": ("Q502", "D502"), "bulk": "C502", "hf": "C503",
+    bridge_box(sh, "A", "right", 20.32, {"h1": ("Q501", "D501"), "h2": ("Q502", "D502"), "bulk": "C502", "hf": "C503",
                                         "sense": ("R509", "NT501", "NT503", "C501")})
-    bridge_box(sh, "B", "right", 134.62, {"h1": ("Q503", "D503"), "h2": ("Q504", "D504"), "bulk": "C505", "hf": "C506",
+    bridge_box(sh, "B", "left", 134.62, {"h1": ("Q503", "D503"), "h2": ("Q504", "D504"), "bulk": "C505", "hf": "C506",
                                           "sense": ("R512", "NT502", "NT504", "C504")})
 
     sh.box(15.24, 223.52, 200.66, 264.16, "Test points: motor current, phases, PWM, SPI")

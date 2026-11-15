@@ -85,6 +85,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
   `scripts/pcb/boost_drv8711.json` and the `BOOST_*` footprints (D-040). `python3 scripts/pcb/drv_block.py --apply`: paste it.
+- `python3 scripts/pcb/motor_io.py --apply`: place J601 / J602 at the side edges with their encoder chains and the encoder
+  supply, from `placement.motor_io()` (one shot, connectors locked; D-042).
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

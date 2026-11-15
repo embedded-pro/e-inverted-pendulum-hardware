@@ -39,8 +39,8 @@ LAYERS = {"Top Layer": "F.Cu", "Bottom Layer": "B.Cu"}
 BOTTOM_Z = placement.STRIP_TOP_Z + 1.0
 BULK = "C507"
 EXTRAS = [  # (ref, how its target is found: ("pads", ref, net) = centroid of those pads, ("pin", ref, number))
-    ("D501", ("pads", "Q501", "MOT_L_P")), ("D502", ("pads", "Q502", "MOT_L_N")),
-    ("D503", ("pads", "Q503", "MOT_R_P")), ("D504", ("pads", "Q504", "MOT_R_N")),
+    ("D501", ("pads", "Q501", "MOT_R_P")), ("D502", ("pads", "Q502", "MOT_R_N")),
+    ("D503", ("pads", "Q503", "MOT_L_P")), ("D504", ("pads", "Q504", "MOT_L_N")),
     ("C503", ("pads", "Q501", "VBAT")), ("C502", ("pads", "Q502", "VBAT")),
     ("C506", ("pads", "Q503", "VBAT")), ("C505", ("pads", "Q504", "VBAT")),
     ("C501", ("pins", "U501", ("34", "33"))), ("C504", ("pins", "U501", ("25", "24"))),

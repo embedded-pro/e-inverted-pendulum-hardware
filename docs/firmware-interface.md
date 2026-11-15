@@ -13,7 +13,7 @@ apply these settings. Every existing pin is unchanged (`docs/pinmap.md`).
 | IMU | MPU-6500: accept WHO_AM_I 0x70; set I2C_IF_DIS right after start-up; SPI ≤ 1 MHz for config, ≤ 20 MHz for sensor reads; INT active-high push-pull pulse | PS-MPU-6500A-01 s6.1, Table 5 |
 | IMU axes | Board mounted vertically: publish the body-frame axis map once the layout fixes the IMU orientation (REQ-IMU-007) | HW-SNS-002 |
 | SPI1 | Shared by the DRV8711 (CS PA4, active-high, mode 0, ≤ 4 MHz) and the W25Q16 (CS PA15, active-low, mode 0, ≤ 133 MHz); per-device prescaler | SLVSC40 p.8; W25Q16JV s6.1 |
-| DRV8711 | PWMMODE = 1; **ISGAIN 20, TORQUE 186 (I_trip 2.0 A with 50 mΩ)**; IDRIVEP = IDRIVEN = 00; TBLANK ≥ 1.2 µs; DTIME 850 ns as today; 0.5 A continuous motor rating enforced by an I²t model | S0 (D-027), S2 (D-022); SLVSC40 p.7, p.11 |
+| DRV8711 | **Bridge B drives the left motor and bridge A the right (D-042).** TIM1 CH1/CH2 (PA8/PA9, `leftInput1/2`) reach BIN1/BIN2 and TIM1 CH3/CH4 (PA10/PA11, `rightInput1/2`) reach AIN1/AIN2, so the pins and timer channels are as the firmware has them; the STATUS register's B bits (BOCP, BPDF) are the left motor's and the A bits the right's. PWMMODE = 1; **ISGAIN 20, TORQUE 186 (I_trip 2.0 A with 50 mΩ)**; IDRIVEP = IDRIVEN = 00; TBLANK ≥ 1.2 µs; DTIME 850 ns as today; 0.5 A continuous motor rating enforced by an I²t model | S0 (D-027), S2 (D-022); SLVSC40 p.7, p.11 |
 | Flash | JEDEC ID EFh 4015h; wait 5 ms after power-up before writes | W25Q16JV s9.1, s10.3 |
 | Battery | VBAT = ADC(PC1) / 0.2126, sampled at ≤ 100 Hz; per-board calibration stored in flash (needed for ±50 mV/cell); arm only above 9.9 V; undervoltage fault and disarm below ~9.5 V under load (hardware cut-off at 8.47 V) | `docs/design-calcs.md`; S3, S5 |
 | Power switch | Switching off takes ~100 ms (soft gate); stop the motors before the switch is turned off | S1 (D-021) |
@@ -25,3 +25,8 @@ apply these settings. Every existing pin is unchanged (`docs/pinmap.md`).
 | IMU position | IMU about 90 mm above the axle, beside the MCU: subtract the tangential acceleration r·θ̈ from the accelerometer (θ̈ from the gyro) or keep the complementary-filter crossover low; publish the axis map once the layout fixes the orientation | D-029; `docs/mechanical.md` |
 | I2C3 devices | Qwiic expansion plus **M24C64 EEPROM at 0x50** (E2..E0 = 0, WC low: writes enabled; 32-byte pages, 5 ms write cycle) and **M24SR64-Y NFC tag at 0x56** (device select 1010110x); keep external Qwiic devices off these addresses | D-031, D-039; M24C64 DocID16891, M24SR64-Y DocID023790 Rev 20 Table 80 |
 | NFC tag | **M24SR64-Y, NFC Forum Type 4 (ISO 14443-A)**: the host talks to it over I2C with the Type 4 command set (session open, select NDEF / system / CC file, read / update binary), not as a plain memory. **GPO on PA2 (EXTI2)**, open drain with a 20k pull-up, configured in the system file (session open on delivery). **RF disable on PA3** (output; high = RF off, 30k pull-down keeps RF on while the MCU is in reset) | D-039; DocID023790 Rev 20 s2.6, s2.7 |
+
+## Open items
+
+1. Firmware repo: `documentation/design/motion-actuation.md` Part A says "the left motor hangs on the first bridge".
+   Since D-042 the left motor is on bridge B (pins and timer channels unchanged); update that sentence there.

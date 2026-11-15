@@ -23,7 +23,7 @@ placed fewest options first, each at its cheapest clean spot around the part's c
 centre; horizontal before vertical, above before below and beside); a label left without a spot may move labels placed
 in this run out of the way (up to REPAIR_BLOCKERS at a time, REPAIR_DEPTH deep), and where two parts can only share
 one spot the larger part keeps it. A label with no clean spot within SEARCH_MM goes to the fab layer (assembly
-drawing) and is listed.
+drawing), sized to fit inside its part (Label.to_fab), and is listed.
 """
 
 import argparse
@@ -52,6 +52,7 @@ REPAIR_SPOTS = 200
 REPAIR_BLOCKERS = 2
 REPAIR_DEPTH = 3
 ERROR = mm(0.005)
+FAB_TEXT_MIN = mm(0.3)
 CELL = mm(2.0)
 
 
@@ -321,6 +322,24 @@ class Label:
         found.sort(key=lambda c: (c[0], c[1], c[2]))
         return found
 
+    def to_fab(self):
+        """No clean spot on the silkscreen: the label goes to the fab layer (assembly drawing), inside the part's own
+        outline, along its long side and small enough to fit, so the dense corners' references don't pile up. A footprint
+        that already draws ${REFERENCE} on the fab layer keeps that and hides this field."""
+        self.style(0.0)
+        field = self.field
+        field.SetLayer(self.fab)
+        own = any(g.GetClass() == "PCB_TEXT" and g.GetText() == "${REFERENCE}" and g.GetLayer() == self.fab
+                  and g.IsVisible() for g in self.fp.GraphicalItems())
+        field.SetVisible(not own)
+        l, t, r, b = self.body
+        across, along = sorted((r - l, b - t))
+        size = max(FAB_TEXT_MIN, min(TEXT_SIZE, across // 2, int(along / (0.9 * len(field.GetText()) + 0.5))))
+        field.SetTextSize(pcbnew.VECTOR2I(size, size))
+        field.SetTextThickness(max(mm(0.05), size // 7))
+        field.SetTextAngleDegrees(0.0 if r - l >= b - t else 90.0)
+        field.SetPosition(pcbnew.VECTOR2I((l + r) // 2, (t + b) // 2))
+
     def put(self, angle, box):
         ink = self.ink_by_angle[angle]
         self.style(angle)
@@ -427,9 +446,7 @@ def layout(board, check):
                 label.put(angle, box)
             moved.append((label, cost))
         elif not check:
-            label.style(0.0)
-            label.field.SetLayer(label.fab)
-            label.field.SetPosition(label.fp.GetPosition())
+            label.to_fab()
     return kept, moved, failed
 
 

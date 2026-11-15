@@ -42,5 +42,8 @@ None to existing pins. New signals for the firmware's board target:
 - **No SWO:** PB3 is SPI1_SCK.
 - **No USB:** PA11 is TIM1_CH4 (D-009).
 - **SWD only:** PA15 (JTDI) is FLASH_CS, so firmware must not enable JTAG.
+- **Bridge inputs (D-042):** PA8/PA9 (`leftInput1/2`, TIM1 CH1/CH2) drive bridge B, which feeds the left motor;
+  PA10/PA11 (`rightInput1/2`, CH3/CH4) drive bridge A, the right motor. Pins and channels are unchanged for the firmware;
+  only the nets (`DRV_BIN1/2`, `DRV_AIN1/2`) and the DRV8711 bridge behind them changed.
 - **Reset-safe bridge:** PA8–PA11 and PB8 get pull-downs so the bridge stays tri-stated and the
   driver asleep while the MCU is in reset (HW-DRV-005).

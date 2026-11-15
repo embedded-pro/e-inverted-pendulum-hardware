@@ -28,7 +28,7 @@ anything on the board.
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
 | Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
-| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 19 references with no room in the MB1355 core and beside TI's FETs are on F.Fab | D-035, D-041, `scripts/pcb/silk.py` |
+| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 19 references with no room in the MB1355 core and beside TI's FETs are on F.Fab, sized to fit inside their part | D-035, D-041, `scripts/pcb/silk.py` |
 | Page | A3, so the staging area fits on the sheet | — |
 
 ## What DRC enforces (rule areas and project rules)
@@ -68,12 +68,23 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
 - **Motor drive (`docs/drive.md`):** done by the copy. The group "BOOST-DRV8711 drive" holds TI's power stage (U501,
   Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks, vias and pours, turned 180°
-  (FETs nearest the strip, bridge A on the right), centred on x 0 from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Move it only as a
+  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), centred on x 0 from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Move it only as a
   group. Still yours: the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (`docs/power-map.md`, power-pcb-layout §3):**
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
-- **Encoders:** ESD (U601/U603) at each PH 6-pin connector, then the RC, then the buffer (U602/U604).
-  Motor pins 1 and 6 bracket the encoder pins, so keep the motor traces away from the encoder lines.
+- **Motor connectors and encoder inputs (D-042, `scripts/pcb/motor_io.py`): placed.**
+  - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 15.5 to 25.5, just
+    above the bracket strip; both locked. J601's pin 1 (M−) is at the top, J602's at the bottom.
+  - Inward from each connector, in signal order: the ESD (U601 / U603) beside pins 2–5, the four RC rows (pull-up DNP,
+    100 Ω, 100 Ω, pull-up DNP) at x ±28.8, the 1 nF caps at x ±25.9, then the SN74LVC3G17 (U602 / U604) with its
+    bypass and test pads above the rows at z 30.6. The right side mirrors the left.
+  - The encoder supply (R601 / R602, F601, C601 / C602, TP605 / TP606) sits above the left chain, z 39–43.
+  - Still yours, routing:
+    - Both motor pins leave at the bottom of the connector, toward the phase pours that end at z 13.5 on the same side.
+      The top motor pin's trace runs down under the housing, outboard of the pads, so no motor copper passes the
+      encoder rows.
+    - Connector → ESD with no via and no stub, a GND via at the ESD's GND pins (interface-layout §2).
+    - ENC_VCC across to J602; the buffered outputs to PC0 / PC2 (left) and PA0 / PA1 (right).
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`.
 - **Holes for you to place (staged under "Mechanical"):** battery cradle MC1–MC4 and bumpers MH1/MH2. Footprints
   `MountingHole_M3_NPTH_KeepOut7mm` and `..._M2_..._KeepOut5.5mm` are in the project library for more.

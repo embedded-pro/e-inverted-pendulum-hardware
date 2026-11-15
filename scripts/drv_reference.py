@@ -52,7 +52,7 @@ PARTS = {"U1": "U501", "Q1": "Q501", "Q2": "Q502", "Q3": "Q503", "Q4": "Q504", "
 BULK = "C1"
 NET_MAP = {
     "VM": "VBAT", "GND": "GND", "GND_A": "SENSE_A", "GND_B": "SENSE_B",
-    "AOUT1": "MOT_L_P", "AOUT2": "MOT_L_N", "BOUT1": "MOT_R_P", "BOUT2": "MOT_R_N",
+    "AOUT1": "MOT_R_P", "AOUT2": "MOT_R_N", "BOUT1": "MOT_L_P", "BOUT2": "MOT_L_N",
     "A1HS": "A1HS", "A1LS": "A1LS", "A2HS": "A2HS", "A2LS": "A2LS",
     "B1HS": "B1HS", "B1LS": "B1LS", "B2HS": "B2HS", "B2LS": "B2LS",
     "CP1": "DRV_CP1", "CP2": "DRV_CP2", "VCP": "DRV_VCP", "V5": "DRV_V5", "VINT": "DRV_VINT", "BEMF": "DRV_BEMF",

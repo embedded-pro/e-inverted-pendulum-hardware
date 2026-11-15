@@ -8,8 +8,8 @@ Since D-040 the **motor-driver power stage is a copy of TI's BOOST-DRV8711 Boost
 - TI's copper.
 
 The owner's reason, as for the RF (D-037) and NFC (D-039) corners: follow the manufacturer's proven board. TI's board
-is a stepper driver, but its hardware is two full H-bridges; we drive them in PWM mode (PWMMODE 1, D-002), bridge A
-for the left motor and B for the right.
+is a stepper driver, but its hardware is two full H-bridges; we drive them in PWM mode (PWMMODE 1, D-002), bridge B
+for the left motor and A for the right (D-042: each bridge feeds the connector on its own side).
 
 ## Provenance and licence
 
@@ -75,7 +75,8 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
 - **Position:** TI's stage is turned 180° about its centre (owner, 2026-11-15; `placement.DRIVE_TURN`).
   - Its box (TI's parts and pours) is centred on x 0, from z 13.5 (1 mm above the bracket strip) to z 50.5.
   - The FETs are nearest the strip, in a row at z 25.0; the DRV8711 is above them, at (−4.0, 40.0).
-  - Bridge A (left motor) is on the right, B on the left: their outputs cross to J601 / J602. The bulk C507 is
+  - Bridge A is on the right and drives the right motor (J602); bridge B is on the left and drives the left motor
+    (J601). The phase pours end at z 13.5 on their own side, so the outputs don't cross (D-042). The bulk C507 is
     bottom-right, at (13.8, 18.9).
   - The DRV8711's 12 PowerPAD thermal vias (0.33 mm, plated, no lead) now sit inside `BATTERY_BACK`. The battery rule
     was scoped to plated holes over 0.4 mm, so they count as vias (already allowed there); real leads are still caught.

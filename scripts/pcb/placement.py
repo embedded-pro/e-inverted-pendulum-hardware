@@ -134,3 +134,47 @@ DRAWINGS = [
     ("rect", (NFC_COIL_BOX[0], NFC_COIL_BOX[1]), (NFC_COIL_BOX[2], NFC_COIL_BOX[3]), "MB1163 NFC COIL ANT14 (D-039)"),
     ("rect", (-_HALF, GROUND_EDGE_Z), (_TAB_RIGHT, TOP_Z), "MB1355 ANTENNA TAB (D-037)"),
 ]
+
+# Motor connectors and encoder inputs at the side edges (owner, D-042), placed once by scripts/pcb/motor_io.py.
+# (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. J601's plug faces the left edge (its courtyard
+# ends at the edge and 0.5 mm above the bracket strip), pin 1 (M-) at the top, pins 2-5 (VCC, A, B, GND) between the
+# motor pins. The encoder chain follows the signal inward: U601 (ESD, pass-through pads 1 / 2 on A / B, interface-layout
+# s2), four rows (A pull-up DNP, A 100 Ohm, B 100 Ohm, B pull-up DNP) with a label lane beside each, then the 1 nF caps;
+# the SN74LVC3G17, its bypass and its test pads sit above the rows (z 30), where the drive stage leaves room, with the
+# encoder supply above them on the left.
+# The right side mirrors the left across x = 0, each part turned 180 degrees: J602's pin 1 is at the bottom, so there A
+# sits below B and the row parts map by row (MOTOR_IO_RIGHT_REFS).
+MOTOR_IO_LEFT = [
+    ("J601", -35.7, 20.5, 270.0),
+    ("U601", -32.75, 20.5, 0.0),
+    ("C603", -32.75, 15.4, 90.0),
+    ("R603", -28.8, 24.2, 0.0),
+    ("R604", -28.8, 20.9, 0.0),
+    ("R606", -28.8, 17.6, 0.0),
+    ("R605", -28.8, 14.3, 0.0),
+    ("C604", -25.9, 22.6, 90.0),
+    ("C605", -25.9, 15.9, 90.0),
+    ("U602", -25.0, 30.6, 0.0),
+    ("C606", -21.3, 30.6, 90.0),
+    ("TP601", -30.5, 30.6, 0.0),
+    ("TP602", -30.5, 34.4, 0.0),
+]
+MOTOR_IO_RIGHT_REFS = {"J601": "J602", "U601": "U603", "C603": "C607", "U602": "U604", "C606": "C610",
+                       "R603": "R609", "R604": "R610", "R606": "R608", "R605": "R607", "C604": "C609", "C605": "C608",
+                       "TP601": "TP603", "TP602": "TP604"}
+# Encoder supply (one, above the left chain): +5V -> R601 (or R602, DNP, from +3V3) -> F601 PTC -> C601 / C602 -> ENC_VCC.
+MOTOR_IO_SUPPLY = [
+    ("R601", -38.0, 39.0, 0.0),
+    ("R602", -38.0, 42.4, 0.0),
+    ("F601", -33.2, 40.7, 0.0),
+    ("C601", -29.2, 40.7, 90.0),
+    ("C602", -26.0, 40.7, 90.0),
+    ("TP605", -21.5, 39.0, 0.0),
+    ("TP606", -21.5, 43.2, 0.0),
+]
+
+
+def motor_io():
+    """Every motor I/O part as (ref, x, z, rotation): the left chain, its mirror on the right, the supply."""
+    right = [(MOTOR_IO_RIGHT_REFS[ref], -x, z, (rot + 180.0) % 360.0) for ref, x, z, rot in MOTOR_IO_LEFT]
+    return MOTOR_IO_LEFT + right + MOTOR_IO_SUPPLY
