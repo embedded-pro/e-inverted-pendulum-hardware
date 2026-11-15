@@ -133,3 +133,6 @@ Result (S0, `simulation/results/sizing_summary.json`):
 5. Motor plugs (D-042): J601 / J602 face sits 0.55 mm inside the side edge (**ASSUMPTION**: the footprint's silk keeps
    JLCPCB's clearance to the edge). Check the PH plug, its latch and the cable bend against the bracket legs (x ±51,
    behind the board) and the wheels on the assembled robot.
+6. **Battery cradle relief (D-044):** J601 / J602's upper four pins (x ±35.7, z 39.5–45.5) sit over the battery's side
+   edges. Their through-hole tails stick out on the back (**ASSUMPTION**: about 1.5 mm; measure the S6B-PH-K), so the
+   cradle needs a relief at x ±34.3…±37.1, z 38.4–46.6 (pads plus 0.5 mm).

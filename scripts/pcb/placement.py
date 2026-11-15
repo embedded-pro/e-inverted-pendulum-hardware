@@ -135,10 +135,10 @@ DRAWINGS = [
     ("rect", (-_HALF, GROUND_EDGE_Z), (_TAB_RIGHT, TOP_Z), "MB1355 ANTENNA TAB (D-037)"),
 ]
 
-# Motor connectors and encoder inputs at the side edges (owner, D-042), placed once by
+# Motor connectors and encoder inputs at the side edges (owner, D-042), raised 20 mm (owner, D-044), placed once by
 # scripts/pcb/place_block.py motor_io.
 # (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. J601's plug faces the left edge (its courtyard
-# ends at the edge and 0.5 mm above the bracket strip), pin 1 (M-) at the top, pins 2-5 (VCC, A, B, GND) between the
+# ends at the edge; pins z 35.5-45.5, the upper four over the battery cradle's relief, BATTERY_RELIEF), pin 1 (M-) at the top, pins 2-5 (VCC, A, B, GND) between the
 # motor pins. The encoder chain follows the signal inward: U601 (ESD, pass-through pads 1 / 2 on A / B, interface-layout
 # s2), four rows (A pull-up DNP, A 100 Ohm, B 100 Ohm, B pull-up DNP) with a label lane beside each, then the 1 nF caps;
 # the SN74LVC3G17, its bypass and its test pads sit above the rows (z 30), where the drive stage leaves room, with the
@@ -146,32 +146,34 @@ DRAWINGS = [
 # The right side mirrors the left across x = 0, each part turned 180 degrees: J602's pin 1 is at the bottom, so there A
 # sits below B and the row parts map by row (MOTOR_IO_RIGHT_REFS).
 MOTOR_IO_LEFT = [
-    ("J601", -35.7, 20.5, 270.0),
-    ("U601", -32.75, 20.5, 0.0),
-    ("C603", -32.75, 15.4, 90.0),
-    ("R603", -28.8, 24.2, 0.0),
-    ("R604", -28.8, 20.9, 0.0),
-    ("R606", -28.8, 17.6, 0.0),
-    ("R605", -28.8, 14.3, 0.0),
-    ("C604", -25.9, 22.6, 90.0),
-    ("C605", -25.9, 15.9, 90.0),
-    ("U602", -25.0, 30.6, 0.0),
-    ("C606", -21.3, 30.6, 90.0),
-    ("TP601", -30.5, 30.6, 0.0),
-    ("TP602", -30.5, 34.4, 0.0),
+    ("J601", -35.7, 40.5, 270.0),
+    ("U601", -32.75, 40.5, 0.0),
+    ("C603", -32.75, 35.4, 90.0),
+    ("R603", -28.8, 44.2, 0.0),
+    ("R604", -28.8, 40.9, 0.0),
+    ("R606", -28.8, 37.6, 0.0),
+    ("R605", -28.8, 34.3, 0.0),
+    ("C604", -25.9, 42.6, 90.0),
+    ("C605", -25.9, 35.9, 90.0),
+    ("U602", -25.0, 50.6, 0.0),
+    ("C606", -21.3, 50.6, 90.0),
+    ("TP601", -30.5, 50.6, 0.0),
+    ("TP602", -30.5, 54.4, 0.0),
 ]
+# Through-hole parts whose pins may sit over the battery: the cradle has a relief for them (owner, D-044).
+BATTERY_RELIEF = {"J601", "J602"}
 MOTOR_IO_RIGHT_REFS = {"J601": "J602", "U601": "U603", "C603": "C607", "U602": "U604", "C606": "C610",
                        "R603": "R609", "R604": "R610", "R606": "R608", "R605": "R607", "C604": "C609", "C605": "C608",
                        "TP601": "TP603", "TP602": "TP604"}
 # Encoder supply (one, above the left chain): +5V -> R601 (or R602, DNP, from +3V3) -> F601 PTC -> C601 / C602 -> ENC_VCC.
 MOTOR_IO_SUPPLY = [
-    ("R601", -38.0, 39.0, 0.0),
-    ("R602", -38.0, 42.4, 0.0),
-    ("F601", -33.2, 40.7, 0.0),
-    ("C601", -29.2, 40.7, 90.0),
-    ("C602", -26.0, 40.7, 90.0),
-    ("TP605", -21.5, 39.0, 0.0),
-    ("TP606", -21.5, 43.2, 0.0),
+    ("R601", -38.0, 59.0, 0.0),
+    ("R602", -38.0, 62.4, 0.0),
+    ("F601", -33.2, 60.7, 0.0),
+    ("C601", -29.2, 60.7, 90.0),
+    ("C602", -26.0, 60.7, 90.0),
+    ("TP605", -21.5, 59.0, 0.0),
+    ("TP606", -21.5, 63.2, 0.0),
 ]
 
 
@@ -180,13 +182,13 @@ def motor_io():
     right = [(MOTOR_IO_RIGHT_REFS[ref], -x, z, (rot + 180.0) % 360.0) for ref, x, z, rot in MOTOR_IO_LEFT]
     return MOTOR_IO_LEFT + right + MOTOR_IO_SUPPLY
 
-# IMU on the centre line, flash below the MCU, EEPROM left of it (owner, D-043), placed once by
+# IMU on the centre line, flash below the MCU, EEPROM stacked under the flash (owner, D-043, D-044), placed once by
 # scripts/pcb/place_block.py imu_memory. (ref, x, z, rotation): mechanical, at the centre of the footprint's pads.
 # U701 (MPU-6500) at rotation 0, pin 1 top-left: chip +X along +x, +Y up, +Z out of the component side
 # (PS-MPU-6500A-01 s9.1); its decoupling at the pins it serves (Table 11: VDDIO pin 8, REGOUT pin 10, VDD pin 13), the
 # nCS pull-up by pin 22, the SPI2 / INT test pads in a column beside it. U702 (W25Q16JV) under the MCU's SPI1 pins, turned so DI / CLK
-# (pins 5 / 6) face R301 and VCC (pin 8, C704) points away from the MCU's caps, its /CS, /WP, /HOLD pull-ups at their pins; R301 (SPI1 SCK source termination) at the MCU's SCK pin. U802 (M24C64) in the
-# free band left of the MCU, SDA / SCL toward it, the I2C3 pull-ups above it.
+# (pins 5 / 6) face R301 and VCC (pin 8, C704) points away from the MCU's caps, its /CS, /WP, /HOLD pull-ups at their pins; R301 (SPI1 SCK source termination) at the MCU's SCK pin. U802 (M24C64) under the
+# flash in the same column (x -20, D-044), SDA / SCL on its right, the I2C3 pull-ups below it.
 IMU_POSITION = (0.0, 78.0)
 IMU_MEMORY = [
     ("U701", IMU_POSITION[0], IMU_POSITION[1], 0.0),
@@ -206,10 +208,10 @@ IMU_MEMORY = [
     ("R704", -26.6, 81.6, 90.0),
     ("TP706", -29.6, 85.4, 0.0),
     ("R301", -19.6, 86.6, 0.0),
-    ("U802", -36.5, 96.0, 0.0),
-    ("C802", -31.6, 97.9, 90.0),
-    ("R808", -38.6, 101.6, 0.0),
-    ("R809", -35.0, 101.6, 0.0),
+    ("U802", -20.0, 70.4, 0.0),
+    ("C802", -15.2, 72.3, 90.0),
+    ("R808", -21.8, 65.8, 0.0),
+    ("R809", -18.2, 65.8, 0.0),
 ]
 
 

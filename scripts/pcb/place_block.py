@@ -10,11 +10,13 @@
 Each block is a list from placement.py of (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. The
 parts move from the staging area to their spots, and the script refuses if any part:
   - leaves the board, or its courtyard reaches into the bracket strip (no parts there, D-026);
-  - puts a through-hole pin over the battery (BATTERY_BACK, D-025);
+  - puts a through-hole pin over the battery (BATTERY_BACK, D-025), except the parts the cradle has a relief for
+    (placement.BATTERY_RELIEF, D-044);
   - touches another part's courtyard, comes closer than rf_block.PART_CLEARANCE to another net's copper, or overlaps
     another silk outline (rf_block.spot_ok).
 It locks the block's anchors and lays the silkscreen labels out (silk.py, D-041). Re-running is a no-op once the
-anchors are on the board. Run board.py first so the parts exist.
+anchors are on the board; --replace moves an already placed block to its table again (after the owner changes it).
+Run board.py first so the parts exist.
 """
 
 import argparse
@@ -49,6 +51,7 @@ def problems(board, fp, outline, others):
     corners = [pcbnew.VECTOR2I(x, y) for x in (box.GetLeft(), box.GetRight()) for y in (box.GetTop(), box.GetBottom())]
     if not all(outline.Contains(c) for c in corners):
         found.append("courtyard leaves the board")
+    relief = fp.GetReference() in placement.BATTERY_RELIEF
     if box.GetBottom() >= B.to_board(0.0, placement.STRIP_TOP_Z).y:
         found.append("courtyard reaches the bracket strip")
     battery = placement.BATTERY
@@ -56,7 +59,7 @@ def problems(board, fp, outline, others):
     y0, y1 = B.to_board(0, battery["z1"] + 1).y, B.to_board(0, battery["z0"] - 1).y
     for pad in fp.Pads():
         p = pad.GetPosition()
-        if pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH and x0 <= p.x <= x1 and y0 <= p.y <= y1:
+        if not relief and pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH and x0 <= p.x <= x1 and y0 <= p.y <= y1:
             found.append(f"through-hole pin {pad.GetNumber()} over the battery")
     if not RF.spot_ok(board, fp, others):
         found.append("touches a courtyard, another net's copper or a silk outline")
@@ -101,10 +104,10 @@ def apply(board, name):
     print(f"placed {len(parts)} parts: {' / '.join(anchors)} locked")
 
 
-def stage(name):
+def stage(name, replace):
     board = pcbnew.LoadBoard(str(B.BOARD))
     anchors = BLOCKS[name][1]
-    if has_placed(board, anchors):
+    if has_placed(board, anchors) and not replace:
         print(f"{' / '.join(anchors)} already on the board: nothing to do")
         sys.exit(3)
     apply(board, name)
@@ -114,15 +117,16 @@ def stage(name):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--apply", choices=sorted(BLOCKS), help="the block to place (one shot)")
+    parser.add_argument("--replace", action="store_true", help="move an already placed block to its table again")
     parser.add_argument("--pcbnew-stage", choices=sorted(BLOCKS), help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.pcbnew_stage:
-        stage(args.pcbnew_stage)
+        stage(args.pcbnew_stage, args.replace)
         return
     if not args.apply:
         parser.error("nothing to do without --apply <block>")
     project = B.PROJECT.read_bytes()
-    result = subprocess.run([sys.executable, __file__, "--pcbnew-stage", args.apply])
+    result = subprocess.run([sys.executable, __file__, "--pcbnew-stage", args.apply] + (["--replace"] if args.replace else []))
     B.PROJECT.write_bytes(project)
     if result.returncode == 3:
         return

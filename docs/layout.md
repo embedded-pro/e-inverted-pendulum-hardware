@@ -66,10 +66,11 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
     INT test pads in a column to its left.
   - U702 (W25Q16JV) below the MCU at (−20, 81.3), turned 180° so DI / CLK face R301 (SPI1 SCK 33 Ω, between the MCU and
     the flash); C704 at VCC, R702 / R703 / R704 at /CS, /WP, /HOLD; TP706 (FLASH_NCS) to the left.
-  - U802 (M24C64) in the band left of the MCU at (−36.5, 96), SDA / SCL toward the MCU, C802 at VCC, the I2C3 pull-ups
-    R808 / R809 above it.
+  - U802 (M24C64) stacked under the flash in the same column (−20, 70.4; D-044), SDA / SCL on its right, C802 at VCC,
+    the I2C3 pull-ups R808 / R809 below it.
   - Still yours, routing: SPI2 from the MCU's left pins (46–50) to the IMU, about 30 mm, under the NFC cluster; I2C3 from
-    the MCU's top pins (28 / 29) around its left side; SPI1 and FLASH_NCS from the bottom pins. Keep them off the RF
+    the MCU's top pins (28 / 29) around its left side and down to the EEPROM, about 50 mm (inside the bus
+    budget's 15 cm, `docs/nfc.md`); SPI1 and FLASH_NCS from the bottom pins. Keep them off the RF
     strip and the L2 cut-out under the RF line.
 - **NFC (`docs/nfc.md`):** done by the copy. The group "MB1163 NFC corner" holds AE801 (ANT14), U803 (M24SR64-Y) and
   ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks, vias and GND pour, turned 90° from ST's
@@ -81,20 +82,23 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   group. Still yours: the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (`docs/power-map.md`, power-pcb-layout §3):**
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
-- **Motor connectors and encoder inputs (D-042, `scripts/pcb/place_block.py motor_io`): placed.**
-  - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 15.5 to 25.5, just
-    above the bracket strip; both locked. J601's pin 1 (M−) is at the top, J602's at the bottom.
+- **Motor connectors and encoder inputs (D-042, D-044, `scripts/pcb/place_block.py motor_io`): placed.**
+  - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 35.5 to 45.5
+    (raised 20 mm, D-044); both locked. The upper four pins of each sit over the battery's edge: the cradle needs a
+    relief there (`docs/mechanical.md`). J601's pin 1 (M−) is at the top, J602's at the bottom.
   - Inward from each connector, in signal order: the ESD (U601 / U603) beside pins 2–5, the four RC rows (pull-up DNP,
     100 Ω, 100 Ω, pull-up DNP) at x ±28.8, the 1 nF caps at x ±25.9, then the SN74LVC3G17 (U602 / U604) with its
-    bypass and test pads above the rows at z 30.6. The right side mirrors the left.
-  - The encoder supply (R601 / R602, F601, C601 / C602, TP605 / TP606) sits above the left chain, z 39–43.
+    bypass and test pads above the rows at z 50.6. The right side mirrors the left.
+  - The encoder supply (R601 / R602, F601, C601 / C602, TP605 / TP606) sits above the left chain, z 59–63.
   - Still yours, routing:
-    - Both motor pins leave at the bottom of the connector, toward the phase pours that end at z 13.5 on the same side.
+    - Both motor pins leave at the bottom of the connector and run about 22 mm down the side to the phase pours that end
+      at z 13.5 on the same side.
       The top motor pin's trace runs down under the housing, outboard of the pads, so no motor copper passes the
       encoder rows.
     - Connector → ESD with no via and no stub, a GND via at the ESD's GND pins (interface-layout §2).
     - ENC_VCC across to J602; the buffered outputs to PC0 / PC2 (left) and PA0 / PA1 (right).
-- **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`.
+- **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
+  J601 / J602, whose pins sit over the cradle's relief (D-044, project rule).
 - **Holes for you to place (staged under "Mechanical"):** battery cradle MC1–MC4 and bumpers MH1/MH2. Footprints
   `MountingHole_M3_NPTH_KeepOut7mm` and `..._M2_..._KeepOut5.5mm` are in the project library for more.
 

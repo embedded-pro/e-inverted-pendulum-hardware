@@ -86,8 +86,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
   `scripts/pcb/boost_drv8711.json` and the `BOOST_*` footprints (D-040). `python3 scripts/pcb/drv_block.py --apply`: paste it.
 - `python3 scripts/pcb/place_block.py --apply <block>`: place a block of parts at the owner's spots from `placement.py`, once
-  (anchors locked): `motor_io` = J601 / J602 at the side edges with their encoder chains and supply (D-042);
-  `imu_memory` = the IMU on the centre line, the flash below the MCU, the EEPROM left of it (D-043).
+  (anchors locked; `--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
+  with their encoder chains and supply (D-042, raised 20 mm by D-044); `imu_memory` = the IMU on the centre line, the
+  flash below the MCU, the EEPROM stacked under it (D-043, D-044).
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.
