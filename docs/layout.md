@@ -28,7 +28,7 @@ anything on the board.
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
 | Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
-| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 16 references with no room (C302, C308, C312, C314, C317, C401, FL401, L302, L401 around the MCU; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns) are on F.Fab, sized to fit inside their part | D-035, D-041, D-047, D-048, `scripts/pcb/silk.py` |
+| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 22 references with no room (C301, C302, C307, C308, C310, C312, C314, C317, C401, C402, FB301, FL401, L302, L401, R401 around the MCU and the RF strip's stitching; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns) are on F.Fab, sized to fit inside their part | D-035, D-041, D-047, D-048, D-049, `scripts/pcb/silk.py` |
 | Page | A3, so the staging area fits on the sheet | — |
 
 ## What DRC enforces (rule areas and project rules)
@@ -68,8 +68,8 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   Its position on the outline (the tab) is part of the copy. Still yours:
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
   - route the MCU's signals on from the fan-out vias (below);
-  - put ground vias back in U301's exposed pad: ST's 50 were removed with the ground field (D-047), and the pad is the
-    MCU's ground and heat path (rf-layout §5: as many vias as the rules allow);
+  - pour the RF strip's ground over the 1.2 mm stitching grid (D-049, `scripts/pcb/gnd_vias.py`); U301's exposed pad
+    has 33 ground vias on a 0.8 mm lattice in its paste gaps;
   - pour the board-wide ground.
 - **MCU fan-out (D-048, `scripts/pcb/mcu_escape.py --fanout`): done.** Each of the 38 U301 pins another part uses
   has a 0.2 mm stub on F.Cu to a 0.15 / 0.25 mm via, 0.30 or 0.75 mm past the pad (0.40 mm for pins 6 and 16),

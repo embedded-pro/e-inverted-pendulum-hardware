@@ -96,6 +96,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/mcu_escape.py --fanout | --decoupling`: a 0.2 mm stub and a 0.15 / 0.25 mm via from every MCU pin
   another part uses, staggered in two rows, clear of the crystals and the RF nets; then the MCU decoupling caps at ST's
   lands, the Nucleo's spots or the nearest free spot to their pin, top side (D-048). One shot each; no-op when done.
+- `python3 scripts/pcb/gnd_vias.py --apply`: GND vias on a regular lattice, 0.15 / 0.25 mm: 33 in U301's exposed pad
+  (0.8 mm, in the paste gaps) and a 1.2 mm stitching grid over ST's RF ground strip, skipping points that don't fit
+  (D-049). One shot; no-op when done.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

@@ -203,11 +203,10 @@ MCU fan-out:
    it the line references L2 and is 33.9 Ω, not 56.9 Ω (`scripts/gcpw.py`, table above). Copy it from b177b8d's rule
    area "MB1355 L2 cut-out (RF line references L3)" (no tracks, no pour on In1.Cu).
 7. **ST's RF-strip ground field (236 GND vias) was removed by the owner (D-047);** the 54 vias beside the RF line stay.
-   Re-create the strip's L1 ground pour with ST's stitching when the pours are made, and the `ANTENNA_TAB` rule area
-   (the next `board.py` run adds it).
+   A regular 1.2 mm stitching grid replaces the field (128 vias, D-049). Re-create the strip's L1 / L3 / L4 ground pours
+   over it when the pours are made, and the `ANTENNA_TAB` rule area (the next `board.py` run adds it).
 8. **Owner's GND via at (−19.3, 105.2)** is 0.18 mm hole-to-copper from RF_50; JLCPCB's floor is 0.20 mm (DRC error).
 9. The MCU decoupling is back on the board (D-048). R301 (SPI1 SCK 33 Ω source termination) is still parked: place it
    at the SPI1_SCK fan-out via, a few mm from pin 63.
-10. **U301's exposed pad has no ground vias** since the owner removed ST's ground field (D-047): ST had 50 there. Put
-    vias back (rf-layout §5: as many as the rules allow); the fan-out vias (D-048) stop 0.30 mm past the pad tips and
-    leave the pad free.
+10. U301's exposed pad has its ground vias back: 33 on a 0.8 mm lattice in the paste gaps (D-049), where ST had 50
+    irregular ones before the owner removed the field (D-047).
