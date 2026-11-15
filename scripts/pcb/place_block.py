@@ -14,8 +14,8 @@ parts move from the staging area to their spots, and the script refuses if any p
     (placement.BATTERY_RELIEF, D-044);
   - touches another part's courtyard, comes closer than rf_block.PART_CLEARANCE to another net's copper, or overlaps
     another silk outline (rf_block.spot_ok).
-It locks the block's anchors and lays the silkscreen labels out (silk.py, D-041). Re-running is a no-op once the
-anchors are on the board; --replace moves an already placed block to its table again (after the owner changes it).
+It lays the silkscreen labels out (silk.py, D-041) and locks nothing: locking is the owner's (D-045). Re-running is a
+no-op once the block's anchors are on the board; --replace moves an already placed block to its table again (after the owner changes it).
 Run board.py first so the parts exist.
 """
 
@@ -95,13 +95,11 @@ def apply(board, name):
         failed += [f"{ref}: {why}" for why in problems(board, fp, outline, others)]
     if failed:
         sys.exit(f"{name} not placed:\n  " + "\n  ".join(failed))
-    for ref in anchors:
-        footprints[ref].SetLocked(True)
     silk.report(*silk.layout(board, check=False), check=False)
     for ref in anchors:
         fp = footprints[ref]
         print(f"{ref} at mechanical {RF.board_to_mech(fp.GetPosition())}, rotation {fp.GetOrientationDegrees():.0f}")
-    print(f"placed {len(parts)} parts: {' / '.join(anchors)} locked")
+    print(f"placed {len(parts)} parts")
 
 
 def stage(name, replace):

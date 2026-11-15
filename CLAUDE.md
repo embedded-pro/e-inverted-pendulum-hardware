@@ -80,13 +80,14 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   moving parts in KiCad. Clean labels never move.
 - `python3 scripts/rf_reference.py`: ST's MB1355 files (`reference/mb1355/`, gitignored, OPLA) -> `scripts/pcb/mb1355_rf.json`
   and the `MB1355_*` footprints (D-037).
-- `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a locked group; no-op once present).
+- `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a group; no-op once present).
+  The scripts lock nothing: locking is the owner's, in KiCad (D-045).
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
   `scripts/pcb/boost_drv8711.json` and the `BOOST_*` footprints (D-040). `python3 scripts/pcb/drv_block.py --apply`: paste it.
 - `python3 scripts/pcb/place_block.py --apply <block>`: place a block of parts at the owner's spots from `placement.py`, once
-  (anchors locked; `--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
+  (`--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
   with their encoder chains and supply (D-042, raised 20 mm by D-044); `imu_memory` = the IMU on the centre line, the
   flash below the MCU, the EEPROM stacked under it (D-043, D-044).
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.

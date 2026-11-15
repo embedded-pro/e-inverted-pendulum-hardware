@@ -11,7 +11,7 @@ One shot, on the owner's request: `python3 scripts/pcb/nfc_block.py --apply`. It
   - copies ST's cluster tracks and vias, and ST's GND pour cut to the cluster (its thermal-relief settings are an
     ASSUMPTION: ST's Gerbers don't carry them);
   - nudges any via whose hole is closer than JLCPCB's 0.20 mm to other-net copper (rf_block.nudge_vias);
-  - groups and locks it all as "MB1163 NFC corner": move or rotate the group as one unit;
+  - groups it all as "MB1163 NFC corner" (unlocked: locking is the owner's, D-045): move or rotate the group as one unit;
   - lays the silkscreen labels out (silk.py, D-041).
 Re-running is a no-op once the group exists; --replace removes the group's copper and pastes it again (the group is
 generated, not hand-edited). Run board.py first so the parts and nets exist.
@@ -151,9 +151,6 @@ def apply(board):
         if polygons:
             group.AddItem(add_pour(board, layer, polygons, gnd))
 
-    for item in group.GetItems():
-        item.SetLocked(True)
-    group.SetLocked(True)
     for fp in placed:
         B.label_fields(fp)
     silk.report(*silk.layout(board, check=False), check=False)

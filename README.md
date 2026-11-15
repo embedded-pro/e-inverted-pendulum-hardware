@@ -166,7 +166,7 @@ Then bring the board in line (new parts land in the staging area; nothing on the
 python3 scripts/pcb/board.py --rules <path to pcb_rules.py from the pcb-design-rules skill>
 ```
 
-The RF corner is a copy of ST's NUCLEO-WB55 (MB1355 rev D-01, D-037). It is pasted once, as a locked group, and a second
+The RF corner is a copy of ST's NUCLEO-WB55 (MB1355 rev D-01, D-037). It is pasted once, as a group, and a second
 run does nothing (`docs/rf.md`):
 
 ```bash

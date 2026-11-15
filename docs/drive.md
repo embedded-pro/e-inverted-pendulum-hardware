@@ -30,7 +30,7 @@ for the left motor and A for the right (D-042: each bridge feeds the connector o
     - It selects the power stage.
     - It copies the stage's tracks, vias and pours inside its box, pruning the legs to TI's headers.
     - It checks every pad's net, and TI's mirrored Q2 / Q4 wiring.
-  - `scripts/pcb/drv_block.py --apply` pastes it once, as the locked group "BOOST-DRV8711 drive".
+  - `scripts/pcb/drv_block.py --apply` pastes it once, as the group "BOOST-DRV8711 drive".
 
 ## The circuit (BOOST-DRV8711 schematic and BOM, SLVSC40H)
 

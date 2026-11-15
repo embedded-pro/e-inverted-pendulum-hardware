@@ -4,7 +4,7 @@ Status: **hand-off (2026-11-13, D-032).** The owner places the components in KiC
 slate:
 - **on the board:** the outline, the keep-out rule areas, the reference drawings and the WHEELTEC bracket holes;
 - **the MB1355 RF corner (2026-11-15, D-037):** the MCU, RF path, antenna, SMPS, crystals and their copper, pasted at the
-  top-left corner as one locked group, "MB1355 RF corner" (`scripts/pcb/rf_block.py`, `docs/rf.md`);
+  top-left corner as one group, "MB1355 RF corner" (`scripts/pcb/rf_block.py`, `docs/rf.md`);
 - **staging area right of the board:** every other part, grouped by schematic sheet (`docs/images/overview.png`).
 
 From now on the `.kicad_pcb` is the source of truth for placement. `scripts/pcb/board.py` never moves, reshapes or deletes
@@ -61,7 +61,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   - route the MCU's other pins out of the corner;
   - pour the board-wide ground.
 - **IMU, flash and EEPROM (D-043, `scripts/pcb/place_block.py imu_memory`): placed.**
-  - U701 (MPU-6500) on the centre line at (0, 78), rotation 0, locked: its position and axes are published
+  - U701 (MPU-6500) on the centre line at (0, 78), rotation 0: its position and axes are published
     (`docs/firmware-interface.md`). C701 / C702 / C703 at VDD / VDDIO / REGOUT, R701 (nCS pull-up) above it, the SPI2 /
     INT test pads in a column to its left.
   - U702 (W25Q16JV) below the MCU at (−20, 81.3), turned 180° so DI / CLK face R301 (SPI1 SCK 33 Ω, between the MCU and
@@ -84,7 +84,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
 - **Motor connectors and encoder inputs (D-042, D-044, `scripts/pcb/place_block.py motor_io`): placed.**
   - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 35.5 to 45.5
-    (raised 20 mm, D-044); both locked. The upper four pins of each sit over the battery's edge: the cradle needs a
+    (raised 20 mm, D-044). The upper four pins of each sit over the battery's edge: the cradle needs a
     relief there (`docs/mechanical.md`). J601's pin 1 (M−) is at the top, J602's at the bottom.
   - Inward from each connector, in signal order: the ESD (U601 / U603) beside pins 2–5, the four RC rows (pull-up DNP,
     100 Ω, 100 Ω, pull-up DNP) at x ±28.8, the 1 nF caps at x ±25.9, then the SN74LVC3G17 (U602 / U604) with its
@@ -105,6 +105,8 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 ## After placing
 
 1. Save in KiCad, then lock the parts you consider fixed (they become the anchors for routing; power-pcb-layout §1).
+   The scripts lock nothing (D-045). The three copies are KiCad groups: a click selects the whole group; double-click it
+   (or right-click → Enter Group) to select one part, track or via inside.
 2. Re-sync and check. This keeps every position:
 
    ```bash

@@ -98,7 +98,7 @@ underside". This board is assembled on top only, so `scripts/pcb/rf_block.py` pu
 | C317 | 100 nF | NRST 8 | C3, bottom | top, 4.05 mm |
 
 The crystals need nothing added: Y301 (HSE) has no external caps (HSETUNE), and Y302 with C315 / C316 sits on ST's lands
-as copied (D-037). The decoupling is inside the locked group; its routing is the owner's.
+as copied (D-037). The decoupling is inside the group; its routing is the owner's.
 
 ## Stack-up and the RF line
 
@@ -149,7 +149,7 @@ as copied (D-037). The decoupling is inside the locked group; its routing is the
   - the L1 / L2 / L3 / L4 ground of the RF strip;
   - the L2 cut-out and ST's four pad keep-outs.
 
-  It is locked: move or rotate it as one unit. `board.py` never moves it, and `rf_block.py` does nothing once it exists.
+  It is a group, unlocked (D-045): move or rotate it as one unit. `board.py` never moves it, and `rf_block.py` does nothing once it exists.
 - **Project DRC rules** (`scripts/pcb/board.py`), each applying inside the group only:
   - clearance ≥ 0.10 mm (ST's own rule; JLCPCB's floor is 0.09);
   - ST's arcs and corner angles are exempt from the 45° rule;

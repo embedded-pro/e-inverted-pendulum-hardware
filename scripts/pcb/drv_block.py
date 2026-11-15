@@ -13,7 +13,8 @@ One shot, on the owner's request: `python3 scripts/pcb/drv_block.py --apply`. It
   - places our extras (owner, D-040) at the nearest free top-side spot to their pin: the SS34 clamps at the phase
     nodes, the per-bridge 10 uF / 100 nF at the high-side drains, the 1 nF sense caps (not fitted) at the ISEN pins
     and the logic pulls at their DRV8711 pins;
-  - groups and locks it all as "BOOST-DRV8711 drive", then lays the silkscreen labels out (silk.py, D-041).
+  - groups it all as "BOOST-DRV8711 drive" (unlocked: locking is the owner's, D-045), then lays the silkscreen labels
+    out (silk.py, D-041).
 Re-running is a no-op once the group exists; --replace removes the group's copper and pastes it again. Run board.py
 first so the parts and nets exist.
 """
@@ -262,9 +263,6 @@ def apply(board):
         group.AddItem(fp)
         placed.append(fp)
 
-    for item in group.GetItems():
-        item.SetLocked(True)
-    group.SetLocked(True)
     for fp in placed:
         B.label_fields(fp)
     silk.report(*silk.layout(board, check=False), check=False)

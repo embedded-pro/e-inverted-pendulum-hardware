@@ -13,7 +13,7 @@ One shot, on the owner's request: `python3 scripts/pcb/rf_block.py --apply`. It 
   - puts the VDDRF decoupling on top (owner decision; ST has it on the bottom): C308 100 pF next to pin 33 after
     removing three of ST's GND vias, C307 100 nF at the nearest free spot (DEVIATIONS below; routed by the owner);
   - nudges the few ST vias whose hole is closer than JLCPCB's 0.20 mm to other-net copper, by the least amount;
-  - groups and locks it all as "MB1355 RF corner": move or rotate the group as one unit;
+  - groups it all as "MB1355 RF corner" (unlocked: locking is the owner's, D-045): move or rotate the group as one unit;
   - lays the silkscreen labels out (silk.py, D-041).
   - places the rest of the MCU decoupling (DS11929 Rev 11 Fig. 16 values) on top: at the Nucleo's spot where the Nucleo
     has that cap on top (C303 / C304 / C305 / C306 at C18 / C28 / C31 / C17), else at the nearest free spot to its pin
@@ -383,9 +383,6 @@ def apply(board):
         zone = add_zone(board, board.GetLayerID(rule["layers"][0]), [rule["polygon"]], rule=rule)
         group.AddItem(zone)
 
-    for item in group.GetItems():
-        item.SetLocked(True)
-    group.SetLocked(True)
     for fp in placed + [mcu]:
         B.label_fields(fp)
     silk.report(*silk.layout(board, check=False), check=False)
