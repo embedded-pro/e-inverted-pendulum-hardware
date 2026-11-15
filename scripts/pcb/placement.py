@@ -13,6 +13,7 @@ board.py creates these items only when they are missing from the board. Componen
 """
 
 import json
+import math
 import pathlib
 
 WIDTH = 85.0
@@ -64,13 +65,29 @@ NFC_EDGE = 2.0  # ASSUMPTION: ANT14's copper to the top and right board edges (S
 _COIL = MB1163["coil"]["bbox"]
 
 
+NFC_TURN = 90.0  # degrees counter-clockwise from ST's board: D-039's 180, then the owner's 90 clockwise (2026-11-15)
+NFC_DROP = 8.0  # mm the NFC group sits below the corner, so the tag clears the RF corner (owner, 2026-11-15)
+DRIVE_TURN = 180.0  # degrees counter-clockwise from TI's board, about the stage's centre (owner, 2026-11-15)
+
+
+def _turn(a, b, degrees):
+    c, s = round(math.cos(math.radians(degrees))), round(math.sin(math.radians(degrees)))
+    return a * c - b * s, a * s + b * c
+
+
+_COIL_CENTRE = ((_COIL[0] + _COIL[2]) / 2, (_COIL[1] + _COIL[3]) / 2)
+_COIL_HALF = tuple(abs(v) for v in _turn((_COIL[2] - _COIL[0]) / 2, (_COIL[3] - _COIL[1]) / 2, NFC_TURN))
+
+
 def from_mb1163(x, y):
-    """MB1163 Gerber coordinates (mm, y up) to ours: turned 180 degrees, so the coil is at the top-right corner and
-    the tag cluster below it, ST's coil-side corner NFC_EDGE in from our top and right edges."""
-    return (round(_HALF - NFC_EDGE - (x - _COIL[0]), 4), round(TOP_Z - NFC_EDGE - (y - _COIL[1]), 4))
+    """MB1163 Gerber coordinates (mm, y up) to ours: turned NFC_TURN about the coil's centre, the coil's copper NFC_EDGE
+    in from our top and right edges (the coil stays in the top-right corner whatever the turn)."""
+    a, b = _turn(x - _COIL_CENTRE[0], y - _COIL_CENTRE[1], NFC_TURN)
+    return (round(_HALF - NFC_EDGE - _COIL_HALF[0] + a, 4), round(TOP_Z - NFC_EDGE - NFC_DROP - _COIL_HALF[1] + b, 4))
 
 
-NFC_COIL_BOX = (from_mb1163(_COIL[2], 0)[0], from_mb1163(0, _COIL[3])[1], _HALF - NFC_EDGE, TOP_Z - NFC_EDGE)
+NFC_COIL_BOX = (_HALF - NFC_EDGE - 2 * _COIL_HALF[0], TOP_Z - NFC_EDGE - NFC_DROP - 2 * _COIL_HALF[1], _HALF - NFC_EDGE,
+                TOP_Z - NFC_EDGE - NFC_DROP)
 NFC_POUR_GAP = MB1163["coil_to_pour_mm"]
 NFC_STEP_X = round(NFC_COIL_BOX[0] - NFC_POUR_GAP, 4)
 
@@ -82,8 +99,8 @@ RULE_AREAS = [
      "polygon": [(NFC_COIL_BOX[0] - 0.5, NFC_COIL_BOX[1] - 0.5), (_HALF + 1.0, NFC_COIL_BOX[1] - 0.5),
                  (_HALF + 1.0, TOP_Z + 1.0), (NFC_COIL_BOX[0] - 0.5, TOP_Z + 1.0)]},
     {"name": "NFC_POUR_GAP", "layers": ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], "deny": {"vias", "pour"},
-     "polygon": [(NFC_STEP_X - 1.0, NFC_COIL_BOX[1] - NFC_POUR_GAP), (_HALF + 1.0, NFC_COIL_BOX[1] - NFC_POUR_GAP),
-                 (_HALF + 1.0, TOP_Z + 1.0), (NFC_STEP_X - 1.0, TOP_Z + 1.0)]},
+     "polygon": [(NFC_STEP_X, NFC_COIL_BOX[1] - NFC_POUR_GAP), (_HALF + 1.0, NFC_COIL_BOX[1] - NFC_POUR_GAP),
+                 (_HALF + 1.0, TOP_Z + 1.0), (NFC_STEP_X, TOP_Z + 1.0)]},
     {"name": "BRACKET_STRIP", "layers": ["F.Cu", "B.Cu"], "deny": set(),
      "polygon": [(-_HALF, BOTTOM_Z), (_HALF, BOTTOM_Z), (_HALF, STRIP_TOP_Z), (-_HALF, STRIP_TOP_Z)]},
     {"name": "BRACKET_BASE_CONTACT", "layers": ["B.Cu"], "deny": {"tracks", "vias", "pour"},

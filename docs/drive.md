@@ -61,7 +61,7 @@ distances):
 |---|---|---|
 | D501–D504 SS34 | phase-node clamps, anode GND (S2: the dead-time body-diode swing passes the −0.6 V phase-pin absolute maximum, SLVSC40H §6.1) | 5.4–7.0 mm from the FET's phase pads |
 | C502 / C503, C505 / C506 | 10 µF + 100 nF per bridge at the high-side drains | 2.0–6.4 mm |
-| C501 / C504 | 1 nF across xISENP / xISENN, not fitted | 2.9–3.6 mm from the ISEN pins |
+| C501 / C504 | 1 nF across xISENP / xISENN, not fitted | 2.8–2.9 mm from the ISEN pins |
 | R515–R518 | nFAULT / nSTALL / SDATO pull-ups, nSLEEP pull-down | 1.5–4.8 mm from their pins |
 
 **Dropped** (owner, D-040): the 8 gate and 4 sense series 0 Ω resistors. They would have cut TI's traces; the
@@ -72,10 +72,13 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
 
 ## Layout
 
-- **Position:** TI's stage is translated, not turned.
+- **Position:** TI's stage is turned 180° about its centre (owner, 2026-11-15; `placement.DRIVE_TURN`).
   - Its box (TI's parts and pours) is centred on x 0, from z 13.5 (1 mm above the bracket strip) to z 50.5.
-  - The DRV8711 is nearest the strip, at (4.0, 24.0); the FETs are above it in a row at z 39.0.
-  - Bridge A is on the left, B on the right. The bulk C507 is top-left, at (−13.8, 45.1).
+  - The FETs are nearest the strip, in a row at z 25.0; the DRV8711 is above them, at (−4.0, 40.0).
+  - Bridge A (left motor) is on the right, B on the left: their outputs cross to J601 / J602. The bulk C507 is
+    bottom-right, at (13.8, 18.9).
+  - The DRV8711's 12 PowerPAD thermal vias (0.33 mm, plated, no lead) now sit inside `BATTERY_BACK`. The battery rule
+    was scoped to plated holes over 0.4 mm, so they count as vias (already allowed there); real leads are still caught.
 - **Copper:** TI's 2-layer copper goes on our F.Cu and B.Cu: 173 tracks, 144 vias and 12 pours (VM, phase, GND_A / B,
   GND).
   - L2 stays solid GND under it, never cut: closer to the hot loops than TI's bottom layer.

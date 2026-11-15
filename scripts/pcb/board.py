@@ -131,8 +131,8 @@ CUSTOM_RULES = """
 """
 
 CUSTOM_RULES += """
-(rule "Battery on the back: no through-hole pins under it (D-025)"
-  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.insideArea('BATTERY_BACK')")
+(rule "Battery on the back: no through-hole pins under it (D-025); plated holes <= 0.4 mm (thermal vias) are vias"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.Hole_Size_X > 0.4mm && A.insideArea('BATTERY_BACK')")
   (constraint disallow pad))
 
 (rule "Bracket strip: no parts except the bracket holes (D-026)"

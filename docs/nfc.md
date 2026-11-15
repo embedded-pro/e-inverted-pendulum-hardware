@@ -108,20 +108,24 @@ External Qwiic devices must avoid 0x50 and 0x56.
 
   It is locked, references on F.Fab. Move or rotate it only as one unit.
 - **Position:**
-  - ST's layout is turned 180° (a rotation, no mirror): the coil is in the top-right corner, the tag below it, toward
-    the board centre.
-  - ANT14 copper spans x 9.5 to 40.5 and z 85.5 to 115.5 (mechanical, `docs/mechanical.md`). That is 2 mm in from the top
-    and right edges (**ASSUMPTION**; ST had ≥ 7.6 mm of bare board around it on a board end).
-  - U803 is at (25.4, 74.4).
-- **Outline:** right of x +5.1 the top edge is back at z 117.5. x +5.1 is the coil's left edge minus ST's 4.4 mm
-  coil-to-pour gap. Between the RF tab and x +5.1 the edge stays on MB1355's step at z 110.02 (D-037).
+  - ST's layout is turned 90° counter-clockwise (a rotation, no mirror; owner, 2026-11-15: D-039's 180°, then 90°
+    clockwise). The coil is at the right edge; the tag cluster sits to its left, toward the MCU.
+  - The whole group sits 8 mm below the corner (`placement.NFC_DROP`), so the tag clears the RF corner's copper. In the
+    corner it overlapped the MCU's VDDA / VREF caps and ST's RF ground-strip vias by 0.65 mm.
+  - ANT14 copper spans x 10.5 to 40.5 and z 76.5 to 107.5 (mechanical, `docs/mechanical.md`). That is 2 mm in from the
+    right edge (**ASSUMPTION**; ST had ≥ 7.6 mm of bare board around it on a board end).
+  - U803 is at (−0.6, 91.6); the cluster spans about x −11 to +8, z 82 to 100.
+- **Outline:** right of x +6.1 the top edge is back at z 117.5. x +6.1 is the coil's left edge minus ST's 4.4 mm
+  coil-to-pour gap. Between the RF tab and x +6.1 the edge stays on MB1355's step at z 110.02 (D-037). With the coil
+  8 mm lower, the strip above it (z 107.5 to 117.5) carries no parts, only the keep-outs.
 - **Rule areas** (all four layers, so L2 is open under the coil, the NFC exception to "L2 never cut"):
   - `NFC_COIL`: the coil + 0.5 mm, to the board edges. No tracks, vias or pour; only the coil footprint's own copper.
   - `NFC_POUR_GAP`: the coil + ST's 4.4 mm pour gap (MB1163's pour edge). No pour or vias. ST's own cluster copper sits
     in it, as on MB1163.
 - **Clearances:**
-  - from metal: the battery's top edge (z 75, on the back) is 10.5 mm below the coil;
-  - from the 2.4 GHz antenna (x ≤ −14.0): ≥ 23.5 mm.
+  - from metal: the battery's top edge (z 75, on the back) is **1.5 mm** below the coil. That is under the 5 mm this
+    doc asked for: accepted by the owner with the 90° turn. Expect more downward detuning; C821–C823 are the spares;
+  - from the 2.4 GHz antenna (x ≤ −14.0): ≥ 24.5 mm.
 - **DRC and the routing gate:**
   - ST's GND T-branch on B.Cu (from the VSS via to the C6 / C8 ground vias) stays as copied.
   - A project rule exempts the group from the 45° corner rule.
@@ -145,4 +149,5 @@ External Qwiic devices must avoid 0x50 and 0x56.
 3. Owner: route NFC_GPO (PA2), NFC_RF_DIS (PA3), QWIIC_SDA / SCL and +3V3 into the cluster; join the cluster's GND pour
    to the board-wide ground.
 4. Owner: keep the bumper screws, the battery cradle and any metal out of `NFC_POUR_GAP`.
-5. **ASSUMPTION:** the coil's 2 mm from the board edges. Check the phone read range with the bumper fitted.
+5. **ASSUMPTION:** the coil's 2 mm from the board edge. Check the phone read range with the bumper fitted.
+6. The coil is 1.5 mm above the battery (owner, 2026-11-15). Measure f0 with the battery fitted, not on a bare board.

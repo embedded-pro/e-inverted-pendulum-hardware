@@ -6,8 +6,8 @@ One shot, on the owner's request: `python3 scripts/pcb/nfc_block.py --apply`. It
   - redraws the outline from placement.py (right of NFC_STEP_X the top edge is back at 117.5), retires the old
     NFC_COIL_KEEPOUT rule area and adds NFC_COIL (no tracks, vias or pour in or near the coil) and NFC_POUR_GAP (ST's
     coil-to-pour clearance: no pour or vias);
-  - places AE801 (ANT14) and the tag cluster as ST has them, turned 180 degrees (placement.from_mb1163): the coil in the
-    top-right corner, the cluster below it, toward the board centre. Every pad lands on ST's pad of the same net;
+  - places AE801 (ANT14) and the tag cluster as ST has them, turned by placement.NFC_TURN (placement.from_mb1163): the
+    coil in the top-right corner, the cluster beside it. Every pad lands on ST's pad of the same net;
   - copies ST's cluster tracks and vias, and ST's GND pour cut to the cluster (its thermal-relief settings are an
     ASSUMPTION: ST's Gerbers don't carry them);
   - nudges any via whose hole is closer than JLCPCB's 0.20 mm to other-net copper (rf_block.nudge_vias);
@@ -47,7 +47,7 @@ def place(fp, part, net):
     listed pad must land on ST's pad of the same net."""
     fp.SetPosition(to_ours(*part["at"]))
     wanted = [(to_ours(x, y), net(DATA["net_map"][st_net]).GetNetCode()) for _, x, y, st_net in part["pads"]]
-    for extra in (180.0, 0.0):
+    for extra in (placement.NFC_TURN, placement.NFC_TURN + 180.0):
         fp.SetOrientationDegrees((part["rot"] + extra) % 360.0)
         if all(any((pad.GetPosition() - target).EuclideanNorm() < mm(0.01) and pad.GetNetCode() == code
                    for pad in fp.Pads()) for target, code in wanted):

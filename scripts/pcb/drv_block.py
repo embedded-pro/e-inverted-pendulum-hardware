@@ -4,9 +4,9 @@
 One shot, on the owner's request: `python3 scripts/pcb/drv_block.py --apply`. It reads scripts/pcb/boost_drv8711.json
 (made by scripts/drv_reference.py, derived from Texas Instruments BOOST-DRV8711 design files, SLVC575B) and:
   - places U501, Q501-Q504, R509 / R512, the net ties NT501-NT504 (on B.Cu, as TI has them) and C508-C514 where TI has
-    U1, Q1-Q4, R1 / R2, NT1-NT4 and C2-C8: TI's stage translated, not turned, its box centred on x 0 with its bottom
-    edge 1 mm above the bracket strip (the DRV8711 nearest the strip, the FETs above it, bridge A on the left). Every
-    pad lands on TI's pad of the same net;
+    U1, Q1-Q4, R1 / R2, NT1-NT4 and C2-C8: TI's stage turned by placement.DRIVE_TURN about its centre (180: the FETs
+    nearest the bracket strip, the DRV8711 above them, bridge A on the right), its box centred on x 0 with its bottom
+    edge 1 mm above the bracket strip. Every pad lands on TI's pad of the same net;
   - puts C507 (our SMD 220 uF, D-040) at the centre of TI's through-hole C1, its + pad toward TI's VM pad;
   - copies TI's tracks, vias and pours cut to the stage's box, and nudges any via whose hole is closer than JLCPCB's
     0.20 mm to other-net copper (rf_block.nudge_vias);
@@ -54,7 +54,12 @@ _BOX = DATA["box"]
 
 
 def to_mech(x, y):
-    return (round(x - (_BOX[0] + _BOX[2]) / 2, 4), round(BOTTOM_Z + (_BOX[3] - y), 4))
+    """TI's frame (y down) to ours: turned placement.DRIVE_TURN about the box centre, the box centred on x 0 with its
+    lower edge at BOTTOM_Z."""
+    a, b = x - (_BOX[0] + _BOX[2]) / 2, -(y - (_BOX[1] + _BOX[3]) / 2)
+    a, b = placement._turn(a, b, placement.DRIVE_TURN)
+    half = abs(placement._turn((_BOX[2] - _BOX[0]) / 2, (_BOX[3] - _BOX[1]) / 2, placement.DRIVE_TURN)[1])
+    return (round(a, 4), round(BOTTOM_Z + half + b, 4))
 
 
 def to_ours(x, y):
@@ -203,6 +208,9 @@ def apply(board):
     board.Add(group)
     footprints = {fp.GetReference(): fp for fp in board.GetFootprints()}
 
+    park = B.to_board(placement.WIDTH, -40.0)
+    for ref, _ in EXTRAS:
+        footprints[ref].SetPosition(park)
     placed = []
     for part in DATA["parts"]:
         fp = footprints.get(part["ours"])

@@ -22,7 +22,7 @@ anything on the board.
 
 | Item | Value | Source |
 |---|---|---|
-| Outline | 85 mm wide; 130 mm tall at MB1355's antenna tab (top-left, x −42.5 to −14.0) and right of x +5.1 (MB1163 NFC corner), 122.5 mm between them (top edge z 110.02); 1 mm radii on the other corners | D-024, D-037, D-039 |
+| Outline | 85 mm wide; 130 mm tall at MB1355's antenna tab (top-left, x −42.5 to −14.0) and right of x +6.1 (MB1163 NFC corner), 122.5 mm between them (top edge z 110.02); 1 mm radii on the other corners | D-024, D-037, D-039 |
 | Coordinates | Grid origin on the wheel axle at the centre line (x = 0, z = 0); the bottom edge is z −12.5, the top edge z 117.5 (KiCad Y = 150 − z) | D-026 |
 | Stack-up | JLC04161H-7628: L1 0.035 / 7628 0.2104 / L2 0.0152 / core 1.065 / L3 0.0152 / 7628 0.2104 / L4 0.035 mm | D-008 |
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
@@ -39,8 +39,8 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 |---|---|---|---|
 | `ANTENNA_TAB` | MB1355's tab, x −42.5 to −14.0, z 109.98 → top edge, all layers | no vias or pour; only the antenna feed (RF_ANT) may cross it (project rule) | Ground-free antenna tab (D-037, `docs/rf.md`) |
 | group "MB1355 RF corner" | top-left: MCU, RF, SMPS, crystals | ST's clearance (0.10 mm), arcs/angles and tight placement allowed inside the group (project rules); the L2 cut-out under the RF line | Literal copy of MB1355 (D-037) |
-| `NFC_COIL` | ANT14 + 0.5 mm: x 9.0 → edge, z 85.0 → edge, all layers | no tracks, vias or pour (the coil footprint excepted) | MB1163 copy (D-039, `docs/nfc.md`) |
-| `NFC_POUR_GAP` | ANT14 + ST's 4.4 mm coil-to-pour gap: x 4.1 → edge, z 81.1 → edge, all layers | no vias or pour | ST's pour edge on MB1163; ST's own cluster copper sits in it |
+| `NFC_COIL` | ANT14 + 0.5 mm: x 10.0 → edge, z 76.0 → edge, all layers | no tracks, vias or pour (the coil footprint excepted) | MB1163 copy (D-039, `docs/nfc.md`) |
+| `NFC_POUR_GAP` | ANT14 + ST's 4.4 mm coil-to-pour gap: x 6.1 → edge, z 72.1 → edge, all layers | no vias or pour | ST's pour edge on MB1163; ST's own cluster copper sits in it |
 | `BRACKET_STRIP` | bottom 25 mm, front and back | **no footprints** except the bracket holes MB1–MB8 (project rule) | Chassis attachment (D-026) |
 | `BRACKET_BASE_CONTACT` | bottom 25 mm, B.Cu | no tracks, vias or pour | The steel bracket base sits on the back |
 | `BATTERY_BACK` | x ±38.5, z 39–76, B.Cu | **no through-hole pins** (project rule; NPTH holes allowed) | The battery lies on the back (D-025) |
@@ -62,12 +62,12 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 - **IMU (U701):** next to the MCU's SPI2 pins (PB12–PB15, PC6). If it sits far from the axle, report its position for the
   firmware (`docs/firmware-interface.md`, tangential acceleration).
 - **NFC (`docs/nfc.md`):** done by the copy. The group "MB1163 NFC corner" holds AE801 (ANT14), U803 (M24SR64-Y) and
-  ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks, vias and GND pour, turned 180°: the coil
-  at the top-right corner, the tag below it. Move it only as a group. Still yours: route NFC_GPO (PA2), NFC_RF_DIS (PA3),
+  ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks, vias and GND pour, turned 90° from ST's
+  board and 8 mm below the corner: the coil at the right edge, the tag to its left, beside the MCU. Move it only as a group. Still yours: route NFC_GPO (PA2), NFC_RF_DIS (PA3),
   QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
 - **Motor drive (`docs/drive.md`):** done by the copy. The group "BOOST-DRV8711 drive" holds TI's power stage (U501,
-  Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks, vias and pours, centred on x 0
-  from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Move it only as a
+  Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks, vias and pours, turned 180°
+  (FETs nearest the strip, bridge A on the right), centred on x 0 from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Move it only as a
   group. Still yours: the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (`docs/power-map.md`, power-pcb-layout §3):**
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
