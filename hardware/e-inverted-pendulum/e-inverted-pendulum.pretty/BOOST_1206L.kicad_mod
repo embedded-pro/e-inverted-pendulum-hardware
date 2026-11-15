@@ -1,0 +1,223 @@
+(footprint "BOOST_1206L"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "1206 capacitor land, TI BOOST-DRV8711. Derived from Texas Instruments BOOST-DRV8711 design files (SLVC575B)")
+	(tags "BOOST-DRV8711 DRV8711 TI motor driver")
+	(property "Reference" "REF**"
+		(at 0 -1.775 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "11261aac-203d-45da-9f15-45af21cd5f8f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "BOOST_1206L"
+		(at 0 1.775 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9e43f88f-3d05-465c-a69e-715b26b98483")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "6e45eaa2-3125-431e-aaa2-4b19f83793b7")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e711b079-a5cd-43d9-96ac-880a5f00b4d0")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(sheetname "BOOST-DRV8711")
+	(sheetfile "BOOST-DRV8711.kicad_sch")
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -2 -0.975)
+		(end 2 -0.975)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "0f391dcd-8878-41f8-8642-4c4f2865e6c3")
+	)
+	(fp_line
+		(start -2 0.975)
+		(end -2 -0.975)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "212cd246-042e-46c6-901f-de26a093f657")
+	)
+	(fp_line
+		(start 2 -0.975)
+		(end 2 0.975)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "c091f60e-ed1e-4de5-8f9a-508342b8e5d6")
+	)
+	(fp_line
+		(start 2 0.975)
+		(end -2 0.975)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "ab88162b-3264-4258-986b-1d0a3b19ae27")
+	)
+	(fp_line
+		(start -1.7 -0.9)
+		(end -1.7 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "a7050419-1318-4529-aeb2-c9105944bc1c")
+	)
+	(fp_line
+		(start 1.7 -0.9)
+		(end -1.7 -0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "10b16791-9c9e-40ee-b561-b6a431e060f5")
+	)
+	(fp_line
+		(start 1.7 -0.9)
+		(end 1.7 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "73d55978-02f9-49a8-b0af-80cebf4bdfbf")
+	)
+	(fp_line
+		(start 1.7 0.9)
+		(end -1.7 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "bcdd86c8-a6a1-4251-8e6d-a3f03021b82f")
+	)
+	(fp_line
+		(start -1.7 -0.9)
+		(end -1.7 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "46ecb55f-b116-4b84-8127-37d3fa7431e5")
+	)
+	(fp_line
+		(start -1.2 -0.9)
+		(end -1.2 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "0bf7db46-77ca-4c22-9541-0f3a03da8fc6")
+	)
+	(fp_line
+		(start 1.2 -0.9)
+		(end 1.2 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "86505bf2-3037-47b4-9729-3efb3f8b9329")
+	)
+	(fp_line
+		(start 1.7 -0.9)
+		(end -1.7 -0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "1c1a65e0-a7ac-4b19-9df5-6f4adeadbbdf")
+	)
+	(fp_line
+		(start 1.7 -0.9)
+		(end 1.7 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "50c7deb5-4150-41d6-a9cb-2cb4753e85cb")
+	)
+	(fp_line
+		(start 1.7 0.9)
+		(end -1.7 0.9)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "73604d34-7cb6-44a0-b4de-441d01a5c223")
+	)
+	(pad "1" smd rect
+		(at -1.35 0 90)
+		(size 1.75 1.1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "9092b99b-e7ad-4e08-9c46-f5f4cabd870c")
+	)
+	(pad "2" smd rect
+		(at 1.35 0 90)
+		(size 1.75 1.1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "6dca2b9a-1055-4ff5-8881-507d015f5e60")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_1206_3216Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

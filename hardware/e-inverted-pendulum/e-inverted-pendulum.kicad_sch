@@ -23,7 +23,7 @@
 		)
 		(uuid "01c5a9c5-f688-5ffc-9acf-68d6985935f0")
 	)
-	(text "DRV8711, PWMMODE 1 (indexer bypass)\nFour CSD88537ND half-bridges, SS34 clamps\nRsense 50 mOhm + Kelvin taps, trip 2.0 A\nVM bulk 220 uF, charge pump, pull-ups"
+	(text "Copy of TI BOOST-DRV8711 (D-040), PWMMODE 1\nFour CSD88537ND half-bridges, SS34 clamps\nRsense 50 mOhm 2512 + Kelvin net ties, trip 2.0 A\nVM bulk 220 uF, charge pump, pull-ups"
 		(exclude_from_sim no)
 		(at 33.02 130.81 0)
 		(effects

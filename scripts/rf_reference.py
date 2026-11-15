@@ -71,9 +71,9 @@ def point(v):
     return [round(mm(v.x), 4), round(mm(v.y), 4)]
 
 
-def footprint_name(fp):
+def footprint_name(fp, prefix="MB1355_"):
     name = fp.GetFPIDAsString().split(":")[-1]
-    return "MB1355_" + "".join(c if c.isalnum() or c in "._-" else "_" for c in name)
+    return prefix + "".join(c if c.isalnum() or c in "._-" else "_" for c in name)
 
 
 def polygons(shape):
@@ -106,13 +106,13 @@ def pad_centre(fp):
     return pcbnew.VECTOR2I((x0 + x1) // 2, (y0 + y1) // 2)
 
 
-def tidy(fp, name, description):
+def tidy(fp, name, description, source=SOURCE, keywords="MB1355 NUCLEO-WB55 STM32WB RF"):
     """Courtyard (pads + 0.1 mm, IPC-7351 least: ST packs the RF corner that tightly), reference on silk, value
     hidden, source in the description. ST's own texts, silk and courtyard are stripped from the saved file by
     clean_file() (removing items through pcbnew leaves its SWIG views unusable for the rest of the process)."""
     fp.SetFPID(pcbnew.LIB_ID(LIBRARY, name))
-    fp.SetLibDescription(f"{description}. {SOURCE}")
-    fp.SetKeywords("MB1355 NUCLEO-WB55 STM32WB RF")
+    fp.SetLibDescription(f"{description}. {source}")
+    fp.SetKeywords(keywords)
     x0, y0, x1, y1 = pad_box(fp)
     margin = pcbnew.FromMM(0.1)
     x0, y0, x1, y1 = x0 - margin, y0 - margin, x1 + margin, y1 + margin
@@ -191,9 +191,11 @@ def clean_file(path, keep_courtyard_uuid=None):
     path.write_text(dump(kept) + "\n", encoding="utf-8")
 
 
-def export_footprint(io, fp, description):
-    """Save a copy of an ST footprint, unrotated, on top, with its origin at the centre of its pads."""
-    name = footprint_name(fp)
+def export_footprint(io, fp, description, prefix="MB1355_", source=SOURCE, keywords="MB1355 NUCLEO-WB55 STM32WB RF",
+                     edit=None):
+    """Save a copy of a vendor footprint, unrotated, on top, with its origin at the centre of its pads. `edit(copy)` may
+    adjust the copy (e.g. pad numbers) before it is saved."""
+    name = footprint_name(fp, prefix)
     copy = pcbnew.FOOTPRINT(fp)
     if copy.IsFlipped():
         copy.Flip(copy.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
@@ -202,7 +204,9 @@ def export_footprint(io, fp, description):
     centre = pad_centre(copy)
     copy.MoveAnchorPosition(pcbnew.VECTOR2I(-centre.x, -centre.y))
     copy.SetPosition(pcbnew.VECTOR2I(0, 0))
-    courtyard = tidy(copy, name, description)
+    if edit is not None:
+        edit(copy)
+    courtyard = tidy(copy, name, description, source, keywords)
     io.FootprintSave(str(PRETTY), copy)
     clean_file(PRETTY / f"{name}.kicad_mod", courtyard)
     return name

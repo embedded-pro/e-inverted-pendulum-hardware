@@ -152,7 +152,7 @@ Rules come from `mcu-circuit-design` §2–§12 and `analog-circuit-design`; the
 5. **Motor drive**, per the DRV8711 datasheet (SLVSC40) and the BOOST-DRV8711 reference:
    - VM decoupling;
    - VCP 1 µF to VM; CP1–CP2 100 nF (VM-rated); VINT 1 µF; V5 bypass;
-   - 0 Ω gate-resistor footprints;
+   - TI's BOOST-DRV8711 power stage copied (D-040, `docs/drive.md`), without gate resistors;
    - 4 × CSD88537ND;
    - 2 × 50 mΩ Rsense with Kelvin ISENP/ISENN;
    - nFAULT and nSTALL pull-ups to 3V3;

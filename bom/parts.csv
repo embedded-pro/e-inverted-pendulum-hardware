@@ -7,10 +7,10 @@ mcu,SMPS series inductor 10 nH,LQG15HS10NJ02D,C77103,1,DS11929 Table 6 note 2; o
 mcu,4.7 uF 0402 (SMPS out/VDD/VFBSMPS),CL05A475MP5NRNC,C23733,4,DS11929 Fig. 16
 rf,RF IPD match + filter,MLPF-WB55-01E3,C2651048,1,D-007; QFN-package variant; MB1355 U12 (D-037)
 rf,Antenna match series 3.6 nH,LQG15HS3N6S02D,C19216,1,MB1355 L3 (D-037)
-drive,Motor pre-driver,DRV8711DCPR,C60013,1,stock is thin, reserve before ordering
-drive,Dual N-MOSFET 60 V (one half-bridge),CSD88537ND,C117439,4,4 half-bridges
+drive,Motor pre-driver,DRV8711DCPR,C60013,1,BOOST-DRV8711 U1 (D-040); stock is thin, reserve before ordering
+drive,Dual N-MOSFET 60 V (one half-bridge),CSD88537ND,C117439,4,BOOST-DRV8711 Q1-Q4 (D-040)
 drive,Low-side Schottky clamp 40 V 3 A,SS34,C8678,4,S2: phase node above -0.6 V
-drive,Sense resistor 50 mOhm 1206 1 W 75 ppm,HoLR1206-1W-50mR-1%-75ppm,C601102,2,D-027: I_trip 2.0 A -> 0.2 W
+drive,Sense resistor 50 mOhm 2512 3 W 50 ppm,CRA2512-FZ-R050ELF,C840617,2,BOOST-DRV8711 R1 / R2 (D-040); I_trip 2.0 A -> 0.2 W
 drive,Bulk capacitor 220 uF 35 V,EEEFK1V221P,C178562,1,size confirmed in S1/S2
 sensing,IMU,MPU-6500,C50278,1,D-004
 sensing,Encoder Schmitt buffer x3,SN74LVC3G17DCTR,C18213,2,D-012

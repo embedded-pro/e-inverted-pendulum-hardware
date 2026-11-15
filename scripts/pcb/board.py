@@ -76,9 +76,9 @@ NET_CLASSES = {
     "MOTOR": {"track_width": 0.8, "clearance": 0.2,
               "patterns": ["MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N", "*/SENSE_A", "*/SENSE_B"]},
     "GATE": {"track_width": 0.3, "clearance": 0.15,
-             "patterns": ["*/A?HS_?", "*/A?LS_?", "*/B?HS_?", "*/B?LS_?", "*/PP_G", "*/DRV_CP1", "*/DRV_CP2"]},
+             "patterns": ["*/A?HS", "*/A?LS", "*/B?HS", "*/B?LS", "*/PP_G", "*/DRV_CP1", "*/DRV_CP2"]},
     "SENSE": {"track_width": 0.2, "clearance": 0.15, "diff_pair_width": 0.2, "diff_pair_gap": 0.2,
-              "patterns": ["*/DRV_?ISENP", "*/DRV_?ISENN", "*/KELVIN_?N", "VBAT_SENSE"]},
+              "patterns": ["*/DRV_?ISENP", "*/DRV_?ISENN", "VBAT_SENSE"]},
     "SWITCH": {"track_width": 0.5, "clearance": 0.15,
                "patterns": ["*/BUCK_SW", "*/SMPS_LX", "*/SMPS_MID"]},
     "SUPPLY": {"track_width": 0.5, "clearance": 0.15,
@@ -115,6 +115,14 @@ CUSTOM_RULES = """
 
 (rule "MB1163 NFC corner: ST's routing keeps its corners and its GND branch (D-039)"
   (condition "A.memberOfGroup('MB1163 NFC corner')")
+  (constraint track_angle (min 0)))
+
+(rule "BOOST-DRV8711 drive: TI's own 0.178 mm clearance inside the copied group (above JLCPCB's 0.09 mm, D-040)"
+  (condition "A.memberOfGroup('BOOST-DRV8711 drive') && B.memberOfGroup('BOOST-DRV8711 drive')")
+  (constraint clearance (min 0.178mm)))
+
+(rule "BOOST-DRV8711 drive: TI's routing keeps its corners (D-040)"
+  (condition "A.memberOfGroup('BOOST-DRV8711 drive')")
   (constraint track_angle (min 0)))
 
 (rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
@@ -308,6 +316,11 @@ def ensure_rule_areas(board):
 
 
 def fingerprint(fp):
+    """What a footprint looks like in its own library frame: a footprint on the bottom (e.g. TI's net ties, D-040) is
+    compared as a top-side copy, so its side alone never counts as a library change."""
+    if fp.IsFlipped():
+        fp = pcbnew.FOOTPRINT(fp)
+        fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
     pads = sorted((p.GetNumber(), p.GetSize(pcbnew.F_Cu).x, p.GetSize(pcbnew.F_Cu).y, p.GetDrillSize().x,
                    p.GetDrillSize().y, int(p.GetAttribute()), p.GetLayerSet().Seq().size(),
                    p.GetFPRelativePosition().x, p.GetFPRelativePosition().y) for p in fp.Pads())
@@ -352,8 +365,11 @@ def sync_models(board, fp, lib_id):
 
 def replace_footprint(board, fp, lib_id):
     position, orientation, locked = fp.GetPosition(), fp.GetOrientationDegrees(), fp.IsLocked()
+    flipped = fp.IsFlipped()
     board.Delete(fp)
     fresh = load_footprint(board, lib_id)
+    if flipped:
+        fresh.Flip(fresh.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
     fresh.SetPosition(position)
     fresh.SetOrientationDegrees(orientation)
     fresh.SetLocked(locked)
@@ -364,7 +380,8 @@ def replace_footprint(board, fp, lib_id):
 SILK_TEXT_MIN = (1.0, 0.15)
 RF_CORNER_GROUP = "MB1355 RF corner"
 NFC_CORNER_GROUP = "MB1163 NFC corner"
-COPIED_GROUPS = {RF_CORNER_GROUP, NFC_CORNER_GROUP}
+DRIVE_GROUP = "BOOST-DRV8711 drive"
+COPIED_GROUPS = {RF_CORNER_GROUP, NFC_CORNER_GROUP, DRIVE_GROUP}
 
 
 def label_fields(fp):
@@ -381,7 +398,7 @@ def label_fields(fp):
     group = fp.GetParentGroup()
     if group is not None and group.GetName() in COPIED_GROUPS:
         value.SetVisible(False)
-        reference.SetLayer(pcbnew.F_Fab)
+        reference.SetLayer(pcbnew.B_Fab if fp.IsFlipped() else pcbnew.F_Fab)
         reference.SetVisible(True)
         return
     if lib_id.startswith("TestPoint:"):

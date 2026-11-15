@@ -723,164 +723,84 @@
 "2"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/A1HS_D": [
+"/5 Motor drive (DRV8711 + external FETs)/A1HS": [
 [
-"R501",
-"1"
+"Q501",
+"2"
 ],
 [
 "U501",
 "36"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/A1HS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/A1LS": [
 [
 "Q501",
-"2"
-],
-[
-"R501",
-"2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/A1LS_D": [
-[
-"R502",
-"1"
+"4"
 ],
 [
 "U501",
 "35"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/A1LS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/A2HS": [
 [
-"Q501",
+"Q502",
 "4"
-],
-[
-"R502",
-"2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/A2HS_D": [
-[
-"R503",
-"1"
 ],
 [
 "U501",
 "31"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/A2HS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/A2LS": [
 [
 "Q502",
 "2"
-],
-[
-"R503",
-"2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/A2LS_D": [
-[
-"R504",
-"1"
 ],
 [
 "U501",
 "32"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/A2LS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/B1HS": [
 [
-"Q502",
-"4"
-],
-[
-"R504",
+"Q503",
 "2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/B1HS_D": [
-[
-"R505",
-"1"
 ],
 [
 "U501",
 "27"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/B1HS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/B1LS": [
 [
 "Q503",
-"2"
-],
-[
-"R505",
-"2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/B1LS_D": [
-[
-"R506",
-"1"
+"4"
 ],
 [
 "U501",
 "26"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/B1LS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/B2HS": [
 [
-"Q503",
+"Q504",
 "4"
-],
-[
-"R506",
-"2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/B2HS_D": [
-[
-"R507",
-"1"
 ],
 [
 "U501",
 "22"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/B2HS_G": [
+"/5 Motor drive (DRV8711 + external FETs)/B2LS": [
 [
 "Q504",
 "2"
-],
-[
-"R507",
-"2"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/B2LS_D": [
-[
-"R508",
-"1"
 ],
 [
 "U501",
 "23"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/B2LS_G": [
-[
-"Q504",
-"4"
-],
-[
-"R508",
-"2"
 ]
 ],
 "/5 Motor drive (DRV8711 + external FETs)/DRV_AISENN": [
@@ -889,8 +809,8 @@
 "2"
 ],
 [
-"R511",
-"2"
+"NT503",
+"1"
 ],
 [
 "U501",
@@ -903,8 +823,8 @@
 "1"
 ],
 [
-"R510",
-"2"
+"NT501",
+"1"
 ],
 [
 "U501",
@@ -927,8 +847,8 @@
 "2"
 ],
 [
-"R514",
-"2"
+"NT504",
+"1"
 ],
 [
 "U501",
@@ -941,8 +861,8 @@
 "1"
 ],
 [
-"R513",
-"2"
+"NT502",
+"1"
 ],
 [
 "U501",
@@ -999,41 +919,21 @@
 "7"
 ]
 ],
-"/5 Motor drive (DRV8711 + external FETs)/KELVIN_AN": [
+"/5 Motor drive (DRV8711 + external FETs)/SENSE_A": [
 [
 "NT501",
-"1"
+"2"
 ],
-[
-"R511",
-"1"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/KELVIN_BN": [
-[
-"NT502",
-"1"
-],
-[
-"R514",
-"1"
-]
-],
-"/5 Motor drive (DRV8711 + external FETs)/SENSE_A": [
 [
 "Q501",
 "3"
 ],
 [
 "Q502",
-"3"
-],
-[
-"R509",
 "1"
 ],
 [
-"R510",
+"R509",
 "1"
 ],
 [
@@ -1043,19 +943,19 @@
 ],
 "/5 Motor drive (DRV8711 + external FETs)/SENSE_B": [
 [
+"NT502",
+"2"
+],
+[
 "Q503",
 "3"
 ],
 [
 "Q504",
-"3"
-],
-[
-"R512",
 "1"
 ],
 [
-"R513",
+"R512",
 "1"
 ],
 [
@@ -1873,6 +1773,10 @@
 "2"
 ],
 [
+"C514",
+"2"
+],
+[
 "C601",
 "2"
 ],
@@ -2129,11 +2033,11 @@
 "MP"
 ],
 [
-"NT501",
+"NT503",
 "2"
 ],
 [
-"NT502",
+"NT504",
 "2"
 ],
 [
@@ -2454,15 +2358,15 @@
 ],
 [
 "Q502",
-"1"
+"3"
 ],
 [
 "Q502",
-"5"
+"7"
 ],
 [
 "Q502",
-"6"
+"8"
 ],
 [
 "TP504",
@@ -2522,15 +2426,15 @@
 ],
 [
 "Q504",
-"1"
+"3"
 ],
 [
 "Q504",
-"5"
+"7"
 ],
 [
 "Q504",
-"6"
+"8"
 ],
 [
 "TP506",
@@ -2785,6 +2689,10 @@
 "2"
 ],
 [
+"C514",
+"1"
+],
+[
 "D102",
 "1"
 ],
@@ -2806,11 +2714,11 @@
 ],
 [
 "Q502",
-"7"
+"5"
 ],
 [
 "Q502",
-"8"
+"6"
 ],
 [
 "Q503",
@@ -2822,11 +2730,11 @@
 ],
 [
 "Q504",
-"7"
+"5"
 ],
 [
 "Q504",
-"8"
+"6"
 ],
 [
 "R104",

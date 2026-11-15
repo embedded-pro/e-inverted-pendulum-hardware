@@ -35,9 +35,9 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 
 ### Motor drive
 
-- DRV8711, PWMMODE 1 (TIM1 drives AIN1/2, BIN1/2 directly), four CSD88537ND dual N-FET half-bridges, 0 Ω gate
-  resistors at the FETs, SS34 clamps on the phase nodes.
-- 50 mΩ low-side shunts with Kelvin taps (net ties at the ground pads), DNP sense filters.
+- DRV8711, PWMMODE 1 (TIM1 drives AIN1/2, BIN1/2 directly), four CSD88537ND dual N-FET half-bridges: the power stage
+  is a copy of TI's BOOST-DRV8711 (D-040), placed by `scripts/pcb/drv_block.py`; SS34 clamps on the phase nodes kept.
+- 50 mΩ 2512 low-side shunts with TI's four Kelvin net ties, DNP sense caps.
 - Trip 2.0 A (ISGAIN 20, TORQUE 186); the 0.5 A continuous rating is enforced by a firmware I²t model (D-027).
 
 ### Encoders, sensors, I/O

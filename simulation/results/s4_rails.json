@@ -6,8 +6,8 @@
       "inductor_ripple_pp_A": 0.5341402679275021,
       "output_ripple_pp_mV": 2.94119544967772,
       "soft_start_ms": 6.836363636363638,
-      "uvlo_start_V": 9.108666666666666,
-      "uvlo_stop_V": 8.466,
+      "uvlo_start_V": 9.136666666666667,
+      "uvlo_stop_V": 8.55,
       "ccm_above_load_A": 0.26707013396375107
     },
     "vin_9.3V": {
@@ -16,8 +16,8 @@
       "inductor_ripple_pp_A": 0.4101072218409213,
       "output_ripple_pp_mV": 2.2582186125727652,
       "soft_start_ms": 6.836363636363638,
-      "uvlo_start_V": 9.108666666666666,
-      "uvlo_stop_V": 8.466,
+      "uvlo_start_V": 9.136666666666667,
+      "uvlo_stop_V": 8.55,
       "ccm_above_load_A": 0.20505361092046065
     }
   },

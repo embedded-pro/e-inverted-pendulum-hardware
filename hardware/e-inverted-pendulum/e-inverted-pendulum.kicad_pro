@@ -501,19 +501,19 @@
       },
       {
         "netclass": "GATE",
-        "pattern": "*/A?HS_?"
+        "pattern": "*/A?HS"
       },
       {
         "netclass": "GATE",
-        "pattern": "*/A?LS_?"
+        "pattern": "*/A?LS"
       },
       {
         "netclass": "GATE",
-        "pattern": "*/B?HS_?"
+        "pattern": "*/B?HS"
       },
       {
         "netclass": "GATE",
-        "pattern": "*/B?LS_?"
+        "pattern": "*/B?LS"
       },
       {
         "netclass": "GATE",
@@ -534,10 +534,6 @@
       {
         "netclass": "SENSE",
         "pattern": "*/DRV_?ISENN"
-      },
-      {
-        "netclass": "SENSE",
-        "pattern": "*/KELVIN_?N"
       },
       {
         "netclass": "SENSE",

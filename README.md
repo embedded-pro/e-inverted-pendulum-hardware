@@ -24,7 +24,8 @@ ngspice simulation suite. The firmware lives in its own repository and is the so
   ST's ground-free tab at the top-left corner (PCB antenna only, D-038). The MCU decoupling sits on top at the
   Nucleo's spots, or the nearest free spot to each pin (DS11929 Fig. 16 values, D-038).
 - **DRV8711 gate driver with four external half-bridges** (`CSD88537ND`) for two MG310 gear motors: indexer bypassed
-  (PWMMODE 1), 50 mΩ low-side shunts with Kelvin taps, 2.0 A trip, SS34 clamps on every phase node.
+  (PWMMODE 1), 50 mΩ low-side shunts with Kelvin taps, 2.0 A trip, SS34 clamps on every phase node. The power stage is
+  a copy of TI's BOOST-DRV8711 (D-040, `docs/drive.md`).
 - **Battery path:** XT30, 4 A fuse, back-to-back `AO4805` P-FETs for reverse polarity and switching, with a simulated
   Miller soft start; `SMBJ15A` after the FETs.
 - **Rails:** `TPS62933F` buck to 5 V (encoders, RGB LEDs, LDO), `TLV75533P` LDO to 3.3 V, ferrite-filtered VDDA.

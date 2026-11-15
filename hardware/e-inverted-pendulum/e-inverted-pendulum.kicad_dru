@@ -41,6 +41,14 @@
   (condition "A.memberOfGroup('MB1163 NFC corner')")
   (constraint track_angle (min 0)))
 
+(rule "BOOST-DRV8711 drive: TI's own 0.178 mm clearance inside the copied group (above JLCPCB's 0.09 mm, D-040)"
+  (condition "A.memberOfGroup('BOOST-DRV8711 drive') && B.memberOfGroup('BOOST-DRV8711 drive')")
+  (constraint clearance (min 0.178mm)))
+
+(rule "BOOST-DRV8711 drive: TI's routing keeps its corners (D-040)"
+  (condition "A.memberOfGroup('BOOST-DRV8711 drive')")
+  (constraint track_angle (min 0)))
+
 (rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
   (condition "A.Type == 'Track' && A.intersectsArea('ANTENNA_TAB') && A.NetName != '/4 2.4 GHz RF path and antenna/RF_ANT'")
   (constraint disallow track))

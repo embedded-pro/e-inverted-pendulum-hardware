@@ -66,7 +66,7 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
    voltage to 7.4 V** (duty ≤ 0.59 at 12.6 V): the motor stays at its rating, and stall current at the cap equals
    the trip.
 3. **DRV8711 setting for Rsense = 50 mΩ:** I_trip 2.0 A → ISGAIN 20, TORQUE 186 (2.00 A). Rsense dissipates 0.2 W
-   at the trip, within the 1 W 1206 part.
+   at the trip, within the 3 W 2512 part (TI's CRA2512 from BOOST-DRV8711, D-040).
 4. **The 2.0 A trip equals the JST PH contact rating (2 A).** Peaks are short (recovery bursts). The motor's 0.5 A
    continuous rating is enforced by the firmware I²t model (D-014's approach, kept).
 5. **PWM ripple** at 25 kHz, D 0.5, 12.6 V with L = 1 mH: 126 mA p-p, 6 % of the trip (REQ-DRIVE-007).

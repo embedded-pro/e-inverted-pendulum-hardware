@@ -65,13 +65,11 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks, vias and GND pour, turned 180°: the coil
   at the top-right corner, the tag below it. Move it only as a group. Still yours: route NFC_GPO (PA2), NFC_RF_DIS (PA3),
   QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
+- **Motor drive (`docs/drive.md`):** done by the copy. The group "BOOST-DRV8711 drive" holds TI's power stage (U501,
+  Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks, vias and pours, centred on x 0
+  from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Move it only as a
+  group. Still yours: the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (`docs/power-map.md`, power-pcb-layout §3):**
-  - **Hot loop:** each bridge's 100 nF HF cap closest to its FET pair's drain and LS source, with L2 GND directly under the loop
-    (≤ 5 nH, S2).
-  - **Gate resistors:** at the FETs.
-  - **Rsense:** R509/R512 between their pair's LS sources, with Kelvin taps from the inner pad edges.
-  - **SS34 clamps:** D501–D504 at the phase nodes.
-  - **Bulk:** C507 between the bridges.
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
 - **Encoders:** ESD (U601/U603) at each PH 6-pin connector, then the RC, then the buffer (U602/U604).
   Motor pins 1 and 6 bracket the encoder pins, so keep the motor traces away from the encoder lines.

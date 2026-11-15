@@ -1,0 +1,223 @@
+(footprint "BOOST_0603L"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "0603 capacitor land, TI BOOST-DRV8711. Derived from Texas Instruments BOOST-DRV8711 design files (SLVC575B)")
+	(tags "BOOST-DRV8711 DRV8711 TI motor driver")
+	(property "Reference" "REF**"
+		(at 0 -1.325 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "3f20b32a-dead-4d38-b767-a636cfaf5e90")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "BOOST_0603L"
+		(at 0 1.325 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "cc20c75d-d9d6-4b62-8f6c-6b95505d9011")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "af5ae652-08b5-44f7-bc77-423d524a861a")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7a776928-87b4-4c3d-bc3f-cfe83ff43dea")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(sheetname "BOOST-DRV8711")
+	(sheetfile "BOOST-DRV8711.kicad_sch")
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.2 -0.525)
+		(end 1.2 -0.525)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "84661bcd-f990-45df-8342-335740428ebe")
+	)
+	(fp_line
+		(start -1.2 0.525)
+		(end -1.2 -0.525)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "ff7990fd-2a32-47af-a991-92567d0bc599")
+	)
+	(fp_line
+		(start 1.2 -0.525)
+		(end 1.2 0.525)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "113cf651-6c34-430e-8f04-6117e3bc2723")
+	)
+	(fp_line
+		(start 1.2 0.525)
+		(end -1.2 0.525)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "e9c70aa2-5324-47e7-b28a-35afc38809e9")
+	)
+	(fp_line
+		(start -1.2 0.525)
+		(end -1.2 -0.525)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "25bab040-b39a-40da-abbd-f9ef8cf69930")
+	)
+	(fp_line
+		(start 1.2 -0.525)
+		(end -1.2 -0.525)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "66506915-75f5-490a-a84d-fbb5b4f88af7")
+	)
+	(fp_line
+		(start 1.2 0.525)
+		(end -1.2 0.525)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "6cb82da6-42c6-427e-a69a-4c9201f400e2")
+	)
+	(fp_line
+		(start 1.2 0.525)
+		(end 1.2 -0.525)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "e3244e37-47c6-4231-b594-20384f0e46ae")
+	)
+	(fp_line
+		(start -0.875 0.475)
+		(end -0.875 -0.475)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "99bb9399-400f-43ba-af69-6d89a51e1f5c")
+	)
+	(fp_line
+		(start -0.55 0.475)
+		(end -0.55 -0.475)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "248b9c2b-aba6-4f98-93b0-ae09bbe3653d")
+	)
+	(fp_line
+		(start 0.55 0.475)
+		(end 0.55 -0.475)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "03fedac9-74d1-44b8-b67a-5dd342a8bc84")
+	)
+	(fp_line
+		(start 0.875 -0.475)
+		(end -0.875 -0.475)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "11ab1451-4771-44e3-81ac-34fd23ddf369")
+	)
+	(fp_line
+		(start 0.875 0.475)
+		(end -0.875 0.475)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "211daed2-ca3e-48e0-9713-bfced2a9420d")
+	)
+	(fp_line
+		(start 0.875 0.475)
+		(end 0.875 -0.475)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "User.13")
+		(uuid "b21e76ca-f384-4f61-b7bf-df11e0cf3fa0")
+	)
+	(pad "1" smd rect
+		(at -0.7 0 90)
+		(size 0.85 0.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "0c093e60-e29d-4e74-8719-627091495efb")
+	)
+	(pad "2" smd rect
+		(at 0.7 0 90)
+		(size 0.85 0.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "b1cef5d1-9e21-49f6-9221-c930c0eaa0e1")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_0603_1608Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

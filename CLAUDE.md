@@ -46,6 +46,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   (D-037, `docs/rf.md`). Change it only with ST's reference in hand; ST's files stay in the gitignored `reference/`.
 - The NFC corner (M24SR64-Y, ANT14 coil, tuning caps, copper) is a literal copy of ST's X-NUCLEO-NFC01A1 MB1163 rev C-01
   (D-039, `docs/nfc.md`), under the same rule.
+- The motor-driver power stage (DRV8711, CSD88537ND bridges, shunts, net ties, support caps, copper) is a copy of TI's
+  BOOST-DRV8711 (D-040, `docs/drive.md`), under the same rule; our extras sit beside it.
 - Phases have gates (`docs/plan.md`). Do not start a phase before the previous gate is
   signed off by the user.
 - Layout: the user places the anchors and they are never moved (`power-pcb-layout` §1).
@@ -78,6 +80,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a locked group; no-op once present).
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
+- `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
+  `scripts/pcb/boost_drv8711.json` and the `BOOST_*` footprints (D-040). `python3 scripts/pcb/drv_block.py --apply`: paste it.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.
