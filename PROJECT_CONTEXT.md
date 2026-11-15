@@ -72,8 +72,8 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - Silkscreen shows references only; test pads show their net name (D-035). Labels are JLCPCB's smallest text, placed by
   `scripts/pcb/silk.py` clear of everything; 19 with no room sit on F.Fab (D-041).
 - **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position as one locked group
-  (D-037), the NFC and drive copies (D-039, D-040) and the motor connectors with their encoder inputs at the side edges
-  (D-042). The board has the outline, rule areas and bracket holes; every other part sits
+  (D-037), the NFC and drive copies (D-039, D-040) the motor connectors with their encoder inputs at the side edges
+  (D-042), and the IMU, flash and EEPROM (D-043). The board has the outline, rule areas and bracket holes; every other part sits
   in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.

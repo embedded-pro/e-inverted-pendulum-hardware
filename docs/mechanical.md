@@ -115,7 +115,8 @@ Result (S0, `simulation/results/sizing_summary.json`):
 - **Wheel radius 0.0325 m** (65 mm wheels, owner). **Track width ≈ 0.15 m**: wheel centre planes about 24 mm outside
   the 102 mm bracket (shaft, hub and half the wheel width; measure once assembled). This replaces the 0.145 m
   placeholder (`WheelOdometryImpl.hpp:20`).
-- **IMU position.** The IMU sits beside the MCU near the top, about 90 mm above the axle (D-029). Its accelerometer
+- **IMU position.** The IMU sits on the centre line, 78 mm above the axle (D-043); the axis map is in
+  `docs/firmware-interface.md`. Its accelerometer
   reads the tangential acceleration r·θ̈ on top of gravity. The firmware must subtract it (r from the layout, θ̈ from the
   gyro) or keep the complementary-filter crossover low.
 - **Body inertia:** J about the **centre of mass** (`pendulum-dynamics.md` labels it "about the axle"). The

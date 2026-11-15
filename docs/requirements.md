@@ -40,7 +40,7 @@ Verification methods:
 | ID | Requirement | Source | Verify |
 |---|---|---|---|
 | HW-SNS-001 | The IMU (MPU-6500) shall be on SPI2 (PB13/PB14/PB15, CS PB12), with data-ready on PC6 (EXTI6). | REQ-IMU-001, `InertialSensorStm.hpp:31-38` | R |
-| HW-SNS-002 | The IMU shall be mounted rigidly on the plate, axes aligned to the body frame (x forward, y left, z up), beside the MCU (D-029). Its position from the axle (about 90 mm) and the mounting-to-body axis map are published for the firmware. | REQ-IMU-007, `imu-sensing.md`, D-029 | R |
+| HW-SNS-002 | The IMU shall be mounted rigidly on the plate, on the centre line about 78 mm above the axle (D-043). Its position and the mounting-to-body axis map (body x, y, z = chip Z, X, Y for forward = the component side) are published for the firmware in `docs/firmware-interface.md`. | REQ-IMU-007, `imu-sensing.md`, D-029 | R |
 | HW-SNS-003 | Left encoder A/B = PC0 (LPTIM1_IN1) / PC2 (LPTIM1_IN2). Right encoder A/B = PA0 (TIM2_CH1) / PA1 (TIM2_CH2). The index pins PC5 / PC3 stay wired to the buffer and read low: the MG310 has no index (D-028). | REQ-ODOM-001, REQ-ODOM-005, `WheelEncodersStm.hpp:23-29`, D-028 | R (`check_pinmap.py`) |
 | HW-SNS-004 | Encoder inputs shall carry clean edges up to the maximum edge rate from S0 with ≥ 2× margin. They shall not back-power the MCU while 3V3 is off. | REQ-ODOM-001, D-012 | S5, B |
 | HW-SNS-005 | The index (Z) lines shall reach EXTI-capable pins with unique EXTI line numbers. With the MG310 they carry no signal (D-028); REQ-ODOM-005 is reported to the firmware as unsupported by this motor. | REQ-ODOM-005, `imu-sensing.md` (EXTI uniqueness), D-028 | R (`check_pinmap.py`) |

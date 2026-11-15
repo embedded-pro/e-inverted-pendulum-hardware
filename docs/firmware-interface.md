@@ -22,11 +22,13 @@ apply these settings. Every existing pin is unchanged (`docs/pinmap.md`).
 | Expansion | Qwiic on I2C3 (PB10 SCL, PB11 SDA), 3V3 | `docs/pinmap.md` |
 | Model | m 0.386 kg, ℓ 28.5 mm, J 4.32e-04 kg·m² about the CoM, τ 83 ms; **pitch setpoint about 18° toward the front**; fall limit measured from the setpoint; wheel r **0.0325 m**; track width about 0.15 m; include the reflected rotor inertia (≈ 8e-4 kg·m²) | `docs/mechanical.md`; S0 |
 | Motor voltage | Cap the **average motor voltage at 7.4 V** (duty ≤ 7.4 / VBAT): the MG310 is a 7.4 V motor on a 3S bus | S0 (D-027) |
-| IMU position | IMU about 90 mm above the axle, beside the MCU: subtract the tangential acceleration r·θ̈ from the accelerometer (θ̈ from the gyro) or keep the complementary-filter crossover low; publish the axis map once the layout fixes the orientation | D-029; `docs/mechanical.md` |
+| IMU position and axes | **U701 on the centre line, 78 mm above the axle** (x 0, z 78; D-043): subtract the tangential acceleration r·θ̈ (r = 78 mm) from the accelerometer (θ̈ from the gyro) or keep the complementary-filter crossover low. **Axis map:** the MPU-6500 sits at rotation 0, pin 1 top-left as seen from the component side, so chip +X points across the plate to the right (+x), +Y up the plate (+z) and +Z out of the component side. With forward = the component side, **body (x, y, z) = chip (+Z, +X, +Y)** (a right-handed cyclic permutation); with forward = the back, body x and y both change sign. Set it in the board implementation's signed permutation and verify by tilting (`imu-sensing.md` Part C) | D-043; PS-MPU-6500A-01 §9.1; `docs/mechanical.md` |
 | I2C3 devices | Qwiic expansion plus **M24C64 EEPROM at 0x50** (E2..E0 = 0, WC low: writes enabled; 32-byte pages, 5 ms write cycle) and **M24SR64-Y NFC tag at 0x56** (device select 1010110x); keep external Qwiic devices off these addresses | D-031, D-039; M24C64 DocID16891, M24SR64-Y DocID023790 Rev 20 Table 80 |
 | NFC tag | **M24SR64-Y, NFC Forum Type 4 (ISO 14443-A)**: the host talks to it over I2C with the Type 4 command set (session open, select NDEF / system / CC file, read / update binary), not as a plain memory. **GPO on PA2 (EXTI2)**, open drain with a 20k pull-up, configured in the system file (session open on delivery). **RF disable on PA3** (output; high = RF off, 30k pull-down keeps RF on while the MCU is in reset) | D-039; DocID023790 Rev 20 s2.6, s2.7 |
 
 ## Open items
 
-1. Firmware repo: `documentation/design/motion-actuation.md` Part A says "the left motor hangs on the first bridge".
+1. Firmware repo: set the IMU's signed permutation (body = chip Z, X, Y for forward = the component side) and r = 78 mm,
+   and verify both by tilting the robot (D-043).
+2. Firmware repo: `documentation/design/motion-actuation.md` Part A says "the left motor hangs on the first bridge".
    Since D-042 the left motor is on bridge B (pins and timer channels unchanged); update that sentence there.

@@ -60,8 +60,17 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
   - route the MCU's other pins out of the corner;
   - pour the board-wide ground.
-- **IMU (U701):** next to the MCU's SPI2 pins (PB12–PB15, PC6). If it sits far from the axle, report its position for the
-  firmware (`docs/firmware-interface.md`, tangential acceleration).
+- **IMU, flash and EEPROM (D-043, `scripts/pcb/place_block.py imu_memory`): placed.**
+  - U701 (MPU-6500) on the centre line at (0, 78), rotation 0, locked: its position and axes are published
+    (`docs/firmware-interface.md`). C701 / C702 / C703 at VDD / VDDIO / REGOUT, R701 (nCS pull-up) above it, the SPI2 /
+    INT test pads in a column to its left.
+  - U702 (W25Q16JV) below the MCU at (−20, 81.3), turned 180° so DI / CLK face R301 (SPI1 SCK 33 Ω, between the MCU and
+    the flash); C704 at VCC, R702 / R703 / R704 at /CS, /WP, /HOLD; TP706 (FLASH_NCS) to the left.
+  - U802 (M24C64) in the band left of the MCU at (−36.5, 96), SDA / SCL toward the MCU, C802 at VCC, the I2C3 pull-ups
+    R808 / R809 above it.
+  - Still yours, routing: SPI2 from the MCU's left pins (46–50) to the IMU, about 30 mm, under the NFC cluster; I2C3 from
+    the MCU's top pins (28 / 29) around its left side; SPI1 and FLASH_NCS from the bottom pins. Keep them off the RF
+    strip and the L2 cut-out under the RF line.
 - **NFC (`docs/nfc.md`):** done by the copy. The group "MB1163 NFC corner" holds AE801 (ANT14), U803 (M24SR64-Y) and
   ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks, vias and GND pour, turned 90° from ST's
   board and 8 mm below the corner: the coil at the right edge, the tag to its left, beside the MCU. Move it only as a group. Still yours: route NFC_GPO (PA2), NFC_RF_DIS (PA3),
@@ -72,7 +81,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
   group. Still yours: the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (`docs/power-map.md`, power-pcb-layout §3):**
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
-- **Motor connectors and encoder inputs (D-042, `scripts/pcb/motor_io.py`): placed.**
+- **Motor connectors and encoder inputs (D-042, `scripts/pcb/place_block.py motor_io`): placed.**
   - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 15.5 to 25.5, just
     above the bracket strip; both locked. J601's pin 1 (M−) is at the top, J602's at the bottom.
   - Inward from each connector, in signal order: the ESD (U601 / U603) beside pins 2–5, the four RC rows (pull-up DNP,

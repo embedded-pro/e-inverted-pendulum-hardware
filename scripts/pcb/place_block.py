@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""Place the motor connectors and encoder inputs at the side edges (owner, D-042).
+"""Place a block of parts at the owner's chosen spots, once (D-042, D-043).
 
-One shot, on the owner's request: `python3 scripts/pcb/motor_io.py --apply`. It moves J601 / J602 (JST PH side entry,
-plug toward the edge), their encoder chains (ESD, RC, Schmitt buffer, bypass, test pads), the encoder supply and its
-test pads from the staging area to placement.motor_io() (each part's pad centre on its spot), and refuses if any part:
+    python3 scripts/pcb/place_block.py --apply motor_io      J601 / J602 at the side edges, their encoder chains and the
+                                                            encoder supply (D-042)
+    python3 scripts/pcb/place_block.py --apply imu_memory    the IMU on the centre line, the flash below the MCU and the
+                                                            EEPROM left of it, with their support parts and test pads
+                                                            (D-043)
+
+Each block is a list from placement.py of (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. The
+parts move from the staging area to their spots, and the script refuses if any part:
   - leaves the board, or its courtyard reaches into the bracket strip (no parts there, D-026);
   - puts a through-hole pin over the battery (BATTERY_BACK, D-025);
   - touches another part's courtyard, comes closer than rf_block.PART_CLEARANCE to another net's copper, or overlaps
     another silk outline (rf_block.spot_ok).
-It locks J601 / J602 (the anchors) and lays the silkscreen labels out (silk.py, D-041). Re-running is a no-op once J601
-is on the board. Run board.py first so the parts exist.
+It locks the block's anchors and lays the silkscreen labels out (silk.py, D-041). Re-running is a no-op once the
+anchors are on the board. Run board.py first so the parts exist.
 """
 
 import argparse
@@ -25,7 +30,10 @@ import placement  # noqa: E402
 import rf_block as RF  # noqa: E402
 import silk  # noqa: E402
 
-ANCHORS = ("J601", "J602")
+BLOCKS = {
+    "motor_io": (placement.motor_io, ("J601", "J602")),
+    "imu_memory": (placement.imu_memory, ("U701",)),
+}
 
 
 def outline_of(board):
@@ -55,14 +63,15 @@ def problems(board, fp, outline, others):
     return found
 
 
-def has_placed(board):
+def has_placed(board, anchors):
     footprints = {fp.GetReference(): fp for fp in board.GetFootprints()}
-    return all(outline_of(board).Contains(footprints[ref].GetPosition()) for ref in ANCHORS)
+    return all(outline_of(board).Contains(footprints[ref].GetPosition()) for ref in anchors)
 
 
-def apply(board):
+def apply(board, name):
+    parts_of, anchors = BLOCKS[name]
     footprints = {fp.GetReference(): fp for fp in board.GetFootprints()}
-    parts = placement.motor_io()
+    parts = parts_of()
     missing = [ref for ref, *_ in parts if ref not in footprints]
     if missing:
         sys.exit(f"{', '.join(missing)} not on the board: run board.py first")
@@ -82,39 +91,38 @@ def apply(board):
         others = [f for f in board.GetFootprints() if f.GetReference() != ref]
         failed += [f"{ref}: {why}" for why in problems(board, fp, outline, others)]
     if failed:
-        sys.exit("motor I/O not placed:\n  " + "\n  ".join(failed))
-    for ref in ANCHORS:
+        sys.exit(f"{name} not placed:\n  " + "\n  ".join(failed))
+    for ref in anchors:
         footprints[ref].SetLocked(True)
     silk.report(*silk.layout(board, check=False), check=False)
-    for ref in ANCHORS:
+    for ref in anchors:
         fp = footprints[ref]
-        pins = sorted(fp.Pads(), key=lambda p: int(p.GetNumber()))
-        print(f"{ref} at mechanical {RF.board_to_mech(fp.GetPosition())}, rotation {fp.GetOrientationDegrees():.0f}: "
-              f"pin 1 {RF.board_to_mech(pins[0].GetPosition())}, pin 6 {RF.board_to_mech(pins[-1].GetPosition())}")
-    print(f"placed {len(parts)} parts: J601 / J602 locked")
+        print(f"{ref} at mechanical {RF.board_to_mech(fp.GetPosition())}, rotation {fp.GetOrientationDegrees():.0f}")
+    print(f"placed {len(parts)} parts: {' / '.join(anchors)} locked")
 
 
-def stage():
+def stage(name):
     board = pcbnew.LoadBoard(str(B.BOARD))
-    if has_placed(board):
-        print("J601 / J602 are already on the board: nothing to do")
+    anchors = BLOCKS[name][1]
+    if has_placed(board, anchors):
+        print(f"{' / '.join(anchors)} already on the board: nothing to do")
         sys.exit(3)
-    apply(board)
+    apply(board, name)
     pcbnew.SaveBoard(str(B.BOARD), board)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--apply", action="store_true", help="place the motor connectors and encoder inputs (one shot)")
-    parser.add_argument("--pcbnew-stage", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--apply", choices=sorted(BLOCKS), help="the block to place (one shot)")
+    parser.add_argument("--pcbnew-stage", choices=sorted(BLOCKS), help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.pcbnew_stage:
-        stage()
+        stage(args.pcbnew_stage)
         return
     if not args.apply:
-        parser.error("nothing to do without --apply")
+        parser.error("nothing to do without --apply <block>")
     project = B.PROJECT.read_bytes()
-    result = subprocess.run([sys.executable, __file__, "--pcbnew-stage"])
+    result = subprocess.run([sys.executable, __file__, "--pcbnew-stage", args.apply])
     B.PROJECT.write_bytes(project)
     if result.returncode == 3:
         return

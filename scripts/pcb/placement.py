@@ -135,7 +135,8 @@ DRAWINGS = [
     ("rect", (-_HALF, GROUND_EDGE_Z), (_TAB_RIGHT, TOP_Z), "MB1355 ANTENNA TAB (D-037)"),
 ]
 
-# Motor connectors and encoder inputs at the side edges (owner, D-042), placed once by scripts/pcb/motor_io.py.
+# Motor connectors and encoder inputs at the side edges (owner, D-042), placed once by
+# scripts/pcb/place_block.py motor_io.
 # (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. J601's plug faces the left edge (its courtyard
 # ends at the edge and 0.5 mm above the bracket strip), pin 1 (M-) at the top, pins 2-5 (VCC, A, B, GND) between the
 # motor pins. The encoder chain follows the signal inward: U601 (ESD, pass-through pads 1 / 2 on A / B, interface-layout
@@ -178,3 +179,40 @@ def motor_io():
     """Every motor I/O part as (ref, x, z, rotation): the left chain, its mirror on the right, the supply."""
     right = [(MOTOR_IO_RIGHT_REFS[ref], -x, z, (rot + 180.0) % 360.0) for ref, x, z, rot in MOTOR_IO_LEFT]
     return MOTOR_IO_LEFT + right + MOTOR_IO_SUPPLY
+
+# IMU on the centre line, flash below the MCU, EEPROM left of it (owner, D-043), placed once by
+# scripts/pcb/place_block.py imu_memory. (ref, x, z, rotation): mechanical, at the centre of the footprint's pads.
+# U701 (MPU-6500) at rotation 0, pin 1 top-left: chip +X along +x, +Y up, +Z out of the component side
+# (PS-MPU-6500A-01 s9.1); its decoupling at the pins it serves (Table 11: VDDIO pin 8, REGOUT pin 10, VDD pin 13), the
+# nCS pull-up by pin 22, the SPI2 / INT test pads in a column beside it. U702 (W25Q16JV) under the MCU's SPI1 pins, turned so DI / CLK
+# (pins 5 / 6) face R301 and VCC (pin 8, C704) points away from the MCU's caps, its /CS, /WP, /HOLD pull-ups at their pins; R301 (SPI1 SCK source termination) at the MCU's SCK pin. U802 (M24C64) in the
+# free band left of the MCU, SDA / SCL toward it, the I2C3 pull-ups above it.
+IMU_POSITION = (0.0, 78.0)
+IMU_MEMORY = [
+    ("U701", IMU_POSITION[0], IMU_POSITION[1], 0.0),
+    ("C702", -1.4, 74.8, 0.0),
+    ("C703", 1.6, 74.8, 0.0),
+    ("C701", 3.3, 77.2, 90.0),
+    ("R701", -0.2, 81.0, 0.0),
+    ("TP704", -6.0, 80.6, 0.0),
+    ("TP701", -6.0, 78.2, 0.0),
+    ("TP702", -6.0, 75.8, 0.0),
+    ("TP703", -6.0, 73.4, 0.0),
+    ("TP705", -6.0, 71.0, 0.0),
+    ("U702", -20.0, 81.3, 180.0),
+    ("C704", -25.9, 78.4, 90.0),
+    ("R702", -13.4, 80.0, 90.0),
+    ("R703", -16.2, 76.6, 0.0),
+    ("R704", -26.6, 81.6, 90.0),
+    ("TP706", -29.6, 85.4, 0.0),
+    ("R301", -19.6, 86.6, 0.0),
+    ("U802", -36.5, 96.0, 0.0),
+    ("C802", -31.6, 97.9, 90.0),
+    ("R808", -38.6, 101.6, 0.0),
+    ("R809", -35.0, 101.6, 0.0),
+]
+
+
+def imu_memory():
+    """The IMU, the flash and the EEPROM with their support parts, as (ref, x, z, rotation)."""
+    return list(IMU_MEMORY)
