@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Place a block of parts at the owner's chosen spots, once (D-042, D-043, D-047).
+"""Place a block of parts at the owner's chosen spots, once (D-042, D-043, D-047, D-049).
 
     python3 scripts/pcb/place_block.py --apply motor_io      J601 / J602 at the side edges, their encoder chains and the
                                                             encoder supply (D-042, D-044)
     python3 scripts/pcb/place_block.py --apply imu_memory    the IMU on the centre line, the flash and the EEPROM left of
                                                             the MCU, with their support parts (D-043)
+    python3 scripts/pcb/place_block.py --apply power         the TPS62933F buck and the TLV75533P LDO right of the power
+                                                            entry, to TI's layout guidance (D-049)
 
 Each block is a list from placement.py of (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. The
 tables hold the owner's positions from KiCad (D-047), so --replace on the owner's board changes nothing; the parts the
@@ -36,6 +38,7 @@ import silk  # noqa: E402
 BLOCKS = {
     "motor_io": (placement.motor_io, ("J601", "J602")),
     "imu_memory": (placement.imu_memory, ("U701",)),
+    "power": (placement.power, ("U201",)),
 }
 
 

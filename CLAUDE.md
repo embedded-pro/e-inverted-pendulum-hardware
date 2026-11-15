@@ -91,7 +91,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/place_block.py --apply <block>`: place a block of parts at the owner's spots from `placement.py`, once
   (`--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
   with their encoder chains and supply (D-042, D-044); `imu_memory` = the IMU on the centre line, the flash and the
-  EEPROM left of the MCU (D-043). The tables hold the owner's positions from KiCad (D-047): after moving parts, update
+  EEPROM left of the MCU (D-043); `power` = the TPS62933F buck and the TLV75533P LDO right of the power entry, to TI's
+  layout guidance (D-049). The tables hold the owner's positions from KiCad (D-047): after moving parts, update
   them so `--replace` changes nothing; parts parked off the board are not in them.
 - `python3 scripts/pcb/mcu_escape.py --fanout | --decoupling`: a 0.2 mm stub and a 0.15 / 0.25 mm via from every MCU pin
   another part uses, staggered in two rows, clear of the crystals and the RF nets; then the MCU decoupling caps at ST's

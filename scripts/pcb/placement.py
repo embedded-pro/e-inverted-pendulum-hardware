@@ -213,3 +213,38 @@ IMU_MEMORY_PARKED = ("TP701", "TP702", "TP703", "TP704", "TP705", "TP706", "C704
 def imu_memory():
     """The placed IMU, flash and EEPROM parts, as (ref, x, z, rotation)."""
     return list(IMU_MEMORY)
+
+# The power stage right of the power entry (owner, D-049): the TPS62933F buck and the TLV75533P LDO beside it, placed by
+# scripts/pcb/place_block.py power. (ref, x, z, rotation): mechanical, at the centre of the footprint's pads.
+# TI's layout guidance (TPS62933 datasheet ZHCSO99D s12.1, Fig. 12-2): every part on top; C203 (100 nF) the closest part
+# to VIN / GND (pins 3 / 4), the 10 uF input caps beside it toward the power entry, so the input loop is the smallest;
+# C204 (BST) between BST and SW (pins 6 / 5), L201's SW pad facing pin 5; the output caps under L201, +5V pads up toward
+# its +5V pad; the EN divider, the SS cap and the FB divider in a row above the IC, the FB pair over FB (pin 8), away from
+# SW and L201. The LDO sits beside the output caps, rotated so IN / EN face C209 and OUT faces C210. Test pads above.
+POWER = [
+    ("U201", -7.71, 58.0, 0.0),
+    ("C203", -10.1, 57.5, 270.0),
+    ("C202", -12.15, 57.5, 270.0),
+    ("C201", -14.45, 57.5, 270.0),
+    ("C204", -5.605, 57.5, 270.0),
+    ("L201", -2.52, 57.25, 0.0),
+    ("C208", -1.0, 52.95, 270.0),
+    ("C206", -3.275, 52.95, 270.0),
+    ("C207", -5.575, 52.95, 270.0),
+    ("C209", -7.625, 52.95, 270.0),
+    ("U202", -10.745, 52.95, 180.0),
+    ("C210", -13.865, 52.95, 90.0),
+    ("R201", -13.2, 62.8, 270.0),
+    ("R202", -11.4, 62.8, 90.0),
+    ("C205", -9.6, 62.8, 90.0),
+    ("R204", -7.8, 62.8, 90.0),
+    ("R203", -6.0, 62.8, 270.0),
+    ("TP201", -3.4, 62.8, 0.0),
+    ("TP203", -0.6, 62.8, 0.0),
+    ("TP202", 2.2, 62.8, 0.0),
+]
+
+
+def power():
+    """The buck and the LDO with their support parts and test pads, as (ref, x, z, rotation)."""
+    return list(POWER)

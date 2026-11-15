@@ -94,8 +94,20 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks and vias, turned 180°
   (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), from z 13.5 to 50.5, centred on x +2.85 since the owner moved it 2.85 mm right (D-047), and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Still yours: the power copper
   the pours carried (VM, phases, GND_A / GND_B), the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
-- **Power (`docs/power-map.md`, power-pcb-layout §3):**
-  - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
+- **Power (D-049, `scripts/pcb/place_block.py power`, `docs/power-map.md`, power-pcb-layout §3): placed** right of the
+  power entry, x −15.5…+3.5, z 51.2–64.1, all on top, to TI's layout guidance (TPS62933 datasheet ZHCSO99D §12.1, Fig.
+  12-2):
+  - U201 (TPS62933F) at (−7.7, 58.0), VIN / GND pins toward the power entry; C203 (100 nF) the closest part to VIN /
+    GND, C202 / C201 (10 µF) beside it, so VBAT arrives from the left and the input loop is the smallest on the block.
+  - C204 (BST) between BST and SW; L201 right of U201, its SW pad facing pin 5; the SW node is about 2 mm of copper,
+    17 mm from the IMU.
+  - C208 / C206 / C207 (output) under L201, +5V pads up; U202 (TLV75533P) beside them, IN / EN toward C209, OUT toward
+    C210.
+  - R201 / R202 (EN), C205 (SS), R204 / R203 (FB) in a row above U201, the FB pair over FB (pin 8), away from SW;
+    TP201 (+5V), TP203 (GND), TP202 (+3V3) beside them.
+  - Still yours, routing: VBAT and GND wide to C201–C203 and U201 with vias to L2; the SW node short and minimal,
+    nothing under it on L3 / L4; the +5V sense to R203 from the output caps, away from L201; +5V on to the encoders and
+    the LEDs, +3V3 on the L3 plane. C203's and C204's references are on F.Fab (no 1.0 mm spot, D-041).
 - **Motor connectors and encoder inputs (D-042, D-044, D-047, `scripts/pcb/place_block.py motor_io`): placed, arranged
   by the owner.**
   - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 35.5 to 45.5
