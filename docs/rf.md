@@ -83,22 +83,33 @@ underside". This board is assembled on top only, so `scripts/pcb/rf_block.py` pu
 | Ours | Value | Pin | Nucleo (D-01) | Spot on our board |
 |---|---|---|---|---|
 | C308 | 100 pF | VDDRF 33 | C34, bottom | top, 1.75 mm (three ST GND vias removed, D-037) |
-| C307 | 100 nF | VDDRF 33 | C33, bottom | top, 2.80 mm |
-| C303 | 100 nF | VDD 68 | C18, top | Nucleo spot |
-| C304 | 100 nF | VBAT 1 | C28, top | Nucleo spot |
-| C305 | 100 nF | VDDUSB 55 | C31, top | Nucleo spot |
-| C306 | 4.7 µF | VDD | C17 (100 nF), top | Nucleo spot, about 14.5 mm below the MCU, as ST's |
+| C307 | 100 nF | VDDRF 33 | C33, bottom | top, 2.10 mm, beside C308 (D-048) |
+| C303 | 100 nF | VDD 68 | C18, top | top, 2.26 mm, below the fan-out vias (D-048) |
+| C304 | 100 nF | VBAT 1 | C28, top | top, 2.84 mm, below the fan-out vias (D-048) |
+| C305 | 100 nF | VDDUSB 55 | C31, top | top, 3.89 mm, below the fan-out vias (D-048) |
+| C306 | 4.7 µF | VDD | C17 (100 nF), top | Nucleo spot, 10.7 mm from pin 68, as ST's |
 | C301 | 100 nF | VDD 30 | C19 / C20, bottom | top, 2.75 mm |
-| C302 | 100 nF | VDD 45 | C19 / C20, bottom | top, 1.75 mm |
+| C302 | 100 nF | VDD 45 | C19 / C20, bottom | top, 2.20 mm, above the SMPS pins: its +3V3 goes round the VLXSMPS route or through L3 (D-048) |
 | C312 | 100 nF | VREF+ 13 | C32, bottom | top, 1.35 mm |
 | C313 | 1 µF | VREF+ 13 | — | top, 4.35 mm |
 | C310 | 10 nF | VDDA 14 | — | top, 2.90 mm |
 | C311 | 1 µF | VDDA 14 | — | top, 4.75 mm |
 | FB301 | BLM18PG221SN1D | VDDA 14 | L2 ferrite, bottom | top, 6.00 mm |
-| C317 | 100 nF | NRST 8 | C3, bottom | top, 4.05 mm |
+| C317 | 100 nF | NRST 8 | C3, bottom | top, 1.95 mm, beside the right-hand fan-out vias (D-048) |
 
 The crystals need nothing added: Y301 (HSE) has no external caps (HSETUNE), and Y302 with C315 / C316 sits on ST's lands
 as copied (D-037). Its routing is the owner's.
+
+Since D-048 (`scripts/pcb/mcu_escape.py --decoupling`) the caps the owner had parked (D-047) are back on top, after the
+MCU fan-out:
+- C309 (VDDSMPS 4.7 µF) on ST's land (MB1355 C23).
+- C318 (VDDSMPS 100 nF) 0.05 mm from ST's land (C24): the land itself now touches L302's courtyard, since the owner moved
+  L302 (D-047).
+- The others at the Nucleo's spot or the nearest free spot (table above, centre to pin).
+- While they were placed, the copy's routes the owner took up were kept free: VLXSMPS pin 43 → L302, HSE pins 34 / 35
+  → Y301.
+- C301, C308, C310–C313 and FB301 stay where the owner placed them.
+- C302's and C317's references are on F.Fab, as are C308's, C314's and L302's now (no 1.0 mm spot left, D-041).
 
 ## Stack-up and the RF line
 
@@ -195,8 +206,8 @@ as copied (D-037). Its routing is the owner's.
    Re-create the strip's L1 ground pour with ST's stitching when the pours are made, and the `ANTENNA_TAB` rule area
    (the next `board.py` run adds it).
 8. **Owner's GND via at (−19.3, 105.2)** is 0.18 mm hole-to-copper from RF_50; JLCPCB's floor is 0.20 mm (DRC error).
-9. The MCU decoupling C302–C307, C309, C317, C318 and R301 are parked off the board (owner, D-047): place them back at
-   their pins (table above) before routing.
+9. The MCU decoupling is back on the board (D-048). R301 (SPI1 SCK 33 Ω source termination) is still parked: place it
+   at the SPI1_SCK fan-out via, a few mm from pin 63.
 10. **U301's exposed pad has no ground vias** since the owner removed ST's ground field (D-047): ST had 50 there. Put
     vias back (rf-layout §5: as many as the rules allow); the fan-out vias (D-048) stop 0.30 mm past the pad tips and
     leave the pad free.

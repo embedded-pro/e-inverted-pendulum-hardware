@@ -28,7 +28,7 @@ anything on the board.
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
 | Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
-| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 12 references with no room (C312, C314, C401, FL401, L401 in the MB1355 core; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns) are on F.Fab, sized to fit inside their part | D-035, D-041, D-047, `scripts/pcb/silk.py` |
+| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 16 references with no room (C302, C308, C312, C314, C317, C401, FL401, L302, L401 around the MCU; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns) are on F.Fab, sized to fit inside their part | D-035, D-041, D-047, D-048, `scripts/pcb/silk.py` |
 | Page | A3, so the staging area fits on the sheet | — |
 
 ## What DRC enforces (rule areas and project rules)
@@ -61,8 +61,9 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   - the MCU decoupling on top, at the Nucleo's spots or the nearest free spot to each pin (D-038, `docs/rf.md`);
   - ST's copper, vias and ground (the owner removed the ground field's 236 vias, D-047; the 54 beside the RF line stay).
 
-  Parked off the board by the owner (D-047), to go back at their pins: C302–C307, C309, C317, C318 and R301; C803 of
-  the NFC cluster.
+  The MCU decoupling the owner parked (D-047) is back on top after the fan-out (D-048, `scripts/pcb/mcu_escape.py
+  --decoupling`, `docs/rf.md`). Still parked: R301 (SPI1 SCK termination, goes at the SPI1_SCK via) and C803 of the NFC
+  cluster.
 
   Its position on the outline (the tab) is part of the copy. Still yours:
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;

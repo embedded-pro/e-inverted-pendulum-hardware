@@ -75,7 +75,7 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
   (D-037), the NFC and drive copies (D-039, D-040) the motor connectors with their encoder inputs at the side edges
   (D-042), and the IMU, flash and EEPROM (D-043). Since 49b38c1 the owner places in KiCad (D-047): the power entry and
   J301 are on the board, some support parts are parked off it, and the rule areas `ANTENNA_TAB`, `NFC_COIL`,
-  `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out come back with the pours. The board has the outline, the bracket
+  `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out come back with the pours. Every MCU pin another part uses has a 0.2 mm stub to a 0.15 / 0.25 mm via, and the MCU decoupling is back on top beside the pins (D-048, `scripts/pcb/mcu_escape.py`). The board has the outline, the bracket
   rule areas and bracket holes; every other part sits in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.

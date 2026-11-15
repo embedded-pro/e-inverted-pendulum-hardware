@@ -20,8 +20,10 @@ Fan-out (owner: the smallest via JLCPCB makes, 0.15 / 0.25 mm on 4 layers, pcb-d
   - a pad that already has a track is left alone, so a second run changes nothing.
 Decoupling (DS11929 s6.1.6 Fig. 16, D-038; owner: on top, beside the pins): the parked caps go to ST's top-side lands
 (C309 / C318), the Nucleo's top-side spots (C303 / C304 / C305 / C306) or, where those are taken, the nearest spot
-to their pin that clears every courtyard, other-net copper, every via and every silk outline (rf_block.spot_ok).
-Positions only: the owner routes them. Nothing is locked (D-045); silk.py lays the labels out last.
+to the land, the spot or their pin that clears every courtyard, other-net copper, every via (none in a pad) and every
+silk outline (rf_block.spot_ok). The copy's routes the owner took up (CORRIDORS: VLXSMPS to L302, HSE to Y301) stand in
+as tracks while the caps are placed, so no cap lands on them. Positions only: the owner routes them. Nothing is locked
+(D-045); silk.py lays the labels out last.
 """
 
 import argparse
@@ -68,6 +70,8 @@ CAPS = [
     ("C306", "C17", "68"),
 ]
 VIA_SIZE = {"diameter": VIA_DIAMETER, "drill": VIA_DRILL}
+CORRIDORS = [("43", "L302"), ("34", "Y301"), ("35", "Y301")]
+CORRIDOR_WIDTH = 0.25
 
 
 def short(net):
@@ -357,6 +361,26 @@ def place_cap(board, fp, centre, first):
     sys.exit(f"no free spot for {fp.GetReference()}")
 
 
+def keep_corridors(board, pins, footprints):
+    """Stand-in tracks, while the caps are placed, for the copy's routes the owner took up and hasn't redrawn: the SMPS
+    switch node (pin 43 to L302) and the HSE crystal (pins 34 / 35 to Y301). They keep the caps off those paths."""
+    tracks = []
+    for pin, ref in CORRIDORS:
+        pad = pins[pin]
+        if any(t.GetNetCode() == pad.GetNetCode() for t in board.GetTracks()):
+            continue
+        end = next(p for p in footprints[ref].Pads() if p.GetNetCode() == pad.GetNetCode())
+        track = pcbnew.PCB_TRACK(board)
+        track.SetStart(pad.GetPosition())
+        track.SetEnd(end.GetPosition())
+        track.SetWidth(mm(CORRIDOR_WIDTH))
+        track.SetLayer(pcbnew.F_Cu)
+        track.SetNet(pad.GetNet())
+        board.Add(track)
+        tracks.append(track)
+    return tracks
+
+
 def decoupling(board):
     footprints = {fp.GetReference(): fp for fp in board.GetFootprints()}
     outline = outline_of(board)
@@ -366,13 +390,15 @@ def decoupling(board):
         sys.exit(3)
     mcu = footprints[MCU]
     pins = {p.GetNumber(): p for p in mcu.Pads()}
+    corridors = keep_corridors(board, pins, footprints)
     report = []
     for ref, spot, pin in todo:
         fp = footprints[ref]
         fp.SetLocked(False)
         target = pins[pin].GetPosition()
         if spot == "land":
-            how = place_cap(board, fp, target, lambda fp=fp: land(board, fp))
+            part = next(p for p in RF.DATA["parts"] if p["ours"] == ref)
+            how = place_cap(board, fp, RF.to_ours(*part["at"]), lambda fp=fp: land(board, fp))
         elif spot:
             st = RF.DATA["decoupling"][spot]
             nucleo = RF.to_ours(*st["at"])
@@ -387,6 +413,8 @@ def decoupling(board):
         B.label_fields(fp)
         distance = pcbnew.ToMM((fp.GetPosition() - target).EuclideanNorm())
         report.append((ref, pin, short(pins[pin].GetNetname()), how, distance))
+    for track in corridors:
+        board.Remove(track)
     silk.report(*silk.layout(board, check=False), check=False)
     for ref, pin, net, how, distance in report:
         fp = footprints[ref]
