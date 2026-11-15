@@ -46,7 +46,7 @@ External Qwiic devices must avoid 0x50 and 0x56.
     - Nets come from copper connectivity, named from ST's schematic.
     - The script fails if a copper island would need two nets, if a pad's net differs from ST's schematic, or if the coil
       is not one path from AC0 to AC1.
-  - `scripts/pcb/nfc_block.py --apply` pastes the corner once, as a group "MB1163 NFC corner".
+  - `scripts/pcb/nfc_block.py --apply` pasted the corner once, as a group "MB1163 NFC corner" (ungrouped since D-046).
   - `scripts/nfc_coil.py` checks the coil (below).
 
 ## The circuit (MB1163 C-01 sheet 1)
@@ -99,14 +99,10 @@ External Qwiic devices must avoid 0x50 and 0x56.
 
 ## Layout
 
-- **The group** "MB1163 NFC corner":
-  - AE801;
-  - the 14 cluster parts;
-  - 58 tracks, 13 vias;
-  - ST's GND pour, cut to the cluster box, on F.Cu and B.Cu. Its thermal-relief settings are an **ASSUMPTION** (0.3 mm
-    gap, 0.4 mm spoke): ST's Gerbers don't carry them. Its 0.3 mm clearance is ST's.
-
-  It is a group, unlocked (D-045); every reference is on the silkscreen (D-041). Move or rotate it only as one unit.
+- **What is left of the copy (D-046, owner):** AE801, the 14 cluster parts, ST's 58 tracks and 13 vias; no group and no
+  pours, all unlocked. ST's GND pour (F.Cu and B.Cu, cut to the cluster, 0.3 mm clearance) is gone: the owner pours the
+  ground, and `NFC_POUR_GAP` still keeps any pour 4.4 mm from the coil. Every reference is on the silkscreen (D-041).
+  `nfc_block.py` does nothing once AE801 is on the board.
 - **Position:**
   - ST's layout is turned 90° counter-clockwise (a rotation, no mirror; owner, 2026-11-15: D-039's 180°, then 90°
     clockwise). The coil is at the right edge; the tag cluster sits to its left, toward the MCU.
@@ -128,7 +124,7 @@ External Qwiic devices must avoid 0x50 and 0x56.
   - from the 2.4 GHz antenna (x ≤ −14.0): ≥ 24.5 mm.
 - **DRC and the routing gate:**
   - ST's GND T-branch on B.Cu (from the VSS via to the C6 / C8 ground vias) stays as copied.
-  - A project rule exempts the group from the 45° corner rule.
+  - ST's 90° corners are DRC exclusions in the project (D-046), so anything new is checked in full.
   - The routing gate runs with `--gate track_junctions=1` (and `jogs=4` for MB1355). Shorts, clearance and the fab
     floor are not relaxed.
 - **Deviation:** ST's drill file lists ANT14's two layer changes as **non-plated** 0.5 mm holes. A non-plated hole
@@ -146,7 +142,7 @@ External Qwiic devices must avoid 0x50 and 0x56.
 1. Measure f0 on the assembled robot (loop probe / VNA) and check the read range with an Android and an iOS phone; fit
    C823 or C821 / C822 only if the measurement asks for it.
 2. ST's MB1163 BOM is not in hand. Confirm the 47 pF part (tolerance, dielectric) when it is; ours is C0G ±5%.
-3. Owner: route NFC_GPO (PA2), NFC_RF_DIS (PA3), QWIIC_SDA / SCL and +3V3 into the cluster; join the cluster's GND pour
+3. Owner: route NFC_GPO (PA2), NFC_RF_DIS (PA3), QWIIC_SDA / SCL and +3V3 into the cluster; pour the cluster's ground
    to the board-wide ground.
 4. Owner: keep the bumper screws, the battery cradle and any metal out of `NFC_POUR_GAP`.
 5. **ASSUMPTION:** the coil's 2 mm from the board edge. Check the phone read range with the bumper fitted.

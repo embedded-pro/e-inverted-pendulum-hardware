@@ -30,7 +30,7 @@ for the left motor and A for the right (D-042: each bridge feeds the connector o
     - It selects the power stage.
     - It copies the stage's tracks, vias and pours inside its box, pruning the legs to TI's headers.
     - It checks every pad's net, and TI's mirrored Q2 / Q4 wiring.
-  - `scripts/pcb/drv_block.py --apply` pastes it once, as the group "BOOST-DRV8711 drive".
+  - `scripts/pcb/drv_block.py --apply` pasted it once, as the group "BOOST-DRV8711 drive" (ungrouped since D-046).
 
 ## The circuit (BOOST-DRV8711 schematic and BOM, SLVSC40H)
 
@@ -80,19 +80,22 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
     bottom-right, at (13.8, 18.9).
   - The DRV8711's 12 PowerPAD thermal vias (0.33 mm, plated, no lead) now sit inside `BATTERY_BACK`. The battery rule
     was scoped to plated holes over 0.4 mm, so they count as vias (already allowed there); real leads are still caught.
-- **Copper:** TI's 2-layer copper goes on our F.Cu and B.Cu: 173 tracks, 144 vias and 12 pours (VM, phase, GND_A / B,
-  GND).
+- **Copper:** TI's 2-layer copper went on our F.Cu and B.Cu: 173 tracks, 144 vias and 12 pours (VM, phase, GND_A / B,
+  GND). **Since D-046 (owner) the group and the 12 pours are gone**; the parts, tracks and vias stay, unlocked, for the
+  owner to edit. The pours carried the bridge current (VM to the high-side drains, the phase nodes, the shunts' GND_A /
+  GND_B), so the owner re-creates that copper: MOTOR / PWR_BUS widths or pours, hot loops as tight as TI's.
   - L2 stays solid GND under it, never cut: closer to the hot loops than TI's bottom layer.
   - Two of TI's vias moved 0.01 mm, to reach JLCPCB's 0.20 mm hole-to-copper from the net ties' bridges.
-- **Project DRC rules**, inside the group only:
-  - TI's 0.178 mm clearance (under our 0.2 mm MOTOR / PWR_BUS class value, above JLCPCB's 0.09);
-  - TI's 90° corners exempt from the 45° rule.
+- **Project DRC rules**, scoped by net since D-046:
+  - TI's 0.178 mm clearance on the DRV8711's own nets (DRV_*), except to pours (under our 0.2 mm MOTOR / PWR_BUS class
+    value, above JLCPCB's 0.09);
+  - TI's 90° corners are DRC exclusions in the project, so anything new is checked in full.
 - **Routing gate:** `--gate jogs=5 --gate track_junctions=1`.
   - One of the jogs is TI's: 0.19 mm on A2HS.
   - The other four jogs and the T-junction are ST's copies.
   - Shorts, clearance and the fab floor are not relaxed.
-- **Phase outputs:** TI's phase pours end at the top of the box, where TI's terminal block sat. From there to J601 /
-  J602 (PH 6-pin at the board edges) the routing is the owner's.
+- **Phase outputs:** the phase copper (TI's pours until D-046) is the owner's, from the FETs to J601 / J602 (PH 6-pin at
+  the side edges, D-044).
 - **Net ties on the bottom:** copper only, nothing to assemble, no label.
 - **Silkscreen (D-041):** every reference on the silk except C503 / C506, whose only spots beside the FETs Q501 / Q503
   take (their references are on F.Fab). The extras are placed so that no two outlines overlap.

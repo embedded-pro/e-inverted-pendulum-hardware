@@ -80,8 +80,10 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   moving parts in KiCad. Clean labels never move.
 - `python3 scripts/rf_reference.py`: ST's MB1355 files (`reference/mb1355/`, gitignored, OPLA) -> `scripts/pcb/mb1355_rf.json`
   and the `MB1355_*` footprints (D-037).
-- `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a group; no-op once present).
+- `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot; no-op once U301 is on the board).
   The scripts lock nothing: locking is the owner's, in KiCad (D-045).
+- `python3 scripts/pcb/ungroup_copies.py --apply | --exclusions`: the three copies without groups or pours (D-046), and the
+  copied routing's 90° corners as DRC exclusions in the project (`--exclusions` recomputes them).
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->

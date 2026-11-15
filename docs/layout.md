@@ -4,7 +4,7 @@ Status: **hand-off (2026-11-13, D-032).** The owner places the components in KiC
 slate:
 - **on the board:** the outline, the keep-out rule areas, the reference drawings and the WHEELTEC bracket holes;
 - **the MB1355 RF corner (2026-11-15, D-037):** the MCU, RF path, antenna, SMPS, crystals and their copper, pasted at the
-  top-left corner as one group, "MB1355 RF corner" (`scripts/pcb/rf_block.py`, `docs/rf.md`);
+  top-left corner (`scripts/pcb/rf_block.py`, `docs/rf.md`); ungrouped, its pours removed (D-046);
 - **staging area right of the board:** every other part, grouped by schematic sheet (`docs/images/overview.png`).
 
 From now on the `.kicad_pcb` is the source of truth for placement. `scripts/pcb/board.py` never moves, reshapes or deletes
@@ -38,7 +38,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 | Name | Where | Rule | Why |
 |---|---|---|---|
 | `ANTENNA_TAB` | MB1355's tab, x −42.5 to −14.0, z 109.98 → top edge, all layers | no vias or pour; only the antenna feed (RF_ANT) may cross it (project rule) | Ground-free antenna tab (D-037, `docs/rf.md`) |
-| group "MB1355 RF corner" | top-left: MCU, RF, SMPS, crystals | ST's clearance (0.10 mm), arcs/angles and tight placement allowed inside the group (project rules); the L2 cut-out under the RF line | Literal copy of MB1355 (D-037) |
+| project rules (D-046) | the MB1355 and BOOST-DRV8711 copies | ST's 0.10 mm on the RF / SMPS / HSE nets and C318, TI's 0.178 mm on DRV_* nets (not to pours); Y301 / Y302 tight placement; the copied 90° corners are DRC exclusions | Vendor geometry kept as copied; anything new is checked in full |
 | `NFC_COIL` | ANT14 + 0.5 mm: x 10.0 → edge, z 76.0 → edge, all layers | no tracks, vias or pour (the coil footprint excepted) | MB1163 copy (D-039, `docs/nfc.md`) |
 | `NFC_POUR_GAP` | ANT14 + ST's 4.4 mm coil-to-pour gap: x 6.1 → edge, z 72.1 → edge, all layers | no vias or pour | ST's pour edge on MB1163; ST's own cluster copper sits in it |
 | `BRACKET_STRIP` | bottom 25 mm, front and back | **no footprints** except the bracket holes MB1–MB8 (project rule) | Chassis attachment (D-026) |
@@ -50,13 +50,13 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 
 ## Placement guidance (from the design docs)
 
-- **RF (`docs/rf.md`):** done by the copy. The group "MB1355 RF corner" holds:
+- **RF (`docs/rf.md`):** done by the copy (ungrouped, no pours since D-046). It holds:
   - U301, FL401, the match and AE401 (no SMA branch, D-038);
   - L301 / L302, Y301 / Y302 and their caps, the shield-clip pads;
   - the MCU decoupling on top, at the Nucleo's spots or the nearest free spot to each pin (D-038, `docs/rf.md`);
   - ST's copper, vias and ground.
 
-  Move it only as a group; its position on the outline (the tab) is part of the copy. Still yours:
+  Its position on the outline (the tab) is part of the copy. Still yours:
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
   - route the MCU's other pins out of the corner;
   - pour the board-wide ground.
@@ -72,14 +72,14 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
     the MCU's top pins (28 / 29) around its left side and down to the EEPROM, about 50 mm (inside the bus
     budget's 15 cm, `docs/nfc.md`); SPI1 and FLASH_NCS from the bottom pins. Keep them off the RF
     strip and the L2 cut-out under the RF line.
-- **NFC (`docs/nfc.md`):** done by the copy. The group "MB1163 NFC corner" holds AE801 (ANT14), U803 (M24SR64-Y) and
-  ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks, vias and GND pour, turned 90° from ST's
-  board and 8 mm below the corner: the coil at the right edge, the tag to its left, beside the MCU. Move it only as a group. Still yours: route NFC_GPO (PA2), NFC_RF_DIS (PA3),
+- **NFC (`docs/nfc.md`):** done by the copy (ungrouped, no pours since D-046). It holds AE801 (ANT14), U803 (M24SR64-Y) and
+  ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks and vias, turned 90° from ST's
+  board and 8 mm below the corner: the coil at the right edge, the tag to its left, beside the MCU. Still yours (the cluster's GND pour included): route NFC_GPO (PA2), NFC_RF_DIS (PA3),
   QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
-- **Motor drive (`docs/drive.md`):** done by the copy. The group "BOOST-DRV8711 drive" holds TI's power stage (U501,
-  Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks, vias and pours, turned 180°
-  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), centred on x 0 from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Move it only as a
-  group. Still yours: the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
+- **Motor drive (`docs/drive.md`):** done by the copy (ungrouped, its 12 pours removed since D-046). It holds TI's power stage (U501,
+  Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks and vias, turned 180°
+  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), centred on x 0 from z 13.5 to 50.5, and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Still yours: the power copper
+  the pours carried (VM, phases, GND_A / GND_B), the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (`docs/power-map.md`, power-pcb-layout §3):**
   - **Buck:** TPS62933F per SLUSEA4 §12, its switch node kept small and away from the IMU and the antenna.
 - **Motor connectors and encoder inputs (D-042, D-044, `scripts/pcb/place_block.py motor_io`): placed.**
@@ -105,8 +105,8 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 ## After placing
 
 1. Save in KiCad, then lock the parts you consider fixed (they become the anchors for routing; power-pcb-layout §1).
-   The scripts lock nothing (D-045). The three copies are KiCad groups: a click selects the whole group; double-click it
-   (or right-click → Enter Group) to select one part, track or via inside.
+   The scripts lock nothing (D-045), and the three copies are no longer groups (D-046): every part, track and via selects
+   on its own.
 2. Re-sync and check. This keeps every position:
 
    ```bash

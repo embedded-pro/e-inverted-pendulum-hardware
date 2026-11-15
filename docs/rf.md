@@ -98,7 +98,7 @@ underside". This board is assembled on top only, so `scripts/pcb/rf_block.py` pu
 | C317 | 100 nF | NRST 8 | C3, bottom | top, 4.05 mm |
 
 The crystals need nothing added: Y301 (HSE) has no external caps (HSETUNE), and Y302 with C315 / C316 sits on ST's lands
-as copied (D-037). The decoupling is inside the group; its routing is the owner's.
+as copied (D-037). Its routing is the owner's.
 
 ## Stack-up and the RF line
 
@@ -143,17 +143,21 @@ as copied (D-037). The decoupling is inside the group; its routing is the owner'
 
 ## Layout rules that come with the copy
 
-- **The group:** "MB1355 RF corner" holds:
-  - 34 footprints: U301, the RF-corner parts and the MCU decoupling (D-038);
-  - 61 tracks and arcs and 317 vias;
-  - the L1 / L2 / L3 / L4 ground of the RF strip;
-  - the L2 cut-out and ST's four pad keep-outs.
-
-  It is a group, unlocked (D-045): move or rotate it as one unit. `board.py` never moves it, and `rf_block.py` does nothing once it exists.
-- **Project DRC rules** (`scripts/pcb/board.py`), each applying inside the group only:
-  - clearance ≥ 0.10 mm (ST's own rule; JLCPCB's floor is 0.09);
-  - ST's arcs and corner angles are exempt from the 45° rule;
-  - ST's tight placement is allowed: shared 0R switch pad, crystal and clips.
+- **What is left of the copy (D-046, owner):** no group and no pours. The owner edits it freely.
+  - Kept: 34 footprints (U301, the RF-corner parts, the MCU decoupling of D-038), ST's 61 tracks and arcs and 317 vias, all
+    unlocked (D-045).
+  - Kept, as rule areas: the L2 cut-out under the RF line and ST's two pad keep-outs. The RF line needs them; delete them
+    only with ST's reference in hand.
+  - Removed: ST's five pours. They were the RF strip's L1 / L3 / B.Cu ground, which made the line coplanar (GCPW), and the
+    small RF_50 copper patch between FL401 and R401. The owner re-pours the ground: the RF netclass keeps a pour 0.2 mm
+    from the RF line (ST's gap), and L3 must stay ground under the strip. RF_50 needs a short track or patch again.
+  - `rf_block.py` does nothing once U301 is on the board; `--replace` refuses, since there is no group left.
+- **Project DRC rules** (`scripts/pcb/board.py`), scoped by net and reference since D-046:
+  - ST's 0.10 mm clearance on the RF nets, the SMPS nets, the HSE nets and C318, except to pours (JLCPCB's floor is
+    0.09);
+  - ST's tight placement: Y301 against U301, Y302 against SC403;
+  - ST's 90° corners (four) are DRC exclusions in the project, so anything new is checked in full
+    (`scripts/pcb/ungroup_copies.py`).
   - The RF1 fan-out from pin 31 keeps 0.104 mm between the 0.4 mm-pitch pins.
 - **Exception to "L2 is solid GND, never cut"** (CLAUDE.md): only the copied cut-out under the RF line and match.
 - **Routing-quality gate:** ST's routing has four short sideways jogs (0.15–0.23 mm, on VFBSMPS, VDDSMPS and
@@ -162,8 +166,8 @@ as copied (D-037). The decoupling is inside the group; its routing is the owner'
 - **Silkscreen:** references on the silk where a 1.0 mm label fits clear of everything (D-041). 17 do not: C301, C307,
   C308, C310, C312, C314–C317, C401, C402, FL401, L302, L401, SC404, Y301, Y302. Their references are on F.Fab.
 - **Ground and stitching:**
-  - The L1 / L3 / L4 ground outside the copied strip, and the board-wide L2 plane, are the owner's pours.
-  - Until then DRC lists ST's stitching vias in the shield area as dangling.
+  - All ground pours are the owner's now (D-046), the RF strip's included; L2 stays cut out under the RF line.
+  - Until then DRC lists ST's stitching vias as dangling.
 
 ## Tuning and test
 

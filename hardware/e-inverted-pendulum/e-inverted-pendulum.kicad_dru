@@ -24,30 +24,18 @@
   (condition "A.NetName == 'RF1'")
   (constraint clearance (min 0.104mm)))
 
-(rule "MB1355 RF corner: ST's own 0.1 mm clearance inside the copied group (above JLCPCB's 0.09 mm, D-037)"
-  (condition "A.memberOfGroup('MB1355 RF corner') && B.memberOfGroup('MB1355 RF corner')")
+(rule "MB1355 copy: ST's 0.1 mm on the RF, SMPS and HSE nets and C318, except to pours (they keep the RF class's 0.2 mm GCPW gap) (D-037, D-046)"
+  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetClass == 'RF' || B.NetClass == 'RF' || A.NetName == '*SMPS*' || B.NetName == '*SMPS*' || A.NetName == '*HSE_*' || B.NetName == '*HSE_*' || A.memberOfFootprint('C318') || B.memberOfFootprint('C318'))")
   (constraint clearance (min 0.1mm)))
 
-(rule "MB1355 RF corner: ST's own placement (shared 0R switch pad, crystal and clips packed tight, D-037)"
+(rule "MB1355 copy: ST's own placement, crystals packed against the MCU and a shield clip (D-037, D-046)"
   (severity ignore)
-  (condition "A.memberOfGroup('MB1355 RF corner') && B.memberOfGroup('MB1355 RF corner')")
+  (condition "(A.Reference == 'Y301' && B.Reference == 'U301') || (A.Reference == 'U301' && B.Reference == 'Y301') || (A.Reference == 'Y302' && B.Reference == 'SC403') || (A.Reference == 'SC403' && B.Reference == 'Y302')")
   (constraint courtyard_clearance (min 0mm)))
 
-(rule "MB1355 RF corner: ST's routing keeps its arcs and corners (D-037)"
-  (condition "A.memberOfGroup('MB1355 RF corner')")
-  (constraint track_angle (min 0)))
-
-(rule "MB1163 NFC corner: ST's routing keeps its corners and its GND branch (D-039)"
-  (condition "A.memberOfGroup('MB1163 NFC corner')")
-  (constraint track_angle (min 0)))
-
-(rule "BOOST-DRV8711 drive: TI's own 0.178 mm clearance inside the copied group (above JLCPCB's 0.09 mm, D-040)"
-  (condition "A.memberOfGroup('BOOST-DRV8711 drive') && B.memberOfGroup('BOOST-DRV8711 drive')")
+(rule "BOOST-DRV8711 copy: TI's 0.178 mm on the DRV8711's own nets, except to pours (D-040, D-046)"
+  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetName == '*/DRV_*' || B.NetName == '*/DRV_*')")
   (constraint clearance (min 0.178mm)))
-
-(rule "BOOST-DRV8711 drive: TI's routing keeps its corners (D-040)"
-  (condition "A.memberOfGroup('BOOST-DRV8711 drive')")
-  (constraint track_angle (min 0)))
 
 (rule "Silkscreen: two parts' outlines may sit closer than 0.15 mm but never overlap; labels keep 0.15 mm (D-041)"
   (layer "?.Silkscreen")

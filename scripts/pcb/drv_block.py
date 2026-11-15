@@ -202,6 +202,15 @@ def has_group(board):
     return any(g.GetName() == GROUP for g in board.Groups())
 
 
+def is_pasted(board):
+    """The copy is in place: its group, or, since the copies were ungrouped (D-046), U501 on the board."""
+    if has_group(board):
+        return True
+    outline = pcbnew.SHAPE_POLY_SET()
+    board.GetBoardPolygonOutlines(outline, False)
+    return any(fp.GetReference() == "U501" and outline.Contains(fp.GetPosition()) for fp in board.GetFootprints())
+
+
 def apply(board):
     net = RF.net_lookup(board)
     st_net = lambda name: net(DATA["net_map"][name])  # noqa: E731
@@ -284,7 +293,9 @@ def apply(board):
 
 def stage(step, replace):
     board = pcbnew.LoadBoard(str(B.BOARD))
-    if has_group(board) and not (replace and step == "reset"):
+    if replace and not has_group(board):
+        sys.exit(f"'{GROUP}' was ungrouped (D-046): its copper is the owner's now; edit it in KiCad")
+    if is_pasted(board) and not (replace and step == "reset"):
         print(f"'{GROUP}' is already on the board: nothing to do")
         sys.exit(3)
     if step == "reset":
