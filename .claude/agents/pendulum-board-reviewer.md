@@ -116,7 +116,7 @@ Ground every item in the guide and cite its section next to your package evidenc
    - TPS62933F (SLUSEA4 layout section): input capacitor at the pins, switch-node area, FB divider, nothing under BUCK_SW;
    - DRV8711 (SLVSC40): PowerPAD vias, VM and charge-pump capacitors at the pins, sense routing;
    - STM32WB SMPS and RF (AN5165, DS12804 Fig. 13): L301/L302 at pins 41–44 and orthogonal to the RF line, the 1.5 mm RF1-to-MLPF trace, ground vias;
-   - antenna (TI SWRA117D) and its keep-out; IFA edge distances (AN1088);
+   - the RF corner against ST's MB1355 D-01 (D-037, `docs/rf.md`): antenna tab, keep-out, the listed deviations only;
    - connector ESD (SLVA680): pass-through, no via before the TVS, ground via at the TVS;
    - ST25DV coil (`docs/nfc.md`) and MPU-6500 assembly guidance (no traces under the package, component clearance).
 
@@ -132,7 +132,7 @@ Ground every item in the guide and cite its section next to your package evidenc
    - switch nodes (MOT_*, BUCK_SW, SMPS_LX): only the copper the current needs, nothing under them on any layer;
    - Kelvin taps from the inner pad edges of Rsense; gate loops paired with their return; gate resistors and SS34 clamps at the FETs;
    - high-current paths against `docs/power-map.md` (PWR_BUS widths, ≥ 5 vias per layer change, no necks);
-   - the RF line: GCPW width and gap, no vias or stubs, the via fence, the pi network and U.FL stub, the antenna band clear on all four layers;
+   - the RF line: MB1355's 0.6 / 0.2 mm GCPW over L3 with the L2 cut-out, fence vias, match and SMA branch as copied, the antenna tab clear on all four layers;
    - crystals at their pins with short symmetric loops;
    - encoder traces away from MOT_* copper on every layer; ESD at the connectors;
    - the IMU's surroundings (switch nodes, connectors within 6 mm, heat sources, traces under it) and its silkscreened axes;

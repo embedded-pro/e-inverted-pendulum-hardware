@@ -60,7 +60,7 @@ SYMBOLS = {
     },
     "MLPF-WB55-01E3": {
         "reference": "FL",
-        "footprint": "e-inverted-pendulum:ST_MLPF-WB55-01E3",
+        "footprint": "e-inverted-pendulum:MB1355_ST_CSP650x58P2x3_160x100x42",
         "datasheet": "https://www.st.com/resource/en/datasheet/mlpf-wb55-01e3.pdf",
         "description": "ST integrated 50 ohm match + low-pass filter for STM32WB55 QFN (DS12804 Rev 2, Table 6)",
         "left": [("A3", "IN", "passive"), None, ("B3", "GND1", "passive"), ("B2", "GND2", "passive")],

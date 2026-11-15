@@ -413,8 +413,8 @@
         "wire_width": 6,
         "name": "RF",
         "priority": 6,
-        "track_width": 0.27,
-        "clearance": 0.15
+        "track_width": 0.6,
+        "clearance": 0.2
       },
       {
         "bus_width": 12,
@@ -593,11 +593,19 @@
       },
       {
         "netclass": "RF",
+        "pattern": "*/RF_MATCH"
+      },
+      {
+        "netclass": "RF",
         "pattern": "*/RF_ANT"
       },
       {
         "netclass": "RF",
-        "pattern": "*/RF_UFL"
+        "pattern": "*/RF_SMA_A"
+      },
+      {
+        "netclass": "RF",
+        "pattern": "*/RF_SMA"
       },
       {
         "netclass": "NFC",

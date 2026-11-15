@@ -19,8 +19,9 @@ ngspice simulation suite. The firmware lives in its own repository and is the so
 
 ## Highlights
 
-- **STM32WB55RGV6** with BLE 5: internal SMPS, 32 MHz HSE without external caps, printed IFA through an
-  `MLPF-WB55-01E3` filter on a 50 Ω GCPW line, DNP pi tuning and a DNP U.FL test port.
+- **STM32WB55RGV6** with BLE 5. The whole RF corner is a copy of ST's NUCLEO-WB55 (MB1355 rev D-01, D-037): internal
+  SMPS, 32 MHz HSE without external caps, `MLPF-WB55-01E3` → 3.6 nH / 1.2 pF match → printed meander antenna on
+  ST's ground-free tab at the top-left corner, and a not-fitted SMA branch.
 - **DRV8711 gate driver with four external half-bridges** (`CSD88537ND`) for two MG310 gear motors: indexer bypassed
   (PWMMODE 1), 50 mΩ low-side shunts with Kelvin taps, 2.0 A trip, SS34 clamps on every phase node.
 - **Battery path:** XT30, 4 A fuse, back-to-back `AO4805` P-FETs for reverse polarity and switching, with a simulated
@@ -65,7 +66,7 @@ requirement to a firmware `REQ-*` ID or to a decision in [docs/decisions.md](doc
 | Motors | 2 × MG310 1:20 (7.4 V), average motor voltage capped at 7.4 V by firmware | D-027 |
 | Drive | DRV8711, PWMMODE 1, trip 2.0 A (ISGAIN 20, TORQUE 186), 0.5 A continuous by firmware I²t | D-027, S0 |
 | Encoders | Hall A/B, no index; 1040 counts per wheel revolution (13 PPR is an assumption) | D-028 |
-| Radio | BLE on the STM32WB55, printed IFA | D-001, D-007 |
+| Radio | BLE on the STM32WB55, RF corner copied from ST's NUCLEO-WB55 (MB1355) | D-001, D-007, D-037 |
 | PCB | 85 × 130 mm, 4 layers JLC04161H-7628, L2 solid GND, JLCPCB assembly | D-008, D-024 |
 
 [docs/firmware-interface.md](docs/firmware-interface.md) lists the settings the firmware must apply (DRV8711 registers,
@@ -88,15 +89,16 @@ e-inverted-pendulum-hardware/
 │       ├── e-inverted-pendulum.kicad_pro / .kicad_sch (root) / .kicad_pcb / .kicad_dru
 │       ├── power_entry / logic_power / mcu / rf / drive / motors_encoders / imu_flash / ui .kicad_sch
 │       ├── e-inverted-pendulum.kicad_sym    # project symbols
-│       ├── e-inverted-pendulum.pretty/      # project footprints (XT30, STDC14, NFC coil, ...)
+│       ├── e-inverted-pendulum.pretty/      # project footprints (XT30, STDC14, NFC coil, MB1355_* from ST, ...)
 │       └── sym-lib-table, fp-lib-table
 ├── scripts/
 │   ├── schgen/                       # schematic generator: design/*.py -> hardware/ (D-020, D-033)
-│   ├── pcb/                          # board sync from the schematic (add-only, D-032) and renders
+│   ├── pcb/                          # board sync (add-only, D-032), MB1355 RF-corner paste (rf_block.py, D-037), renders
 │   ├── export_review.py              # review package     -> review_exports/<board>/
 │   ├── export_jlcpcb.py              # fab + assembly     -> manufacturing/<board>/
 │   ├── export_release.py             # release bundle     -> release/<board>-<version>.zip
 │   ├── visual_diff.py                # PR visual diff     -> diff/<board>/
+│   ├── rf_reference.py               # ST MB1355 files (reference/, gitignored) -> pcb/mb1355_rf.json + MB1355_* footprints
 │   └── check_*.py, design_calcs.py, nfc_coil.py, gcpw.py, export_bom.py, jlc_stock.py
 ├── simulation/                       # ngspice suite (S0–S5) + REPORT.md
 ├── pin-data/                         # pin map and the DS11929 package data it is checked against
@@ -161,6 +163,16 @@ Then bring the board in line (new parts land in the staging area; nothing on the
 python3 scripts/pcb/board.py --rules <path to pcb_rules.py from the pcb-design-rules skill>
 ```
 
+The RF corner is a copy of ST's NUCLEO-WB55 (MB1355 rev D-01, D-037). It is pasted once, as a locked group, and a second
+run does nothing (`docs/rf.md`):
+
+```bash
+python3 scripts/pcb/rf_block.py --apply
+```
+
+`scripts/rf_reference.py` re-derives `scripts/pcb/mb1355_rf.json` and the `MB1355_*` footprints from ST's files, which are
+kept out of the repository in `reference/mb1355/` (ST's Open Platform License).
+
 ### Review and fabrication packages
 
 - `python3 scripts/export_review.py`: ERC/DRC, netlist, BOM, PDFs and renders for a design review, used by the
@@ -176,9 +188,9 @@ python3 scripts/pcb/board.py --rules <path to pcb_rules.py from the pcb-design-r
    `rf-layout` §12 checklists ([docs/plan.md](docs/plan.md)).
 2. Re-run the stock check; every line must be in stock for the order quantity.
 3. JLCPCB options (PCB + assembly, D-036): 4 layers, JLC04161H-7628, 1.6 mm, 1 oz outer / 0.5 oz inner; impedance
-   control, 50 Ω ±10 % on the L1 GCPW over L2 (0.27 / 0.15 mm, `docs/rf.md`). Check every CPL rotation in the preview
+   control only if JLCPCB holds MB1355's RF line as drawn (0.6 / 0.2 mm on L1 over L3, `docs/rf.md`). Check every CPL rotation in the preview
    (the WS2812B-2020 footprint is the datasheet pattern turned 180°).
-4. Leave the DNP parts off: pi tuning C401/C402, U.FL J401 + R402, NFC trim C804, sense filters C501/C504, motor
+4. Leave the DNP parts off: antenna-match C401, SMA branch R402 / C403 / C404 / J401, shield clips SC401–SC404, NFC trim C804, sense filters C501/C504, motor
    snubbers C603/C607, encoder pull-ups, R602.
 
 ---

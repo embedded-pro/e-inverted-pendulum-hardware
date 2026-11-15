@@ -40,7 +40,10 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - JLCPCB is the fab and assembler (D-036). Prefer parts in stock, basic before extended; footprints
   must match the LCSC part's package exactly.
 - Stack-up: JLC04161H-7628, 4-layer 1.6 mm, 1 oz outer / 0.5 oz inner. L2 is solid GND and is
-  never cut. Design rules are JLCPCB's (`pcb-design-rules`, D-036).
+  never cut, except the copied MB1355 cut-out under the RF line (D-037). Design rules are JLCPCB's
+  (`pcb-design-rules`, D-036).
+- The RF corner (MCU, RF path, antenna tab, SMPS, crystals) is a literal copy of ST's NUCLEO-WB55 MB1355 rev D-01
+  (D-037, `docs/rf.md`). Change it only with ST's reference in hand; ST's files stay in the gitignored `reference/`.
 - Phases have gates (`docs/plan.md`). Do not start a phase before the previous gate is
   signed off by the user.
 - Layout: the user places the anchors and they are never moved (`power-pcb-layout` §1).
@@ -68,6 +71,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   moves or reshapes what is on the board; it adds missing items (new parts go to the first free spot in the staging
   area) and removes parts deleted from the schematic. Only references show on the silkscreen; test pads show their net
   (D-035). `--stage-all` is a one-shot reset to staging.
+- `python3 scripts/rf_reference.py`: ST's MB1355 files (`reference/mb1355/`, gitignored, OPLA) -> `scripts/pcb/mb1355_rf.json`
+  and the `MB1355_*` footprints (D-037).
+- `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a locked group; no-op once present).
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

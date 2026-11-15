@@ -20,13 +20,26 @@
 
 # Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
 
-(rule "RF1 matching trace: DS12804 Fig. 13 copies a 104 um gap (docs/rf.md)"
+(rule "RF1: MB1355's 0.265 mm fan-out from pin 31 to FL401 between the 0.4 mm-pitch pins (D-037, docs/rf.md)"
   (condition "A.NetName == 'RF1'")
   (constraint clearance (min 0.104mm)))
 
-(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
-  (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
-  (constraint annular_width (min 0.1mm)))
+(rule "MB1355 RF corner: ST's own 0.1 mm clearance inside the copied group (above JLCPCB's 0.09 mm, D-037)"
+  (condition "A.memberOfGroup('MB1355 RF corner') && B.memberOfGroup('MB1355 RF corner')")
+  (constraint clearance (min 0.1mm)))
+
+(rule "MB1355 RF corner: ST's own placement (shared 0R switch pad, crystal and clips packed tight, D-037)"
+  (severity ignore)
+  (condition "A.memberOfGroup('MB1355 RF corner') && B.memberOfGroup('MB1355 RF corner')")
+  (constraint courtyard_clearance (min 0mm)))
+
+(rule "MB1355 RF corner: ST's routing keeps its arcs and corners (D-037)"
+  (condition "A.memberOfGroup('MB1355 RF corner')")
+  (constraint track_angle (min 0)))
+
+(rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
+  (condition "A.Type == 'Track' && A.intersectsArea('ANTENNA_TAB') && A.NetName != '/4 2.4 GHz RF path and antenna/RF_ANT'")
+  (constraint disallow track))
 
 (rule "Battery on the back: no through-hole pins under it (D-025)"
   (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.insideArea('BATTERY_BACK')")

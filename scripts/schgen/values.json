@@ -7,7 +7,7 @@
   },
   "lse_cap": {
     "key": "6.8p_0402_50V_C0G",
-    "source": "LSE load: AN2867, DS11929 Table 41 note 3"
+    "source": "LSE load: AN2867, C_L 6 pF (D-037)"
   },
   "vdda_ferrite": {
     "lcsc": "C80165"

@@ -53,8 +53,8 @@ measurement on the assembled robot.
   from the coil itself.
 - **No metal behind it:** the battery outline on the back stays at least 5 mm below the coil.
 - **Short AC0/AC1:** the ST25DV sits next to the coil terminals, and the two AC traces run as a pair (net class like RF).
-- **Spacing from the 2.4 GHz antenna:** at least 5 mm from the IFA keep-out band (different bands, but copper in the
-  IFA near field detunes it).
+- **Spacing from the 2.4 GHz antenna:** at least 5 mm from the antenna tab (different bands, but copper in the
+  antenna's near field detunes it). The tab is at the top-left (x ≤ −14), the coil at the top-right (x ≥ 16): ≥ 30 mm.
 
 ## Open items
 

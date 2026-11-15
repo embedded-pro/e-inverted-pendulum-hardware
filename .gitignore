@@ -44,3 +44,6 @@ datasheets/
 # Vendor simulation models (TI copyright), fetched by simulation/fetch_models.py
 simulation/models/ti/
 simulation/models/ti-zips/
+
+# ST MB1355 reference material (OPLA): never committed, see docs/rf.md
+reference/

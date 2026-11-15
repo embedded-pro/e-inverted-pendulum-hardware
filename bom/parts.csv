@@ -1,12 +1,12 @@
 group,function,mpn,lcsc,qty,notes
 mcu,MCU,STM32WB55RGV6,C401505,1,D-001; stock is thin, reserve before ordering
-mcu,HSE 32 MHz crystal,NX2016SA-32MHZ-EXS00A-CS06654,C5441424,1,DS11929 Table 5 note 1 reference part (C_L 8 pF); no external load caps (HSETUNE)
-mcu,LSE 32.768 kHz crystal 6 pF,NX3215SA-32.768K-STD-MUA-14,C156244,1,C_L 6 pF per AN2867 low-C_L guidance; load caps from the C_L formula
-mcu,SMPS inductor 10 uH,LQM21FN100M80L,C162582,1,DS11929 Table 6 (4 MHz option; datasheet example LQM21FN100M70L)
-mcu,SMPS series inductor 10 nH,LQG15HS10NJ02D,C77103,1,DS11929 Table 6 note 2
+mcu,HSE 32 MHz crystal,NX2016SA-32MHZ-EXS00A-CS06654,C5441424,1,DS11929 Table 5 note 1 reference part (C_L 8 pF); no external load caps (HSETUNE); same part as MB1355 X1 (D-037)
+mcu,LSE 32.768 kHz crystal 6 pF,NX2012SA-32.768KHZ-STD-MUB-3,C889705,1,MB1355 X2 package (D-037); C_L 6 pF + 2 x 6.8 pF (ST's C_L 7 pF EXS00A-MU00389 not stocked)
+mcu,SMPS inductor 10 uH,LQM21FN100M80L,C162582,1,DS11929 Table 6; on MB1355 L1's 0805 land (D-037); ST fits Wurth 74479777310A (2 in stock)
+mcu,SMPS series inductor 10 nH,LQG15HS10NJ02D,C77103,1,DS11929 Table 6 note 2; on MB1355 L5's land (D-037); ST fits LQP15MN10NG02D (0 in stock)
 mcu,4.7 uF 0402 (SMPS out/VDD/VFBSMPS),CL05A475MP5NRNC,C23733,4,DS11929 Fig. 16
-rf,RF IPD match + filter,MLPF-WB55-01E3,C2651048,1,D-007; QFN-package variant
-rf,U.FL test port (DNP),BWU.FL-IPEX1,C5137195,1,DNP in production
+rf,RF IPD match + filter,MLPF-WB55-01E3,C2651048,1,D-007; QFN-package variant; MB1355 U12 (D-037)
+rf,Antenna match series 3.6 nH,LQG15HS3N6S02D,C19216,1,MB1355 L3 (D-037)
 drive,Motor pre-driver,DRV8711DCPR,C60013,1,stock is thin, reserve before ordering
 drive,Dual N-MOSFET 60 V (one half-bridge),CSD88537ND,C117439,4,4 half-bridges
 drive,Low-side Schottky clamp 40 V 3 A,SS34,C8678,4,S2: phase node above -0.6 V

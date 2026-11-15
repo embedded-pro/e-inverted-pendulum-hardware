@@ -1,5 +1,5 @@
 {
-  "model": "Model: conformal mapping for coplanar waveguide with a lower ground plane (Wadell, Transmission Line Design Handbook, 1991, s3.4; Simons, Coplanar Waveguide Circuits, 2001, s2.4), with the conductor-thickness correction of Gupta et al. (Microstrip Lines and Slotlines, 2nd ed., s7.3): the strip widens and the gap narrows by delta = (1.25 t / pi) (1 + ln(4 pi w / t)), and the air part of the field grows with t / gap. Solder mask is ignored (it lowers Z0 by about 1-2 ohm).",
+  "model": "The RF corner is copied from ST's NUCLEO-WB55 (MB1355 rev D-01): a 0.6 mm L1 line with 0.2 mm gaps to the L1 ground, and L2 cut out under it, so the line references L3. This script computes that line on MB1355's stack-up and on JLC04161H-7628, and what it would be with L2 kept (why ST cuts it). It also keeps the 50 ohm width table for a line referenced to L2.",
   "stack": {
     "name": "JLC04161H-7628 L1 over L2",
     "h_mm": 0.2104,
@@ -39,7 +39,7 @@
       "lambda_g_mm": 70.52826956505889
     }
   ],
-  "chosen": {
+  "l2_reference_50_ohm": {
     "gap_mm": 0.15,
     "width_mm": 0.27,
     "z0": 49.81136854432084,
@@ -49,5 +49,40 @@
     "z0_high_corner": 57.31162787926109,
     "microstrip_limit_width_mm": 0.4022552102549852,
     "worst_return_loss_db": 22.092849368537635
+  },
+  "mb1355_line": {
+    "geometry": {
+      "width_mm": 0.6,
+      "gap_mm": 0.2,
+      "source": "scripts/pcb/mb1355_rf.json (MB1355 D-01 RF tracks, L1 pour gap)"
+    },
+    "mb1355": {
+      "stack": {
+        "name": "MB1355 L1 over L3 (L2 cut out)",
+        "h_mm": 0.9955,
+        "t_mm": 0.0406,
+        "er": 4.305284974093264,
+        "source": "MB1355.PcbDoc layer stack: L1 1.6 mil / 18 mil FR-4 Dk 4.2 / L2 1.2 mil / 20 mil Dk 4.4 / L3"
+      },
+      "z0": 56.29255165171425,
+      "e_eff": 2.6125903337255654,
+      "z0_low_corner": 51.07940989396524,
+      "z0_high_corner": 61.4923548066969
+    },
+    "ours": {
+      "stack": {
+        "name": "JLC04161H-7628 L1 over L3 (L2 cut out)",
+        "h_mm": 1.2906,
+        "t_mm": 0.035,
+        "er": 4.567006429355496,
+        "source": "JLCPCB JLC04161H-7628: 7628 prepreg 0.2104 mm Dk 4.4, L2 0.0152 mm, core 1.065 mm Dk 4.6"
+      },
+      "z0": 56.89896154066765,
+      "e_eff": 2.7253335886077577,
+      "z0_low_corner": 51.86107376220267,
+      "z0_high_corner": 61.94283554389633
+    },
+    "ours_if_l2_kept": 33.93845775786164,
+    "difference_ohm": 0.6064098889534009
   }
 }

@@ -28,7 +28,9 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 
 - STM32WB55RGV6: internal SMPS (10 µH + 10 nH), HSE 32 MHz without external caps (HSETUNE), LSE 32.768 kHz,
   STDC14 (SWD + virtual COM on USART1), BOOT0 pull-down + test pad (no button).
-- RF1 → MLPF-WB55-01E3 → 50 Ω GCPW (0.27 / 0.15 mm) → DNP pi tuning → TI SWRA117D printed IFA at the top edge; DNP U.FL.
+- RF corner copied from ST's NUCLEO-WB55, MB1355 rev D-01 (D-037): RF1 → MLPF-WB55-01E3 → 0R switch → 3.6 nH / 1.2 pF
+  → printed meander antenna on ST's ground-free tab at the top-left corner; SMA branch not fitted. SMPS, HSE, LSE and
+  their copper as ST laid them out, pasted by `scripts/pcb/rf_block.py`; ST's files stay in the gitignored `reference/`.
 - Pin map in `pin-data/pinmap.csv`, kept 1:1 with the firmware's NUCLEO-WB55RG target (`scripts/check_pinmap.py`).
 
 ### Motor drive
@@ -61,12 +63,15 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 
 ## PCB (Phase 3, `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb`)
 
-- 85 × 130 mm, 4 layers JLC04161H-7628, 1 oz outer / 0.5 oz inner. L1 parts and RF, L2 solid GND (never cut), L3
+- 85 × 130 mm (MB1355's antenna tab at the top-left; the top edge steps down 7.5 mm right of it, D-037), 4 layers
+  JLC04161H-7628, 1 oz outer / 0.5 oz inner. L1 parts and RF, L2 solid GND (never cut, except MB1355's cut-out), L3
   power pours, L4 signals + GND fill. Built and assembled at JLCPCB only (D-036).
 - Net classes from `docs/power-map.md`; JLC rules from the `pcb-design-rules` skill; custom DRC rules for the RF1
-  trace, keep-outs and the bracket strip. The 50 Ω GCPW is 0.27 / 0.15 mm (49.8 Ω; order with impedance control).
+  trace, keep-outs and the bracket strip. RF line: MB1355's 0.6 / 0.2 mm on L1 over L3 (L2 cut out locally): 56.9 Ω
+  vs 56.3 Ω on ST's board (`scripts/gcpw.py`).
 - Silkscreen shows references only; test pads show their net name (D-035).
-- **Placement belongs to the owner (D-032).** The board has the outline, rule areas and bracket holes; every part sits
+- **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position as one locked group
+  (D-037). The board has the outline, rule areas and bracket holes; every other part sits
   in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.

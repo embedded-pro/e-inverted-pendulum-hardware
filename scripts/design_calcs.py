@@ -88,15 +88,18 @@ def ldo():
 
 
 def lse():
-    cl, stray = 6.0, 2.5
+    cl, stray, c0, esr, f = 6.0, 2.5, 1.5, 80e3, 32768.0
     each = 2 * (cl - stray)
+    gm_crit = 4 * esr * (2 * math.pi * f) ** 2 * ((c0 + cl) * 1e-12) ** 2
+    record("LSE", "crystal", "NX2012SA-32.768KHZ-STD-MUB-3 (C_L 6 pF, ESR <= 80 kOhm) on MB1355's X2 land (D-037)",
+           "NDK NX2012SA spec (C889705); ST's C_L 7 pF EXS00A-MU00389 is not stocked at JLCPCB")
     record("LSE", "load caps", f"2 x 6.8 pF C0G (computed {each:.1f} pF for C_L 6 pF, stray {stray} pF)",
-           "AN2867 C_L formula (mcu-circuit-design s4); ST characterises LSE with 2 x 6.8 pF (DS11929 Table 41 n3)")
-    record("LSE", "drive", "LSEDRV = 10 (firmware): g_m,crit ~0.67 uA/V vs 1.70 uA/V -> margin ~2.5",
-           "DS11929 Table 54; NX3215SA C0 1.5 pF max, ESR 70 kOhm")
-    values["lse_cap"] = {"key": "6.8p_0402_50V_C0G", "source": "LSE load: AN2867, DS11929 Table 41 note 3"}
-    record("HSE", "crystal", "NX2016SA-32MHZ-EXS00A-CS06654, no external caps (HSETUNE)",
-           "DS11929 Table 5 note 1 reference part; Table 52 C_L 6-8 pF, ESR <= 100 Ohm")
+           "AN2867 C_L formula (mcu-circuit-design s4); MB1355 uses 2 x 10 pF with its C_L 7 pF part")
+    record("LSE", "drive", f"LSEDRV = 10 (firmware): g_m,crit {gm_crit * 1e6:.2f} uA/V vs 1.70 uA/V -> margin "
+           f"{1.70e-6 / gm_crit:.1f}", "DS11929 Table 54; C0 1.5 pF is an ASSUMPTION (not in the NDK spec)")
+    values["lse_cap"] = {"key": "6.8p_0402_50V_C0G", "source": "LSE load: AN2867, C_L 6 pF (D-037)"}
+    record("HSE", "crystal", "NX2016SA-32MHZ-EXS00A-CS06654, no external caps (HSETUNE), MB1355 X1 land",
+           "DS11929 Table 5 note 1 reference part; Table 52 C_L 6-8 pF, ESR <= 100 Ohm; same part as MB1355")
 
 
 def vbat_divider():

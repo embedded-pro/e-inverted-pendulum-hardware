@@ -812,7 +812,7 @@
 				)
 			)
 		)
-		(property "Footprint" "e-inverted-pendulum:ST_MLPF-WB55-01E3"
+		(property "Footprint" "e-inverted-pendulum:MB1355_ST_CSP650x58P2x3_160x100x42"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)

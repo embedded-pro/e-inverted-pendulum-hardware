@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""50 ohm grounded coplanar waveguide (GCPW) for the RF path on JLC04161H-7628.
+"""Grounded coplanar waveguide (GCPW) impedance of the RF line, on MB1355's stack-up and on ours (D-037).
+
+The RF corner is copied from ST's NUCLEO-WB55 (MB1355 rev D-01): a 0.6 mm L1 line with 0.2 mm gaps to the L1
+ground, and L2 cut out under it, so the line references L3. This script computes that line on MB1355's stack-up
+and on JLC04161H-7628, and what it would be with L2 kept (why ST cuts it). It also keeps the 50 ohm width table
+for a line referenced to L2.
 
 Model: conformal mapping for coplanar waveguide with a lower ground plane (Wadell, Transmission
 Line Design Handbook, 1991, s3.4; Simons, Coplanar Waveguide Circuits, 2001, s2.4), with the
@@ -27,6 +32,17 @@ JLC04161H_7628 = {
     "h_mm": 0.2104, "t_mm": 0.035, "er": 4.4,
     "source": "JLCPCB stack-up JLC04161H-7628: 7628 prepreg 0.2104 mm, Dk 4.4; 1 oz outer copper (D-008)",
 }
+MB1355_L1_L3 = {
+    "name": "MB1355 L1 over L3 (L2 cut out)",
+    "h_mm": 0.457 + 0.0305 + 0.508, "t_mm": 0.0406, "er": (4.2 * 0.457 + 4.4 * 0.508) / (0.457 + 0.508),
+    "source": "MB1355.PcbDoc layer stack: L1 1.6 mil / 18 mil FR-4 Dk 4.2 / L2 1.2 mil / 20 mil Dk 4.4 / L3",
+}
+JLC04161H_7628_L1_L3 = {
+    "name": "JLC04161H-7628 L1 over L3 (L2 cut out)",
+    "h_mm": 0.2104 + 0.0152 + 1.065, "t_mm": 0.035, "er": (4.4 * 0.2104 + 4.6 * 1.065) / (0.2104 + 1.065),
+    "source": "JLCPCB JLC04161H-7628: 7628 prepreg 0.2104 mm Dk 4.4, L2 0.0152 mm, core 1.065 mm Dk 4.6",
+}
+MB1355_LINE = {"width_mm": 0.6, "gap_mm": 0.2, "source": "scripts/pcb/mb1355_rf.json (MB1355 D-01 RF tracks, L1 pour gap)"}
 ST_MLPF_REFERENCE = {
     "name": "DS12804 Fig. 14 reference (2-layer)",
     "h_mm": 1.507, "t_mm": 0.048, "er": 4.4,
@@ -99,12 +115,25 @@ def main():
                    "corners": "width +/-0.03 mm, gap -/+0.03 mm, h -/+10 %, er +/-5 % (ASSUMPTION fab tolerances)",
                    "z0_low_corner": z_lo, "z0_high_corner": z_hi,
                    "microstrip_limit_width_mm": microstrip_w(50.0, JLC04161H_7628)})
-    results["chosen"] = chosen
+    results["l2_reference_50_ohm"] = chosen
     gamma = max(abs(z - 50.0) / (z + 50.0) for z in (z_lo, z_hi))
     chosen["worst_return_loss_db"] = -20.0 * math.log10(gamma)
-    print(f"\nchosen: width {chosen['width_mm']} mm, gap {chosen['gap_mm']} mm -> {z_chosen:.1f} ohm; "
-          f"tolerance corners {z_lo:.1f}-{z_hi:.1f} ohm (return loss >= {chosen['worst_return_loss_db']:.0f} dB)")
-    print(f"microstrip limit (Hammerstad) for the same stack-up: {chosen['microstrip_limit_width_mm']:.3f} mm")
+    print(f"\nreferenced to L2 (not used since D-037): {chosen['width_mm']} / {chosen['gap_mm']} mm -> {z_chosen:.1f} ohm")
+
+    w, s_gap = MB1355_LINE["width_mm"], MB1355_LINE["gap_mm"]
+    line = {"geometry": MB1355_LINE}
+    for key, stack in (("mb1355", MB1355_L1_L3), ("ours", JLC04161H_7628_L1_L3)):
+        z, e = gcpw(w, s_gap, stack["h_mm"], stack["t_mm"], stack["er"])
+        z_lo, _ = gcpw(w + 0.03, s_gap - 0.03, stack["h_mm"] * 0.9, stack["t_mm"], stack["er"] * 1.05)
+        z_hi, _ = gcpw(w - 0.03, s_gap + 0.03, stack["h_mm"] * 1.1, stack["t_mm"], stack["er"] * 0.95)
+        line[key] = {"stack": stack, "z0": z, "e_eff": e, "z0_low_corner": z_lo, "z0_high_corner": z_hi}
+        print(f"MB1355 line {w} / {s_gap} mm on {stack['name']}: {z:.1f} ohm (corners {z_lo:.1f}-{z_hi:.1f})")
+    z_kept, _ = gcpw(w, s_gap, JLC04161H_7628["h_mm"], JLC04161H_7628["t_mm"], JLC04161H_7628["er"])
+    line["ours_if_l2_kept"] = z_kept
+    line["difference_ohm"] = line["ours"]["z0"] - line["mb1355"]["z0"]
+    print(f"same line over an uncut L2 on JLC04161H-7628: {z_kept:.1f} ohm (why the L2 cut-out is copied)")
+    print(f"ours - MB1355: {line['difference_ohm']:+.1f} ohm")
+    results["mb1355_line"] = line
 
     out = ROOT / "simulation" / "results" / "gcpw.json"
     out.write_text(json.dumps(results, indent=2, default=float) + "\n", encoding="utf-8")

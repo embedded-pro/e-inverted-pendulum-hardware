@@ -3,6 +3,8 @@
 Status: **hand-off (2026-11-13, D-032).** The owner places the components in KiCad. The board starts as a clean
 slate:
 - **on the board:** the outline, the keep-out rule areas, the reference drawings and the WHEELTEC bracket holes;
+- **the MB1355 RF corner (2026-11-15, D-037):** the MCU, RF path, antenna, SMPS, crystals and their copper, pasted at the
+  top-left corner as one locked group, "MB1355 RF corner" (`scripts/pcb/rf_block.py`, `docs/rf.md`);
 - **staging area right of the board:** every other part, grouped by schematic sheet (`docs/images/overview.png`).
 
 From now on the `.kicad_pcb` is the source of truth for placement. `scripts/pcb/board.py` never moves, reshapes or deletes
@@ -20,11 +22,11 @@ anything on the board.
 
 | Item | Value | Source |
 |---|---|---|
-| Outline | 85 × 130 mm, 1 mm corner radii | D-024 |
+| Outline | 85 mm wide; 130 mm tall at MB1355's antenna tab (top-left, x −42.5 to −14.0), 122.5 mm right of it (top edge z 110.02); 1 mm radii on the other corners | D-024, D-037 |
 | Coordinates | Grid origin on the wheel axle at the centre line (x = 0, z = 0); the bottom edge is z −12.5, the top edge z 117.5 (KiCad Y = 150 − z) | D-026 |
 | Stack-up | JLC04161H-7628: L1 0.035 / 7628 0.2104 / L2 0.0152 / core 1.065 / L3 0.0152 / 7628 0.2104 / L4 0.035 mm | D-008 |
-| Layers | L1 parts, RF, short power pours · L2 solid GND, never cut · L3 VBAT/5V0/3V3 pours, slow signals · L4 signals + GND fill | `docs/plan.md` |
-| Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.27 / 0.15 gap, NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
+| Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
+| Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
 | Silkscreen | References only; test pads show their net name; net ties unlabelled | D-035, `scripts/pcb/board.py` |
 | Page | A3, so the staging area fits on the sheet | — |
@@ -35,22 +37,26 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 
 | Name | Where | Rule | Why |
 |---|---|---|---|
-| `ANTENNA_KEEPOUT` / `ANTENNA_BASE` | full-width band, z 111.1 → top edge, all layers | no tracks, vias or pour (base strip: no vias or pour) | 2.4 GHz IFA keep-out (D-029, `docs/rf.md`) |
+| `ANTENNA_TAB` | MB1355's tab, x −42.5 to −14.0, z 109.98 → top edge, all layers | no vias or pour; only the antenna feed (RF_ANT) may cross it (project rule) | Ground-free antenna tab (D-037, `docs/rf.md`) |
+| group "MB1355 RF corner" | top-left: MCU, RF, SMPS, crystals | ST's clearance (0.10 mm), arcs/angles and tight placement allowed inside the group (project rules); the L2 cut-out under the RF line | Literal copy of MB1355 (D-037) |
 | `NFC_COIL_KEEPOUT` | top-right, x 16 → edge, z 84.5–106.5, all layers | no tracks, vias or pour | NFC coil area; move it with the coil (`docs/nfc.md`) |
 | `BRACKET_STRIP` | bottom 25 mm, front and back | **no footprints** except the bracket holes MB1–MB8 (project rule) | Chassis attachment (D-026) |
 | `BRACKET_BASE_CONTACT` | bottom 25 mm, B.Cu | no tracks, vias or pour | The steel bracket base sits on the back |
 | `BATTERY_BACK` | x ±38.5, z 39–76, B.Cu | **no through-hole pins** (project rule; NPTH holes allowed) | The battery lies on the back (D-025) |
-| project rule | RF1 net | 0.104 mm clearance | DS12804 Fig. 13 matching trace |
+| project rule | RF1 net | 0.104 mm clearance | MB1355's 0.265 mm fan-out from pin 31 between the 0.4 mm-pitch pins |
 | project rule | NPTH holes | 0.5 mm hole-to-copper | Screw threads touch the hole wall |
 
 ## Placement guidance (from the design docs)
 
-- **RF (`docs/rf.md`):**
-  - MLPF FL401 IN must sit 1.5 mm from the MCU's RF1 pad (pin 31), on a 200 µm trace with 104 µm gaps.
-  - RF1 is on the package's bottom edge at rot 0, so rotate the MCU so it faces the antenna.
-  - MLPF OUT → pi (C401, R401, C402) → AE401 feed: one short 50 Ω GCPW (0.27 / 0.15 mm), L1 only, no vias.
-  - U.FL J401 hangs off RF_50 through R402.
-  - HSE Y301 goes at pins 34/35; SMPS L301/L302 at pins 41–44; LSE Y302 at pins 3/4.
+- **RF (`docs/rf.md`):** done by the copy. The group "MB1355 RF corner" holds:
+  - U301, FL401, the match, AE401 and the SMA branch;
+  - L301 / L302, Y301 / Y302 and their caps, the shield-clip pads;
+  - ST's copper, vias and ground.
+
+  Move it only as a group; its position on the outline (the tab) is part of the copy. Still yours:
+  - route C307 / C308 (VDDRF, on top) to pin 33 and +3V3;
+  - route the MCU's other pins out of the corner;
+  - pour the board-wide ground.
 - **IMU (U701):** next to the MCU's SPI2 pins (PB12–PB15, PC6). If it sits far from the axle, report its position for the
   firmware (`docs/firmware-interface.md`, tangential acceleration).
 - **NFC:** the ST25DV (U803) right at the coil's terminals (AE801 pads 1/2 on its left side); AC0/AC1 short and paired.
@@ -89,7 +95,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 3. Phase 3 steps 4–8 follow: support placement around your anchors, power copper, critical routes, the rest of the
    routing, fills, DRC and fab outputs.
 
-## Previous generated draft (gate A v2, not applied)
+## Previous generated draft (gate A v2, not applied; superseded by the MB1355 RF corner, D-037)
 
 For reference only; the owner rejected it. Mechanical coordinates (mm, front view), rotation in degrees.
 

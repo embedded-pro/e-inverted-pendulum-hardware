@@ -121,14 +121,6 @@ def mechanical(name, description, length, width, keepout_width):
 
 
 FOOTPRINTS = {
-    "ST_MLPF-WB55-01E3": lambda n: footprint(
-        n, "ST MLPF-WB55-01E3 bumpless CSP, 2x3 pads 0.5 x 0.587 mm pitch; DS12804 Rev 2 Table 4, Table 6, Fig. 13 "
-           "(top view: A1 OUT, A2 GND4, A3 IN | B1 GND3, B2 GND2, B3 GND1; 300 um copper, 200 um mask/paste)",
-        "smd", (-0.5, -0.8, 0.5, 0.8), (-0.75, -1.05, 0.75, 1.05),
-        [smd(p, x, y, 0.3, 0.3, n, mask=-0.05, paste=-0.05) for p, x, y in (
-            ("A1", -0.25, -0.587), ("A2", -0.25, 0.0), ("A3", -0.25, 0.587),
-            ("B1", 0.25, -0.587), ("B2", 0.25, 0.0), ("B3", 0.25, 0.587))],
-        [label("OUT", -1.2, -0.587, "F.Fab", n, "out"), label("IN", -1.2, 0.587, "F.Fab", n, "in")]),
     "AMASS_XT30UPB-F_1x02_P5.00mm_Vertical": lambda n: footprint(
         n, "AMASS XT30UPB-F PCB socket, 2 x Ø1.6 pins at 5.00 mm, recommended holes Ø1.9 (AMASS drawing p.2-3); "
            "pad 1 = +; check against the molded marking at assembly",

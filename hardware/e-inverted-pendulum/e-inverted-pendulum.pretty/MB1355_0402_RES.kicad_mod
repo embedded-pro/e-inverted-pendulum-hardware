@@ -1,0 +1,112 @@
+(footprint "MB1355_0402_RES"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "ST land pattern Passive:0402_RES (MB1355 R5). Derived from STMicroelectronics MB1355 rev D-01 (NUCLEO-WB55), Open Platform License www.st.com/opla")
+	(tags "MB1355 NUCLEO-WB55 STM32WB RF")
+	(property "Reference" "REF**"
+		(at 0 -1.154 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "d979c58b-d08a-4fcf-9518-55d1434a87a7")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MB1355_0402_RES"
+		(at 0 1.154 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9b2a5edb-898e-4c1d-a0fa-c4e6ba10fac7")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "84999397-97c4-444b-af61-c5a10101eb27")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "f26897fa-0df3-4337-94bf-c394b48e70cc")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(sheetname "RF")
+	(sheetfile "RF.kicad_sch")
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.01647 -0.354)
+		(end 1.01647 -0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "743dc7d7-c9ee-4b43-9ddb-5cd32a42de72")
+	)
+	(fp_line
+		(start -1.01647 0.354)
+		(end -1.01647 -0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "c31f9cb1-d118-4959-9f92-e1a509b2a6d0")
+	)
+	(fp_line
+		(start 1.01647 -0.354)
+		(end 1.01647 0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "441d571b-d210-4321-aeb7-f7982bb6b54b")
+	)
+	(fp_line
+		(start 1.01647 0.354)
+		(end -1.01647 0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "19447a47-247f-4d86-8d08-a5fb3197633b")
+	)
+	(pad "1" smd rect
+		(at -0.59897 0)
+		(size 0.635 0.508)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "fb3bb4a1-48bf-43fc-a2c3-b25e63365992")
+	)
+	(pad "2" smd rect
+		(at 0.59897 0)
+		(size 0.635 0.508)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "920b8efb-143b-47cb-bc29-1f3a0c4dcd25")
+	)
+	(embedded_fonts no)
+)

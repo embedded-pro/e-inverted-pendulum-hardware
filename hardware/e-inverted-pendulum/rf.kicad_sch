@@ -199,7 +199,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:Antenna_Shield"
+		(symbol "Device:Antenna"
 			(pin_numbers
 				(hide yes)
 			)
@@ -213,7 +213,7 @@
 			(in_pos_files yes)
 			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "AE"
-				(at -1.905 4.445 0)
+				(at -1.905 1.905 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -223,8 +223,8 @@
 					(justify right)
 				)
 			)
-			(property "Value" "Antenna_Shield"
-				(at -1.905 2.54 0)
+			(property "Value" "Antenna"
+				(at -1.905 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -235,7 +235,7 @@
 				)
 			)
 			(property "Footprint" ""
-				(at 0 2.54 0)
+				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(hide yes)
@@ -246,7 +246,7 @@
 				)
 			)
 			(property "Datasheet" ""
-				(at 0 2.54 0)
+				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(hide yes)
@@ -256,7 +256,7 @@
 					)
 				)
 			)
-			(property "Description" "Antenna with extra pin for shielding"
+			(property "Description" "Antenna"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -278,22 +278,10 @@
 					)
 				)
 			)
-			(symbol "Antenna_Shield_0_1"
-				(arc
-					(start 0 -2.667)
-					(mid -0.8485 -2.1032)
-					(end -0.508 -1.143)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
+			(symbol "Antenna_0_1"
 				(polyline
 					(pts
-						(xy 0 5.08) (xy 0 -3.81)
+						(xy 0 2.54) (xy 0 -3.81)
 					)
 					(stroke
 						(width 0.254)
@@ -305,69 +293,10 @@
 				)
 				(polyline
 					(pts
-						(xy 0 -2.54) (xy 0 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 0.508 -1.143)
-					(mid 0.8046 -2.0885)
-					(end 0 -2.667)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.762 -1.905) (xy 2.54 -1.905)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0.762 -1.905)
-					(radius 0.1778)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 5.08) (xy 0 0) (xy -1.27 5.08)
+						(xy 1.27 2.54) (xy 0 -2.54) (xy -1.27 2.54)
 					)
 					(stroke
 						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 -2.54) (xy 2.54 -1.905)
-					)
-					(stroke
-						(width 0)
 						(type default)
 					)
 					(fill
@@ -375,7 +304,7 @@
 					)
 				)
 			)
-			(symbol "Antenna_Shield_1_1"
+			(symbol "Antenna_1_1"
 				(pin input line
 					(at 0 -5.08 90)
 					(length 2.54)
@@ -387,24 +316,6 @@
 						)
 					)
 					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at 2.54 -5.08 90)
-					(length 2.54)
-					(name "Shield"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -553,6 +464,184 @@
 					(at 0 -3.81 90)
 					(length 2.794)
 					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:L"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "L"
+				(at -1.27 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "L"
+				(at 1.905 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Inductor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "inductor choke coil reactor magnetic"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Choke_* *Coil* Inductor_* L_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "L_0_1"
+				(arc
+					(start 0 2.54)
+					(mid 0.6323 1.905)
+					(end 0 1.27)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 0 1.27)
+					(mid 0.6323 0.635)
+					(end 0 0)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 0 0)
+					(mid 0.6323 -0.635)
+					(end 0 -1.27)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 0 -1.27)
+					(mid 0.6323 -1.905)
+					(end 0 -2.54)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "L_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -739,7 +828,7 @@
 					)
 				)
 			)
-			(property "Footprint" "e-inverted-pendulum:ST_MLPF-WB55-01E3"
+			(property "Footprint" "e-inverted-pendulum:MB1355_ST_CSP650x58P2x3_160x100x42"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -1015,7 +1104,7 @@
 	)
 	(rectangle
 		(start 15.24 20.32)
-		(end 182.88 134.62)
+		(end 182.88 147.32)
 		(stroke
 			(width 0)
 			(type dash)
@@ -1023,9 +1112,20 @@
 		(fill
 			(type none)
 		)
-		(uuid "893057b8-dc37-587e-a9fe-3969856358b9")
+		(uuid "4083820a-b3c6-534b-9035-4c98b62a80ab")
 	)
-	(text "2.4 GHz RF path (DS12804, D-007, docs/rf.md)"
+	(text "Copy of ST NUCLEO-WB55 (MB1355 rev D-01): values, parts and land patterns as ST's; the copper, the L2 cut-out\nunder the line (it references L3) and the ground-free antenna tab come from scripts/pcb/mb1355_rf.json.\nDefault: R401 0R fitted -> PCB antenna.  Conducted test / external antenna: fit R402 0R, remove R401, fit J401.\nC401 / C403 / C404 not fitted, as on MB1355; tune C401 / C402 with a VNA if the robot detunes the antenna.\nDerived from STMicroelectronics MB1355 rev D-01, Open Platform License (www.st.com/opla)."
+		(exclude_from_sim no)
+		(at 20.32 129.54 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "26736812-1914-5a87-b9fe-af1f83aeab19")
+	)
+	(text "2.4 GHz RF path: copy of MB1355 rev D-01 sheet 3 (D-037, docs/rf.md)"
 		(exclude_from_sim no)
 		(at 16.51 24.13 0)
 		(effects
@@ -1035,52 +1135,53 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "642afd3c-fda6-52a6-8a95-dfebdcb76277")
-	)
-	(text "RF1 (pin 31) -> FL401 MLPF-WB55-01E3: harmonic filter + match, IN 1.5 mm from RF1 (DS12804 Fig. 13).\nRF_50: 50 Ohm GCPW 0.27 / 0.15 mm on L1 over the solid L2 GND (scripts/gcpw.py, docs/rf.md).\nPi tuning: C401 / C402 DNP, R401 0R; tune with a VNA at the antenna feed (rf-layout s3).\nConducted test: fit R402, remove R401 -> J401 U.FL (DNP in production).\nLayout: L1 only, no vias on the line, via fence 1.0-1.3 mm; antenna keep-out on all layers;\nkeep the SMPS (L301 / L302) away and orthogonal to the line."
-		(exclude_from_sim no)
-		(at 20.32 110.49 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ef0a5526-6c99-53d5-86f7-f47707d9b51d")
+		(uuid "59ecde62-166c-58fc-b2bb-fd4465b07225")
 	)
 	(junction
-		(at 88.9 60.96)
+		(at 109.22 60.96)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "2c6406b6-ebe9-54df-8141-1fd33b7a0270")
-	)
-	(junction
-		(at 124.46 60.96)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "35f36e6d-2a9a-55d1-9a96-ae2607c71c51")
-	)
-	(junction
-		(at 76.2 68.58)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8b018686-1165-5a14-bf25-ee4cdfe62415")
-	)
-	(junction
-		(at 96.52 60.96)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ea42d02d-6d49-5854-a88c-89f0b3f90405")
+		(uuid "4ab105d6-1e8b-5d58-b878-bb42afb5efd2")
 	)
 	(junction
 		(at 45.72 68.58)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "ebee7cba-809e-5ee6-b7a2-7a5e8fd31616")
+		(uuid "77705af2-ccec-5da2-b269-2bead8cef472")
+	)
+	(junction
+		(at 127 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a1e87322-913b-5a4e-b99b-7e2d052422ea")
+	)
+	(junction
+		(at 81.28 60.96)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b39693c3-4a42-5849-aa36-f9827364c0b1")
+	)
+	(junction
+		(at 139.7 60.96)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c0008d59-fac5-52ea-91a7-653e5c705629")
+	)
+	(junction
+		(at 76.2 68.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ee319cca-694d-51d3-82b2-b9df5e4ad480")
+	)
+	(junction
+		(at 96.52 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f6687085-b1fd-5b29-987a-b4c106161a7a")
 	)
 	(wire
 		(pts
-			(xy 88.9 69.85) (xy 88.9 72.39)
+			(xy 139.7 60.96) (xy 157.48 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1090,7 +1191,7 @@
 	)
 	(wire
 		(pts
-			(xy 73.66 60.96) (xy 88.9 60.96)
+			(xy 81.28 60.96) (xy 90.17 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1100,13 +1201,33 @@
 	)
 	(wire
 		(pts
-			(xy 110.49 60.96) (xy 124.46 60.96)
+			(xy 127 99.06) (xy 144.78 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0ef9afd0-89f6-523f-baca-3276d050553f")
+	)
+	(wire
+		(pts
+			(xy 139.7 62.23) (xy 139.7 60.96)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "107cecab-ef8b-547f-b2fa-a330b587e1ea")
+	)
+	(wire
+		(pts
+			(xy 96.52 107.95) (xy 96.52 110.49)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "37e3eb14-be42-5c6c-9491-c80abed83c30")
 	)
 	(wire
 		(pts
@@ -1120,7 +1241,7 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 72.39) (xy 96.52 60.96)
+			(xy 73.66 60.96) (xy 81.28 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1140,7 +1261,7 @@
 	)
 	(wire
 		(pts
-			(xy 124.46 69.85) (xy 124.46 72.39)
+			(xy 81.28 85.09) (xy 81.28 99.06)
 		)
 		(stroke
 			(width 0)
@@ -1150,7 +1271,7 @@
 	)
 	(wire
 		(pts
-			(xy 88.9 60.96) (xy 96.52 60.96)
+			(xy 109.22 62.23) (xy 109.22 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1170,13 +1291,43 @@
 	)
 	(wire
 		(pts
-			(xy 88.9 62.23) (xy 88.9 60.96)
+			(xy 109.22 69.85) (xy 109.22 72.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67658d03-8184-5d81-b726-aaf0c22e2b49")
+	)
+	(wire
+		(pts
+			(xy 139.7 69.85) (xy 139.7 72.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "68dc8dd8-aeb8-5b45-8cf7-e66c92b795cc")
+	)
+	(wire
+		(pts
+			(xy 81.28 77.47) (xy 81.28 60.96)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "6f8c0e16-f55c-50be-b42b-61cb4f8e7747")
+	)
+	(wire
+		(pts
+			(xy 127 100.33) (xy 127 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b2351d8-d44c-5884-86aa-38b3da1b33c1")
 	)
 	(wire
 		(pts
@@ -1200,7 +1351,17 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 60.96) (xy 144.78 63.5)
+			(xy 149.86 104.14) (xy 149.86 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "97812dd0-0fa4-5cd9-8850-a2792898d55b")
+	)
+	(wire
+		(pts
+			(xy 96.52 100.33) (xy 96.52 99.06)
 		)
 		(stroke
 			(width 0)
@@ -1210,7 +1371,7 @@
 	)
 	(wire
 		(pts
-			(xy 124.46 62.23) (xy 124.46 60.96)
+			(xy 109.22 60.96) (xy 120.65 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1220,7 +1381,7 @@
 	)
 	(wire
 		(pts
-			(xy 124.46 60.96) (xy 142.24 60.96)
+			(xy 128.27 60.96) (xy 139.7 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1240,13 +1401,13 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 86.36) (xy 109.22 86.36)
+			(xy 96.52 99.06) (xy 107.95 99.06)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "b303b587-8b82-55ea-b330-dca038366fd7")
+		(uuid "b119f3d8-9745-57da-be73-7364b5818338")
 	)
 	(wire
 		(pts
@@ -1270,17 +1431,7 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 80.01) (xy 96.52 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c82a2dc5-3fa2-5ce4-a4d7-5c053a769d6a")
-	)
-	(wire
-		(pts
-			(xy 114.3 91.44) (xy 114.3 93.98)
+			(xy 81.28 99.06) (xy 96.52 99.06)
 		)
 		(stroke
 			(width 0)
@@ -1320,7 +1471,17 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 60.96) (xy 102.87 60.96)
+			(xy 115.57 99.06) (xy 127 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e014079e-dc80-5606-9545-eb9c1772846c")
+	)
+	(wire
+		(pts
+			(xy 97.79 60.96) (xy 109.22 60.96)
 		)
 		(stroke
 			(width 0)
@@ -1328,8 +1489,18 @@
 		)
 		(uuid "ef492102-8de3-54a9-8b80-8bb52d389add")
 	)
-	(label "RF_UFL"
-		(at 99.06 86.36 0)
+	(wire
+		(pts
+			(xy 127 107.95) (xy 127 110.49)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f51ff081-8d2b-5d57-a369-4bab757eaba2")
+	)
+	(label "RF_50"
+		(at 82.55 60.96 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1338,8 +1509,18 @@
 		)
 		(uuid "554a133f-2ab1-5d5a-b251-4718640266b1")
 	)
-	(label "RF_50"
-		(at 77.47 60.96 0)
+	(label "RF_SMA"
+		(at 132.08 99.06 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "57e01ca4-2cbb-5c1c-bcd5-c2e04c31cf7a")
+	)
+	(label "RF_MATCH"
+		(at 110.49 60.96 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1349,7 +1530,7 @@
 		(uuid "b54be5d8-e575-59be-8e05-26d44ddc0905")
 	)
 	(label "RF_ANT"
-		(at 129.54 60.96 0)
+		(at 144.78 60.96 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1357,6 +1538,16 @@
 			(justify left bottom)
 		)
 		(uuid "f1d2d011-2766-5d1b-82b2-9372f798a4a9")
+	)
+	(label "RF_SMA_A"
+		(at 83.82 99.06 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f9c40cd3-4cb6-58ff-938a-778c7ffecf11")
 	)
 	(global_label "RF1"
 		(shape bidirectional)
@@ -1377,6 +1568,119 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 127 104.14 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "2c77029d-307b-53e2-9b49-bd68b9d53a63")
+		(property "Reference" "C404"
+			(at 130.81 102.87 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "NF"
+			(at 130.81 105.41 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_CAP_NPOL"
+			(at 127 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 127 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 127 104.14 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 127 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" ""
+			(at 127 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Purpose" "MB1355 C40: SMA filter / match shunt, not fitted"
+			(at 127 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a0f97b30-7add-517d-9784-e153da6a48ef")
+		)
+		(pin "2"
+			(uuid "e834962d-f020-5ad1-9d27-565b405305f2")
+		)
+		(instances
+			(project "e-inverted-pendulum"
+				(path "/59c7cc85-6aaa-5d75-b473-66e6d9d7b7ba/3d516be7-1588-5875-b4d3-9778475b8ef6"
+					(reference "C404")
+					(unit 1)
 				)
 			)
 		)
@@ -1452,6 +1756,119 @@
 			(project "e-inverted-pendulum"
 				(path "/59c7cc85-6aaa-5d75-b473-66e6d9d7b7ba/3d516be7-1588-5875-b4d3-9778475b8ef6"
 					(reference "#PWR0033")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:L")
+		(at 124.46 60.96 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3b3c787c-b232-59cd-ba5a-1d994fdb0299")
+		(property "Reference" "L401"
+			(at 120.65 57.15 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "3.6nH"
+			(at 120.65 59.69 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_COIL"
+			(at 124.46 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 124.46 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 124.46 60.96 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C19216"
+			(at 124.46 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "LQG15HS3N6S02D"
+			(at 124.46 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Purpose" "MB1355 L3: antenna match series 3.6 nH +/-0.3 nH"
+			(at 124.46 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5fbb6ad3-de8e-599f-b36c-2f76cda8c3ab")
+		)
+		(pin "2"
+			(uuid "5d4c80af-0140-5b92-a305-df16059f8ba4")
+		)
+		(instances
+			(project "e-inverted-pendulum"
+				(path "/59c7cc85-6aaa-5d75-b473-66e6d9d7b7ba/3d516be7-1588-5875-b4d3-9778475b8ef6"
+					(reference "L401")
 					(unit 1)
 				)
 			)
@@ -1535,7 +1952,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 88.9 72.39 0)
+		(at 149.86 106.68 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1543,9 +1960,9 @@
 		(on_board no)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "5c3337e6-3405-5c94-9a0d-218d5c1cae12")
-		(property "Reference" "#PWR0035"
-			(at 88.9 72.39 0)
+		(uuid "5c0dc6af-c8f8-52be-b2fa-cd0a39096983")
+		(property "Reference" "#PWR0039"
+			(at 149.86 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1556,7 +1973,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 88.9 76.2 0)
+			(at 149.86 110.49 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1566,7 +1983,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 88.9 72.39 0)
+			(at 149.86 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1577,7 +1994,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 88.9 72.39 0)
+			(at 149.86 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1588,7 +2005,83 @@
 			)
 		)
 		(property "Description" ""
-			(at 88.9 72.39 0)
+			(at 149.86 106.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1c4e8bb8-30f6-5889-94bc-ad71f2a57fee")
+		)
+		(instances
+			(project "e-inverted-pendulum"
+				(path "/59c7cc85-6aaa-5d75-b473-66e6d9d7b7ba/3d516be7-1588-5875-b4d3-9778475b8ef6"
+					(reference "#PWR0039")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 109.22 72.39 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "5c3337e6-3405-5c94-9a0d-218d5c1cae12")
+		(property "Reference" "#PWR0035"
+			(at 109.22 72.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 109.22 76.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 109.22 72.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 109.22 72.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 109.22 72.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1611,7 +2104,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 144.78 63.5 0)
+		(at 96.52 110.49 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1621,7 +2114,7 @@
 		(dnp no)
 		(uuid "8b8259fc-cbbe-5e77-b162-9b84f11f1744")
 		(property "Reference" "#PWR0037"
-			(at 144.78 63.5 0)
+			(at 96.52 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1632,7 +2125,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 144.78 67.31 0)
+			(at 96.52 114.3 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1642,7 +2135,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 144.78 63.5 0)
+			(at 96.52 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1653,7 +2146,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 144.78 63.5 0)
+			(at 96.52 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1664,7 +2157,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 144.78 63.5 0)
+			(at 96.52 110.49 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1687,7 +2180,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 88.9 66.04 0)
+		(at 109.22 66.04 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1697,7 +2190,7 @@
 		(dnp yes)
 		(uuid "94194704-4911-54cb-852d-3d4399f62521")
 		(property "Reference" "C401"
-			(at 92.71 64.77 0)
+			(at 113.03 64.77 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1707,8 +2200,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100pF 50V"
-			(at 92.71 67.31 0)
+		(property "Value" "NF"
+			(at 113.03 67.31 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1718,8 +2211,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 88.9 66.04 0)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_CAP_NPOL"
+			(at 109.22 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1730,7 +2223,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 88.9 66.04 0)
+			(at 109.22 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1741,7 +2234,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 88.9 66.04 0)
+			(at 109.22 66.04 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1750,8 +2243,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C26409"
-			(at 88.9 66.04 0)
+		(property "LCSC" ""
+			(at 109.22 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1761,8 +2254,8 @@
 				)
 			)
 		)
-		(property "MPN" "CL05C101JB5NNNC"
-			(at 88.9 66.04 0)
+		(property "MPN" ""
+			(at 109.22 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1772,8 +2265,8 @@
 				)
 			)
 		)
-		(property "Purpose" "pi shunt 1 (tune with VNA)"
-			(at 88.9 66.04 0)
+		(property "Purpose" "MB1355 C36: antenna match shunt, not fitted"
+			(at 109.22 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1799,40 +2292,38 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:C")
-		(at 124.46 66.04 0)
+		(lib_id "Device:R")
+		(at 111.76 99.06 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp yes)
-		(uuid "9941ae76-a4fe-5a0e-a7ad-0fdef299d594")
-		(property "Reference" "C402"
-			(at 128.27 64.77 0)
+		(dnp no)
+		(uuid "96b91948-87f4-554b-9f86-8a45e63ce304")
+		(property "Reference" "R403"
+			(at 111.76 96.774 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Value" "100pF 50V"
-			(at 128.27 67.31 0)
+		(property "Value" "0"
+			(at 111.76 102.276 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 124.46 66.04 0)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_COIL"
+			(at 111.76 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1843,7 +2334,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 124.46 66.04 0)
+			(at 111.76 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1854,7 +2345,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 124.46 66.04 0)
+			(at 111.76 99.06 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1863,8 +2354,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C26409"
-			(at 124.46 66.04 0)
+		(property "LCSC" "C17168"
+			(at 111.76 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1874,8 +2365,8 @@
 				)
 			)
 		)
-		(property "MPN" "CL05C101JB5NNNC"
-			(at 124.46 66.04 0)
+		(property "MPN" "0402WGF0000TCE"
+			(at 111.76 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1885,8 +2376,121 @@
 				)
 			)
 		)
-		(property "Purpose" "pi shunt 2 (tune with VNA)"
-			(at 124.46 66.04 0)
+		(property "Purpose" "MB1355 L4 (0R): SMA branch series element"
+			(at 111.76 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b1238352-009c-5e24-9d6e-18e1d3ab2d6c")
+		)
+		(pin "2"
+			(uuid "f30e9097-852a-5e11-8bc8-7888f5880272")
+		)
+		(instances
+			(project "e-inverted-pendulum"
+				(path "/59c7cc85-6aaa-5d75-b473-66e6d9d7b7ba/3d516be7-1588-5875-b4d3-9778475b8ef6"
+					(reference "R403")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 139.7 66.04 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9941ae76-a4fe-5a0e-a7ad-0fdef299d594")
+		(property "Reference" "C402"
+			(at 143.51 64.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1.2pF 50V"
+			(at 143.51 67.31 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_CAP_NPOL"
+			(at 139.7 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 139.7 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 139.7 66.04 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C76899"
+			(at 139.7 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "GJM1555C1H1R2WB01D"
+			(at 139.7 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Purpose" "MB1355 C37: antenna match shunt 1.2 pF"
+			(at 139.7 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1913,7 +2517,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 96.52 76.2 0)
+		(at 81.28 81.28 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1923,7 +2527,7 @@
 		(dnp yes)
 		(uuid "9fb5cc5d-4c7c-51e1-a66c-2c6b916ecede")
 		(property "Reference" "R402"
-			(at 99.06 74.93 0)
+			(at 83.82 80.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1934,7 +2538,7 @@
 			)
 		)
 		(property "Value" "0"
-			(at 99.06 77.47 0)
+			(at 83.82 82.55 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1944,8 +2548,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 96.52 76.2 0)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_RES"
+			(at 81.28 81.28 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1956,7 +2560,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 96.52 76.2 0)
+			(at 81.28 81.28 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1967,7 +2571,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 96.52 76.2 0)
+			(at 81.28 81.28 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1977,7 +2581,7 @@
 			)
 		)
 		(property "LCSC" "C17168"
-			(at 96.52 76.2 0)
+			(at 81.28 81.28 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1988,7 +2592,7 @@
 			)
 		)
 		(property "MPN" "0402WGF0000TCE"
-			(at 96.52 76.2 0)
+			(at 81.28 81.28 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1998,8 +2602,8 @@
 				)
 			)
 		)
-		(property "Purpose" "fit (and remove the series 0R) for conducted tests"
-			(at 96.52 76.2 0)
+		(property "Purpose" "MB1355 R13 (nc): fit, and remove R401, to drive J401"
+			(at 81.28 81.28 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2026,7 +2630,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 124.46 72.39 0)
+		(at 139.7 72.39 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2036,7 +2640,7 @@
 		(dnp no)
 		(uuid "ac28a329-6265-54e2-ab0d-061df45d0f37")
 		(property "Reference" "#PWR0036"
-			(at 124.46 72.39 0)
+			(at 139.7 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2047,7 +2651,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 124.46 76.2 0)
+			(at 139.7 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2057,7 +2661,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 124.46 72.39 0)
+			(at 139.7 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2068,7 +2672,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 124.46 72.39 0)
+			(at 139.7 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2079,7 +2683,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 124.46 72.39 0)
+			(at 139.7 72.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2133,7 +2737,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "e-inverted-pendulum:ST_MLPF-WB55-01E3"
+		(property "Footprint" "e-inverted-pendulum:MB1355_ST_CSP650x58P2x3_160x100x42"
 			(at 60.96 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -2187,7 +2791,7 @@
 				)
 			)
 		)
-		(property "Purpose" "IN (A3) 1.5 mm from RF1 per DS12804 Fig. 13"
+		(property "Purpose" "MB1355 U12: IPD = match + low-pass filter (DS12804)"
 			(at 60.96 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -2227,7 +2831,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 106.68 60.96 90)
+		(at 93.98 60.96 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2237,7 +2841,7 @@
 		(dnp no)
 		(uuid "c9e326c1-2075-5088-b125-62e291d8bf37")
 		(property "Reference" "R401"
-			(at 106.68 58.674 90)
+			(at 93.98 58.674 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2247,7 +2851,7 @@
 			)
 		)
 		(property "Value" "0"
-			(at 106.68 64.176 90)
+			(at 93.98 64.176 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2256,8 +2860,8 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 106.68 60.96 0)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_RES"
+			(at 93.98 60.96 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2268,7 +2872,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 106.68 60.96 0)
+			(at 93.98 60.96 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2279,7 +2883,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 106.68 60.96 0)
+			(at 93.98 60.96 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2289,7 +2893,7 @@
 			)
 		)
 		(property "LCSC" "C17168"
-			(at 106.68 60.96 0)
+			(at 93.98 60.96 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2300,7 +2904,7 @@
 			)
 		)
 		(property "MPN" "0402WGF0000TCE"
-			(at 106.68 60.96 0)
+			(at 93.98 60.96 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2310,8 +2914,8 @@
 				)
 			)
 		)
-		(property "Purpose" "pi series element; remove to use the U.FL"
-			(at 106.68 60.96 0)
+		(property "Purpose" "MB1355 R5: RF switch to the PCB antenna (remove to use J401)"
+			(at 93.98 60.96 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2338,7 +2942,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 114.3 93.98 0)
+		(at 127 110.49 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2348,7 +2952,7 @@
 		(dnp no)
 		(uuid "cad3a4f4-559d-5de4-852d-02da8557dac2")
 		(property "Reference" "#PWR0038"
-			(at 114.3 93.98 0)
+			(at 127 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2359,7 +2963,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 114.3 97.79 0)
+			(at 127 114.3 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2369,7 +2973,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 114.3 93.98 0)
+			(at 127 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2380,7 +2984,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 114.3 93.98 0)
+			(at 127 110.49 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2391,7 +2995,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 114.3 93.98 0)
+			(at 127 110.49 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2413,8 +3017,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:Conn_Coaxial")
-		(at 114.3 86.36 0)
+		(lib_id "Device:C")
+		(at 96.52 104.14 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2422,9 +3026,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp yes)
-		(uuid "d30a0621-8d77-59af-96b7-05b721562ec0")
-		(property "Reference" "J401"
-			(at 118.11 87.63 0)
+		(uuid "cf6ff1bd-c6d8-5d46-9bfb-012d16e5d280")
+		(property "Reference" "C403"
+			(at 100.33 102.87 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2434,8 +3038,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "U.FL"
-			(at 118.11 90.17 0)
+		(property "Value" "NF"
+			(at 100.33 105.41 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2445,8 +3049,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical"
-			(at 114.3 86.36 0)
+		(property "Footprint" "e-inverted-pendulum:MB1355_0402_CAP_NPOL"
+			(at 96.52 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2457,7 +3061,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 114.3 86.36 0)
+			(at 96.52 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2468,7 +3072,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 114.3 86.36 0)
+			(at 96.52 104.14 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2477,8 +3081,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C5137195"
-			(at 114.3 86.36 0)
+		(property "LCSC" ""
+			(at 96.52 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2488,8 +3092,8 @@
 				)
 			)
 		)
-		(property "MPN" "BWU.FL-IPEX1"
-			(at 114.3 86.36 0)
+		(property "MPN" ""
+			(at 96.52 104.14 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2499,8 +3103,121 @@
 				)
 			)
 		)
-		(property "Purpose" "conducted test port, DNP in production"
-			(at 114.3 86.36 0)
+		(property "Purpose" "MB1355 C39: SMA filter / match shunt, not fitted"
+			(at 96.52 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8207e869-62a1-59ea-969a-92b350a72623")
+		)
+		(pin "2"
+			(uuid "33b9ed38-3b64-553e-a64c-6537173084c3")
+		)
+		(instances
+			(project "e-inverted-pendulum"
+				(path "/59c7cc85-6aaa-5d75-b473-66e6d9d7b7ba/3d516be7-1588-5875-b4d3-9778475b8ef6"
+					(reference "C403")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_Coaxial")
+		(at 149.86 99.06 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "d30a0621-8d77-59af-96b7-05b721562ec0")
+		(property "Reference" "J401"
+			(at 153.67 100.33 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SMA"
+			(at 153.67 102.87 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "e-inverted-pendulum:MB1355_SMA_T_9.52_NF"
+			(at 149.86 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 149.86 99.06 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 149.86 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" ""
+			(at 149.86 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Purpose" "MB1355 J2: edge SMA for a 50 Ohm antenna or instrument, not fitted"
+			(at 149.86 99.06 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2526,8 +3243,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:Antenna_Shield")
-		(at 142.24 55.88 0)
+		(lib_id "Device:Antenna")
+		(at 157.48 55.88 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2537,7 +3254,7 @@
 		(dnp no)
 		(uuid "e59d4c03-51d1-5268-b091-ec52cf9ff478")
 		(property "Reference" "AE401"
-			(at 147.32 50.8 0)
+			(at 162.56 50.8 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2547,8 +3264,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SWRA117D IFA"
-			(at 147.32 53.34 0)
+		(property "Value" "Meander antenna"
+			(at 162.56 53.34 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2558,8 +3275,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "RF_Antenna:Texas_SWRA117D_2.4GHz_Left"
-			(at 142.24 55.88 0)
+		(property "Footprint" "e-inverted-pendulum:MB1355_Meander_Antenna"
+			(at 157.48 55.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2570,7 +3287,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 142.24 55.88 0)
+			(at 157.48 55.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2581,7 +3298,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 142.24 55.88 0)
+			(at 157.48 55.88 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2591,7 +3308,7 @@
 			)
 		)
 		(property "LCSC" ""
-			(at 142.24 55.88 0)
+			(at 157.48 55.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2602,7 +3319,7 @@
 			)
 		)
 		(property "MPN" ""
-			(at 142.24 55.88 0)
+			(at 157.48 55.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2612,8 +3329,8 @@
 				)
 			)
 		)
-		(property "Purpose" "printed antenna (TI SWRA117D), keep-out on all layers"
-			(at 142.24 55.88 0)
+		(property "Purpose" "MB1355 printed meander antenna (ST AN3359 type) on the ground-free tab"
+			(at 157.48 55.88 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2625,9 +3342,6 @@
 		)
 		(pin "1"
 			(uuid "2263581e-732b-585a-abc1-fb05d1f99b3a")
-		)
-		(pin "2"
-			(uuid "a355db00-33aa-5307-b000-869a7345ad8d")
 		)
 		(instances
 			(project "e-inverted-pendulum"

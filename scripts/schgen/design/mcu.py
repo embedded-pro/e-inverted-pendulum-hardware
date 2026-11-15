@@ -13,6 +13,9 @@ from sch import Sheet
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 QFN68 = "Package_DFN_QFN:QFN-68-1EP_8x8mm_P0.4mm_EP6.4x6.4mm"
+MB1355 = "e-inverted-pendulum:MB1355_"
+RF_CORNER_FP = {"C307": MB1355 + "0402_CAP_NPOL", "C308": MB1355 + "0402_CAP_NPOL", "C309": MB1355 + "0402_CAP_NPOL",
+                "C318": MB1355 + "0402_CAP_NPOL"}
 
 
 def pin_map():
@@ -46,29 +49,31 @@ def build(project, values):
         ("C303", "100n_0402_16V_X7R", "VDD pin 68", "VDD 68"), ("C304", "100n_0402_16V_X7R", "VBAT pin 1", "VBAT 1"),
         ("C305", "100n_0402_16V_X7R", "VDDUSB pin 55", "VDDUSB 55"), ("C306", "4.7u_0402_10V_X5R", "VDD bulk", "VDD bulk"),
         ("C307", "100n_0402_16V_X7R", "VDDRF", "VDDRF 33"), ("C308", "100p_0402_50V_C0G", "VDDRF HF", "VDDRF 33"),
-        ("C309", "4.7u_0402_10V_X5R", "VDDSMPS", "VDDSMPS 44"),
+        ("C309", "4.7u_0402_10V_X5R", "VDDSMPS", "VDDSMPS 44"), ("C318", "100n_0402_16V_X7R", "VDDSMPS HF", "VDDSMPS 44"),
     ]
     caps = []
     for i, (ref, key, purpose, tag) in enumerate(decoupling):
         x = 30.48 + 15.24 * i
-        caps.append(C(sh, ref, key, x, 40.64, "+3V3", "GND", purpose=f"{purpose}: DS11929 Fig. 16"))
+        source = "MB1355 D-01 copy (D-037)" if ref in RF_CORNER_FP else "DS11929 Fig. 16"
+        caps.append(C(sh, ref, key, x, 40.64, "+3V3", "GND", purpose=f"{purpose}: {source}", fp=RF_CORNER_FP.get(ref)))
         sh.text(tag, (x - 2.54, 55.88))
-    fb = sh.part("Device:FerriteBead_Small", "FB301", "BLM18PG221SN1D", (167.64, 33.02), 90,
+    fb = sh.part("Device:FerriteBead_Small", "FB301", "BLM18PG221SN1D", (182.88, 33.02), 90,
                  fp="Inductor_SMD:L_0603_1608Metric", lcsc=v["vdda_ferrite"]["lcsc"], mpn="BLM18PG221SN1D",
                  Purpose="VDDA filter: mcu-circuit-design s2")
     fb.fpos = (-3.81, -3.81, "left")
-    analog = [C(sh, "C310", "10n_0603_50V_X7R", 182.88, 40.64, "VDDA", "GND", purpose="VDDA: DS11929 Fig. 16"),
-              C(sh, "C311", "1u_0603_50V_X5R", 198.12, 40.64, "VDDA", "GND", purpose="VDDA: DS11929 Fig. 16"),
-              C(sh, "C312", "100n_0402_16V_X7R", 213.36, 40.64, "VDDA", "GND", purpose="VREF+: DS11929 Fig. 16"),
-              C(sh, "C313", "1u_0603_50V_X5R", 228.6, 40.64, "VDDA", "GND", purpose="VREF+: DS11929 Fig. 16")]
+    analog = [C(sh, "C310", "10n_0603_50V_X7R", 198.12, 40.64, "VDDA", "GND", purpose="VDDA: DS11929 Fig. 16"),
+              C(sh, "C311", "1u_0603_50V_X5R", 213.36, 40.64, "VDDA", "GND", purpose="VDDA: DS11929 Fig. 16"),
+              C(sh, "C312", "100n_0402_16V_X7R", 228.6, 40.64, "VDDA", "GND", purpose="VREF+: DS11929 Fig. 16"),
+              C(sh, "C313", "1u_0603_50V_X5R", 243.84, 40.64, "VDDA", "GND", purpose="VREF+: DS11929 Fig. 16")]
     for c, tag in zip(analog, ("VDDA 14", "VDDA 14", "VREF+ 13", "VREF+ 13")):
         sh.text(tag, (c.x - 2.54, 55.88))
-    fa = sh.flag("VDDA", (241.3, 33.02), label=False)
+    fa = sh.flag("VDDA", (256.54, 33.02), label=False)
     sh.rail("+3V3", 33.02, [c["1"] for c in caps] + [fb["1"]], tap=(22.86, (0, -1)))
-    sh.rail("VDDA", 33.02, [fb["2"]] + [c["1"] for c in analog] + [fa["1"]], tap=(248.92, (0, -1)))
-    sh.rail("GND", 50.8, [c["2"] for c in caps + analog], tap=(167.64, (0, 1)))
+    sh.rail("VDDA", 33.02, [fb["2"]] + [c["1"] for c in analog] + [fa["1"]], tap=(264.16, (0, -1)))
+    sh.rail("GND", 50.8, [c["2"] for c in caps + analog], tap=(175.26, (0, 1)))
     sh.note(20.32, 60.96, [
-        "One 100 nF per supply pin, at the pin, each with its own via; 4.7 uF bulk on VDD.  VDDRF 100 nF + 100 pF at pin 33.",
+        "One 100 nF per supply pin, at the pin, each with its own via; 4.7 uF bulk on VDD.  VDDRF 100 nF + 100 pF at pin 33,",
+        "VDDSMPS 4.7 uF + 100 nF at pin 44: values and land patterns from MB1355 D-01 (C33 / C34 / C23 / C24, D-037).",
         "VDDA and VREF+ through FB301: 10 nF + 1 uF on VDDA, 100 nF + 1 uF on VREF+ (mcu-circuit-design s2).",
         "VDDUSB to VDD: USB unused (DS11929 s3.7).  VBAT to VDD: no backup domain battery."])
 
@@ -78,37 +83,43 @@ def build(project, values):
     sh.nets(u, pin_nets())
 
     sh.box(15.24, 81.28, 152.4, 124.46, "Core SMPS (DS11929 Table 6)")
-    l301 = sh.part("Device:L", "L301", "10uH", (50.8, 96.52), 90, fp="Inductor_SMD:L_0805_2012Metric", lcsc="C162582",
-                   mpn="LQM21FN100M80L", Purpose="SMPS L1, 4 MHz: DS11929 Table 6")
-    l302 = sh.part("Device:L", "L302", "10nH", (71.12, 96.52), 90, fp="Inductor_SMD:L_0402_1005Metric", lcsc="C77103",
-                   mpn="LQG15HS10NJ02D", Purpose="series 10 nH for RX performance: DS11929 Table 6 note 2")
-    c314 = C(sh, "C314", "4.7u_0402_10V_X5R", 88.9, 102.87, "VFBSMPS", "GND", purpose="SMPS output C2: DS11929 Table 6")
+    l302 = sh.part("Device:L", "L302", "10nH", (50.8, 96.52), 90, fp=MB1355 + "IND_0402_MURATA_LQW15AN_H0P5",
+                   lcsc="C77103", mpn="LQG15HS10NJ02D",
+                   Purpose="MB1355 L5 position (VLXSMPS side), 10 nH: DS11929 Table 6 note 2; ST fits LQP15MN10NG02 (no stock)")
+    l301 = sh.part("Device:L", "L301", "10uH", (71.12, 96.52), 90, fp=MB1355 + "0805_COIL", lcsc="C162582",
+                   mpn="LQM21FN100M80L",
+                   Purpose="MB1355 L1 position, SMPS 10 uH: DS11929 Table 6; ST fits Wurth 74479777310A (no stock)")
+    c314 = C(sh, "C314", "4.7u_0402_10V_X5R", 88.9, 102.87, "VFBSMPS", "GND", fp=MB1355 + "0402_CAP_NPOL",
+             purpose="MB1355 C29, SMPS output C2: DS11929 Table 6")
     fl = sh.flag("SMPS_LX", (38.1, 96.52), label=False)
-    sh.rail("SMPS_LX", 96.52, [fl["1"], l301["1"]], label="left", ext=7.62)
-    sh.link(l301["2"], l302["1"], "SMPS_MID")
-    sh.rail("VFBSMPS", 96.52, [l302["2"], c314["1"]], label="right", ext=7.62)
+    sh.rail("SMPS_LX", 96.52, [fl["1"], l302["1"]], label="left", ext=7.62)
+    sh.link(l302["2"], l301["1"], "SMPS_MID")
+    sh.rail("VFBSMPS", 96.52, [l301["2"], c314["1"]], label="right", ext=7.62)
     sh.net(c314["2"], "GND")
     sh.note(20.32, 114.3, [
-        "L301 10 uH + L302 10 nH (RX performance) + C314 4.7 uF: DS11929 Table 6.",
-        "L301 / L302 at pins 41-44, small loop, orthogonal to the RF line (docs/rf.md)."])
+        "As on MB1355 D-01 (D-037): VLXSMPS -> L302 10 nH -> L301 10 uH -> VFBSMPS, C314 4.7 uF (DS11929 Table 6).",
+        "ST's land patterns and copper; in-stock equivalents on ST's pads (ST: LQP15MN10NG02, 74479777310A)."])
 
     sh.box(15.24, 129.54, 152.4, 180.34, "Clocks: HSE 32 MHz, LSE 32.768 kHz")
-    hse = sh.part("Device:Crystal_GND24", "Y301", "32MHz", (38.1, 147.32), fp="Crystal:Crystal_SMD_2016-4Pin_2.0x1.6mm",
+    hse = sh.part("Device:Crystal_GND24", "Y301", "32MHz", (38.1, 147.32), fp=MB1355 + "NX2016_4P",
                   lcsc="C5441424", mpn="NX2016SA-32MHZ-EXS00A-CS06654",
                   Purpose="HSE, internal load caps trimmed by HSETUNE (no external caps)")
     hse.fpos = (-3.81, -7.62, "left")
     sh.nets(hse, {"1": "HSE_IN", "3": "HSE_OUT", "2": "GND", "4": "GND"})
-    lse = sh.part("Device:Crystal", "Y302", "32.768kHz", (101.6, 144.78), fp="Crystal:Crystal_SMD_3215-2Pin_3.2x1.5mm",
-                  lcsc="C156244", mpn="NX3215SA-32.768K-STD-MUA-14", Purpose="LSE, C_L 6 pF")
+    lse = sh.part("Device:Crystal", "Y302", "32.768kHz", (101.6, 144.78), fp=MB1355 + "NX2012_2P",
+                  lcsc="C889705", mpn="NX2012SA-32.768KHZ-STD-MUB-3",
+                  Purpose="LSE, MB1355 X2 package and position, C_L 6 pF (ST's C_L 7 pF part is not stocked)")
     lse.fpos = (-3.81, -7.62, "left")
-    c315 = C(sh, "C315", v["lse_cap"]["key"], 88.9, 152.4, "OSC32_IN", "GND", purpose=v["lse_cap"]["source"])
-    c316 = C(sh, "C316", v["lse_cap"]["key"], 114.3, 152.4, "OSC32_OUT", "GND", purpose=v["lse_cap"]["source"])
+    c315 = C(sh, "C315", v["lse_cap"]["key"], 88.9, 152.4, "OSC32_IN", "GND", purpose=v["lse_cap"]["source"],
+             fp=MB1355 + "0402_CAP_NPOL")
+    c316 = C(sh, "C316", v["lse_cap"]["key"], 114.3, 152.4, "OSC32_OUT", "GND", purpose=v["lse_cap"]["source"],
+             fp=MB1355 + "0402_CAP_NPOL")
     sh.rail("OSC32_IN", 144.78, [c315["1"], lse["1"]], label="left", ext=7.62)
     sh.rail("OSC32_OUT", 144.78, [lse["2"], c316["1"]], label="right", ext=7.62)
     sh.rail("GND", 160.02, [c315["2"], c316["2"]], tap=(101.6, (0, 1)))
     sh.note(20.32, 165.1, [
-        "HSE NX2016SA: no external caps, load trimmed by HSETUNE (DS11929 Table 5 note 1).",
-        "LSE NX3215SA, C_L 6 pF: 2 x 6.8 pF C0G (AN2867); LSEDRV = 10, margin ~2.5 (Table 54)."])
+        "HSE NX2016SA (as MB1355 X1): no external caps, load trimmed by HSETUNE (DS11929 Table 5 note 1).",
+        "LSE NX2012SA MUB-3 C_L 6 pF on MB1355's X2 land: 2 x 6.8 pF C0G (AN2867); ST fits a C_L 7 pF part + 2 x 10 pF."])
 
     sh.box(15.24, 185.42, 152.4, 243.84, "Reset, boot and SPI1 clock termination")
     c317 = C(sh, "C317", "100n_0402_16V_X7R", 30.48, 204.47, "NRST", "GND",

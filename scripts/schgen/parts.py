@@ -32,21 +32,25 @@ def _purpose(purpose):
     return {"Purpose": purpose} if purpose else {}
 
 
-def R(sh, ref, value, x, y, n1, n2, rot=0, package="0603", dnp=False, purpose=""):
-    """Resistor; rot 0 is vertical with pin 1 on top, rot 90 horizontal with pin 1 on the left."""
+def R(sh, ref, value, x, y, n1, n2, rot=0, package="0603", dnp=False, purpose="", fp=None):
+    """Resistor; rot 0 is vertical with pin 1 on top, rot 90 horizontal with pin 1 on the left.
+
+    `fp` overrides the standard land pattern (e.g. an MB1355-derived one, D-037)."""
     entry = _passive(f"R_{value}_{package}")
-    p = sh.part("Device:R", ref, value, (x, y), rot, fp=FOOTPRINT[f"R{package}"], lcsc=entry["lcsc"],
+    p = sh.part("Device:R", ref, value, (x, y), rot, fp=fp or FOOTPRINT[f"R{package}"], lcsc=entry["lcsc"],
                 mpn=entry["mpn"], dnp=dnp, **_purpose(purpose))
     sh.net(p["1"], n1)
     sh.net(p["2"], n2)
     return p
 
 
-def C(sh, ref, key, x, y, n1, n2="GND", rot=0, dnp=False, purpose=""):
-    """Capacitor from its catalog key (value_package_voltage_dielectric); pin 1 on top at rot 0."""
+def C(sh, ref, key, x, y, n1, n2="GND", rot=0, dnp=False, purpose="", fp=None):
+    """Capacitor from its catalog key (value_package_voltage_dielectric); pin 1 on top at rot 0.
+
+    `fp` overrides the standard land pattern (e.g. an MB1355-derived one, D-037)."""
     entry = _passive(f"C_{key}")
     value, package, voltage = key.split("_")[:3]
-    p = sh.part("Device:C", ref, f"{value}F {voltage}", (x, y), rot, fp=FOOTPRINT[f"C{package}"],
+    p = sh.part("Device:C", ref, f"{value}F {voltage}", (x, y), rot, fp=fp or FOOTPRINT[f"C{package}"],
                 lcsc=entry["lcsc"], mpn=entry["mpn"], dnp=dnp, **_purpose(purpose))
     sh.net(p["1"], n1)
     sh.net(p["2"], n2)

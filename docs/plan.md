@@ -16,7 +16,7 @@ Goal: one 4-layer PCB that is also the robot's structural body. It carries the m
 | Battery | 3S LiPo pack, 9.0–12.6 V, XT30, external balance charger | DRV8711 needs VM ≥ 8 V |
 | IMU | **MPU-6500** (C50278) | Same accel/gyro die and registers as the MPU9250. Only WHO_AM_I changes (0x70). |
 | Chassis | Single vertical plate, about 100 × 160 mm (final size from sizing) | Motors on L-brackets at the bottom edge, battery strapped to the back face, antenna on the top edge |
-| Radio | Printed IFA + MLPF-WB55-01E3 IPD, DNP pi tuning network + DNP U.FL test port; no certification | Cheapest; VNA tuning in the final assembly |
+| Radio | RF corner copied from ST's NUCLEO-WB55 (MB1355 D-01): MLPF-WB55-01E3, 3.6 nH / 1.2 pF match, printed meander antenna, SMA branch not fitted; no certification (D-037) | Lowest risk: ST's proven layout; VNA check in the final assembly |
 | Fab | JLCPCB 4-layer 1.6 mm (JLC04161H-7628), 1 oz outer / 0.5 oz inner, top-side PCBA | Solid L2 GND under RF and motor hot loops |
 | Debug | STDC14 (Samtec FTSH-107-01-L-DV-K, C5307809): SWD + NRST + USART1 VCP | No USB: TIM1_CH4 is only on PA11 = USB_DM |
 
@@ -27,7 +27,7 @@ Goal: one 4-layer PCB that is also the robot's structural body. It carries the m
   (rev-pol + on/off + soft-start, slide switch)   │                                     Rsense 2×50 mΩ ───────────────┴─ Motor R (bridge B) + enc R
                                                   ├─ VBAT divider ─ ADC
                                                   └─ TPS62933 buck → 5V0 ─ TLV75533 LDO → 3V3 ─ STM32WB55RG (SMPS on, 10µH+10nH)
-                                                                       │                         ├ SPI1 ─ DRV8711 + W25Q16 flash   ├ RF1 ─ MLPF ─ 50Ω ─ pi(DNP) ─ IFA
+                                                                       │                         ├ SPI1 ─ DRV8711 + W25Q16 flash   ├ RF1 ─ MLPF ─ match ─ antenna (MB1355)
                                                                        └ encoder VCC (0Ω opt)    ├ SPI2 ─ MPU-6500    ├ HSE 32 MHz / LSE 32.768 kHz
                                                                          ABZ ×2 ─ ESD ─ LVC3G17 ─┤ (5 V-tolerant Schmitt buffers powered from 3V3)
                                                                                                  └ STDC14, status LED, 12 RGB LEDs (D-035), Qwiic (I2C3)
@@ -60,7 +60,7 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | MCU | STM32WB55RGV6 | C401505 | 225 |
 | RF IPD | MLPF-WB55-01E3 | C2651048 | 3.3k |
 | HSE 32 MHz (ST-recommended, no load caps, HSETUNE) | NX2016SA-32M-EXS00A-CS06465 | C1986260 | 49.7k |
-| LSE 32.768 kHz | NX3215SA family, C_L ≤ 7 pF (AN2867); choose the in-stock variant | C156244 etc. | 8–14k |
+| LSE 32.768 kHz | NX2012SA-32.768KHZ-STD-MUB-3 (C_L 6 pF) on MB1355's X2 land (D-037) | C889705 | 3.7k (2026-11-15) |
 | SMPS L / series L / caps | LQM21FN100M80L (10 µH) / LQG15HS10NJ02D (10 nH) / CL05A475MP5NRNC | C162582 / C77103 / C23733 | ok |
 | Motor driver | DRV8711DCPR | C60013 | 128 |
 | Bridge FETs (×4 duals, one half-bridge each) | CSD88537ND, 60 V | C117439 | 14.8k |
@@ -78,7 +78,7 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | Encoder ESD | TPD4E05U06QDQARQ1 (SLVSCO7A; alternate TPD4E05U06DQAR C138714, same pinout and footprint) | C81353 | 2.4k (2026-11-14) |
 | SPI flash | W25Q16JVSSIQ, 2 MB, SOIC-8 208 mil (alternative: W25Q80DVSSIG, 1 MB, C98163, 29.7k, same footprint) | C131025 | 8.4k |
 | Debug | FTSH-107-01-L-DV-K (STDC14) | C5307809 | 616 |
-| Antenna test port (DNP) | BWU.FL-IPEX1 | C5137195 | 617k |
+| Antenna test port (not fitted) | edge SMA on MB1355's J2 land (D-037) | — | — |
 | RGB LED / LED buffer / switch / Qwiic | WS2812B-2020-V6 / SN74AHCT1G125DBVR / SS-12D10L5 / SM04B-SRSS-TB | C52917434 / C7484 / C319012 / C160404 | ok (2026-11-14) |
 
 Stock risk: the MCU (225) and DRV8711 (128) are thin. Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
@@ -147,9 +147,9 @@ Rules come from `mcu-circuit-design` §2–§12 and `analog-circuit-design`; the
    - HSE with no external capacitors.
    - LSE with load capacitors from the C_L formula (stated stray convention).
 4. **RF**:
-   - Copy the RF1 → MLPF-WB55-01E3 section from ST AN5165.
-   - 50 Ω GCPW to a DNP U.FL, then a pi network (0 Ω series, shunts DNP), then the IFA feed.
-   - Use a published IFA designed for 1.6 mm FR-4 (e.g. the 1.6 mm variant in Silicon Labs AN1088) and copy its geometry exactly.
+   - Since D-037 (2026-11-15): copy ST's NUCLEO-WB55 RF corner (MB1355 rev D-01) as a whole: schematic, parts, land
+     patterns and copper (`scripts/rf_reference.py`, `scripts/pcb/rf_block.py`, `docs/rf.md`).
+   - Earlier plan, superseded: MLPF section from AN5165, own 50 Ω GCPW to a DNP U.FL, pi network, published IFA.
 5. **Motor drive**, per the DRV8711 datasheet (SLVSC40) and the BOOST-DRV8711 reference:
    - VM decoupling;
    - VCP 1 µF to VM; CP1–CP2 100 nF (VM-rated); VINT 1 µF; V5 bypass;

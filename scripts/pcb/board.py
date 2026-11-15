@@ -3,8 +3,8 @@
 
 Placement belongs to the owner (D-032): the .kicad_pcb is the source of truth for where parts are and for the
 board geometry. This script never moves or reshapes anything that already exists on the board. It:
-  - creates what is missing: the 85 x 130 mm outline, the rule areas and reference drawings from placement.py, and the
-    bracket holes (placement.MECHANICAL), each only if absent;
+  - creates what is missing: the outline (85 mm wide, MB1355's antenna tab at the top-left corner, D-037), the rule
+    areas and reference drawings from placement.py, and the bracket holes (placement.MECHANICAL), each only if absent;
   - syncs the schematic: one footprint per symbol with its fields, sheet path, DNP/BOM flags and pad nets; a footprint
     whose library entry changed is swapped in place (position, rotation and lock kept); new parts go to the first
     free spot in the staging area right of the board; parts removed from the schematic are deleted (board-only
@@ -81,8 +81,8 @@ NET_CLASSES = {
                "patterns": ["*/BUCK_SW", "*/SMPS_LX", "*/SMPS_MID"]},
     "SUPPLY": {"track_width": 0.5, "clearance": 0.15,
                "patterns": ["+5V", "+3V3", "VDDA", "*/ENC_VCC", "*/DRV_V5", "*/DRV_VINT", "*/DRV_VCP"]},
-    "RF": {"track_width": 0.27, "clearance": 0.15,
-           "patterns": ["RF1", "*/RF_50", "*/RF_ANT", "*/RF_UFL"]},
+    "RF": {"track_width": 0.6, "clearance": 0.2,
+           "patterns": ["RF1", "*/RF_50", "*/RF_MATCH", "*/RF_ANT", "*/RF_SMA_A", "*/RF_SMA"]},
     "NFC": {"track_width": 0.25, "clearance": 0.15,
             "patterns": ["*/NFC_AC0", "*/NFC_AC1"]},
     "CRYSTAL": {"track_width": 0.2, "clearance": 0.15,
@@ -94,13 +94,26 @@ FABS = "jlcpcb"
 CUSTOM_RULES = """
 # Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
 
-(rule "RF1 matching trace: DS12804 Fig. 13 copies a 104 um gap (docs/rf.md)"
+(rule "RF1: MB1355's 0.265 mm fan-out from pin 31 to FL401 between the 0.4 mm-pitch pins (D-037, docs/rf.md)"
   (condition "A.NetName == 'RF1'")
   (constraint clearance (min 0.104mm)))
 
-(rule "AE401 shorting leg: SWRA117D grounds it through a 0.3 mm plated hole in a 0.5 mm land, a via (JLC via ring 0.05 mm)"
-  (condition "A.Type == 'Pad' && A.memberOfFootprint('AE401')")
-  (constraint annular_width (min 0.1mm)))
+(rule "MB1355 RF corner: ST's own 0.1 mm clearance inside the copied group (above JLCPCB's 0.09 mm, D-037)"
+  (condition "A.memberOfGroup('MB1355 RF corner') && B.memberOfGroup('MB1355 RF corner')")
+  (constraint clearance (min 0.1mm)))
+
+(rule "MB1355 RF corner: ST's own placement (shared 0R switch pad, crystal and clips packed tight, D-037)"
+  (severity ignore)
+  (condition "A.memberOfGroup('MB1355 RF corner') && B.memberOfGroup('MB1355 RF corner')")
+  (constraint courtyard_clearance (min 0mm)))
+
+(rule "MB1355 RF corner: ST's routing keeps its arcs and corners (D-037)"
+  (condition "A.memberOfGroup('MB1355 RF corner')")
+  (constraint track_angle (min 0)))
+
+(rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
+  (condition "A.Type == 'Track' && A.intersectsArea('ANTENNA_TAB') && A.NetName != '/4 2.4 GHz RF path and antenna/RF_ANT'")
+  (constraint disallow track))
 """
 
 CUSTOM_RULES += """
@@ -119,9 +132,7 @@ CUSTOM_RULES += """
   (constraint hole_clearance (min 0.5mm)))
 """
 
-MASK_BRIDGES_ALLOWED = {
-    "J401": "Hirose U.FL-R-SMT land pattern: one solder-mask opening over the signal and ground pads",
-}
+MASK_BRIDGES_ALLOWED = {}
 
 
 def to_board(x, z):
@@ -185,13 +196,16 @@ def load_footprint(board, lib_id):
 
 
 def outline_shapes():
-    w, top, bottom, r = placement.WIDTH / 2.0, placement.TOP_Z, placement.BOTTOM_Z, CORNER_RADIUS
+    """85 mm wide plate; the top-left corner is MB1355's antenna tab and step (D-037), the other corners r 1 mm."""
+    w, top, bottom, r = placement.WIDTH / 2.0, placement.TOP_RIGHT_Z, placement.BOTTOM_Z, CORNER_RADIUS
+    tab = placement.TAB_OUTLINE
     shapes = [
-        ("line", (-w + r, top), (w - r, top)), ("line", (w, top - r), (w, bottom + r)),
-        ("line", (w - r, bottom), (-w + r, bottom)), ("line", (-w, bottom + r), (-w, top - r)),
-        ("arc", (w - r, top - r), (w, top - r), 90), ("arc", (-w + r, top - r), (-w + r, top), 90),
+        ("line", tab[-1], (w - r, top)), ("line", (w, top - r), (w, bottom + r)),
+        ("line", (w - r, bottom), (-w + r, bottom)), ("line", (-w, bottom + r), tab[0]),
+        ("arc", (w - r, top - r), (w, top - r), 90),
         ("arc", (-w + r, bottom + r), (-w, bottom + r), 90), ("arc", (w - r, bottom + r), (w - r, bottom), 90),
     ]
+    shapes += [("line", tab[i], tab[i + 1]) for i in range(len(tab) - 1)]
     for slot in placement.STRAP_SLOTS:
         x, z, half, rr = slot["x"], slot["z"], (slot["length"] - slot["width"]) / 2.0, slot["width"] / 2.0
         shapes += [("line", (x - half, z + rr), (x + half, z + rr)), ("line", (x + half, z - rr), (x - half, z - rr)),
@@ -320,10 +334,12 @@ def replace_footprint(board, fp, lib_id):
 
 
 SILK_TEXT_MIN = (1.0, 0.15)
+RF_CORNER_GROUP = "MB1355 RF corner"
 
 
 def label_fields(fp):
-    """Only the reference is shown on the board; test pads show their net name instead (D-035).
+    """Only the reference is shown on the board; test pads show their net name instead (D-035). The MB1355 RF corner
+    (rf_block.py, D-037) is too dense for silk: its references go on F.Fab (assembly drawing).
 
     Net ties keep their reference hidden. Silkscreen text is raised to JLCPCB's minimum (1.0 mm high, 0.15 mm line) and
     never lowered. A test pad's label is moved onto the silkscreen once; after that its
@@ -331,6 +347,12 @@ def label_fields(fp):
     """
     reference, value = fp.Reference(), fp.Value()
     lib_id = fp.GetFPIDAsString()
+    group = fp.GetParentGroup()
+    if group is not None and group.GetName() == RF_CORNER_GROUP:
+        value.SetVisible(False)
+        reference.SetLayer(pcbnew.F_Fab)
+        reference.SetVisible(True)
+        return
     if lib_id.startswith("TestPoint:"):
         reference.SetVisible(False)
         if not value.IsVisible() or value.GetLayer() != pcbnew.F_SilkS:
@@ -563,7 +585,7 @@ def build_board(stage=False):
     block.SetCompany("embedded-pro")
     block.SetRevision("A (draft)")
     block.SetComment(0, "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 (D-008, D-036)")
-    block.SetComment(1, "Outline 85 x 130 mm (D-024); see docs/mechanical.md and docs/rf.md")
+    block.SetComment(1, "Outline 85 x 130 mm with MB1355's antenna tab (D-024, D-037); docs/mechanical.md, docs/rf.md")
 
     ensure_outline(board)
     footprints = sync_footprints(board, components, nets, pins)

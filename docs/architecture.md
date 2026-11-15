@@ -19,7 +19,7 @@ graph LR
     MCU -->|SPI1| DRV
     MCU -->|SPI1| FLASH[W25Q16]
     MCU -->|SPI2 + DRDY| IMU[MPU-6500]
-    MCU -->|RF1| MLPF[MLPF-WB55-01E3] --> PI[pi tuning DNP] --> ANT[printed IFA]
+    MCU -->|RF1| MLPF[MLPF-WB55-01E3] --> MATCH[0R + 3.6 nH / 1.2 pF, MB1355 copy] --> ANT[meander antenna on the tab]
     MCU --> DBG[STDC14: SWD + VCP]
     MCU -->|PA7 via AHCT buffer| RGB[12 RGB LEDs on 5V0]
     MCU --> UI[Status LED, Qwiic, EEPROM, NFC tag]
