@@ -1,7 +1,10 @@
 """Board geometry for scripts/pcb/board.py, in mechanical coordinates (docs/mechanical.md).
 
 The top-left corner copies ST's NUCLEO-WB55 (MB1355 rev D-01) antenna tab (D-037): the outline, the tab depth and the
-ground edge come from scripts/pcb/mb1355_rf.json (derived from STMicroelectronics MB1355, www.st.com/opla).
+ground edge come from scripts/pcb/mb1355_rf.json (derived from STMicroelectronics MB1355, www.st.com/opla). The
+top-right corner holds the NFC corner copied from ST's X-NUCLEO-NFC01A1 (MB1163 rev C-01, D-039,
+scripts/pcb/mb1163_nfc.json): right of NFC_STEP_X the top edge is back at TOP_Z, and the ANT14 coil sits NFC_EDGE in
+from the top and right edges with ST's coil-to-pour clearance kept free of pour and vias.
 
 x: across the plate, 0 on the vertical centreline. z: up the plate, 0 on the wheel axle at the centre of the 25 mm
 bracket strip (D-026). mm, front (component side) view.
@@ -18,6 +21,7 @@ TOP_Z = 117.5
 STRIP_TOP_Z = 12.5
 
 MB1355 = json.loads((pathlib.Path(__file__).resolve().parent / "mb1355_rf.json").read_text(encoding="utf-8"))
+MB1163 = json.loads((pathlib.Path(__file__).resolve().parent / "mb1163_nfc.json").read_text(encoding="utf-8"))
 
 
 def from_mb1355(x, y):
@@ -56,16 +60,30 @@ STRAP_SLOTS = []
 _HALF = WIDTH / 2
 _TAB_RIGHT = TAB_OUTLINE[-1][0]
 
-COIL_CENTRE = (29.0, 95.5)
-COIL_KEEPOUT = (16.0, 84.5, _HALF, 106.5)
+NFC_EDGE = 2.0  # ASSUMPTION: ANT14's copper to the top and right board edges (ST had >= 7.6 mm on a board end)
+_COIL = MB1163["coil"]["bbox"]
+
+
+def from_mb1163(x, y):
+    """MB1163 Gerber coordinates (mm, y up) to ours: turned 180 degrees, so the coil is at the top-right corner and
+    the tag cluster below it, ST's coil-side corner NFC_EDGE in from our top and right edges."""
+    return (round(_HALF - NFC_EDGE - (x - _COIL[0]), 4), round(TOP_Z - NFC_EDGE - (y - _COIL[1]), 4))
+
+
+NFC_COIL_BOX = (from_mb1163(_COIL[2], 0)[0], from_mb1163(0, _COIL[3])[1], _HALF - NFC_EDGE, TOP_Z - NFC_EDGE)
+NFC_POUR_GAP = MB1163["coil_to_pour_mm"]
+NFC_STEP_X = round(NFC_COIL_BOX[0] - NFC_POUR_GAP, 4)
 
 RULE_AREAS = [
     {"name": "ANTENNA_TAB", "layers": ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], "deny": {"vias", "pour"},
      "polygon": [(-_HALF - 1.0, GROUND_EDGE_Z), (_TAB_RIGHT + 0.5, GROUND_EDGE_Z), (_TAB_RIGHT + 0.5, TOP_Z + 1.0),
                  (-_HALF - 1.0, TOP_Z + 1.0)]},
-    {"name": "NFC_COIL_KEEPOUT", "layers": ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], "deny": {"tracks", "vias", "pour"},
-     "polygon": [(COIL_KEEPOUT[0], COIL_KEEPOUT[1]), (COIL_KEEPOUT[2], COIL_KEEPOUT[1]),
-                 (COIL_KEEPOUT[2], COIL_KEEPOUT[3]), (COIL_KEEPOUT[0], COIL_KEEPOUT[3])]},
+    {"name": "NFC_COIL", "layers": ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], "deny": {"tracks", "vias", "pour"},
+     "polygon": [(NFC_COIL_BOX[0] - 0.5, NFC_COIL_BOX[1] - 0.5), (_HALF + 1.0, NFC_COIL_BOX[1] - 0.5),
+                 (_HALF + 1.0, TOP_Z + 1.0), (NFC_COIL_BOX[0] - 0.5, TOP_Z + 1.0)]},
+    {"name": "NFC_POUR_GAP", "layers": ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], "deny": {"vias", "pour"},
+     "polygon": [(NFC_STEP_X - 1.0, NFC_COIL_BOX[1] - NFC_POUR_GAP), (_HALF + 1.0, NFC_COIL_BOX[1] - NFC_POUR_GAP),
+                 (_HALF + 1.0, TOP_Z + 1.0), (NFC_STEP_X - 1.0, TOP_Z + 1.0)]},
     {"name": "BRACKET_STRIP", "layers": ["F.Cu", "B.Cu"], "deny": set(),
      "polygon": [(-_HALF, BOTTOM_Z), (_HALF, BOTTOM_Z), (_HALF, STRIP_TOP_Z), (-_HALF, STRIP_TOP_Z)]},
     {"name": "BRACKET_BASE_CONTACT", "layers": ["B.Cu"], "deny": {"tracks", "vias", "pour"},
@@ -96,6 +114,6 @@ DRAWINGS = [
     ("rect", (-51.0, -12.5), (-49.0, 12.5), ""),
     ("rect", (49.0, -12.5), (51.0, 12.5), ""),
     ("line", (-51.0, 0.0), (51.0, 0.0), "WHEEL AXLE z = 0 (motors + bracket behind)"),
-    ("rect", (COIL_KEEPOUT[0], COIL_KEEPOUT[1]), (COIL_KEEPOUT[2], COIL_KEEPOUT[3]), "NFC COIL"),
+    ("rect", (NFC_COIL_BOX[0], NFC_COIL_BOX[1]), (NFC_COIL_BOX[2], NFC_COIL_BOX[3]), "MB1163 NFC COIL ANT14 (D-039)"),
     ("rect", (-_HALF, GROUND_EDGE_Z), (_TAB_RIGHT, TOP_Z), "MB1355 ANTENNA TAB (D-037)"),
 ]

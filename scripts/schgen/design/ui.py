@@ -2,15 +2,17 @@
 
 No buttons and no buzzer (D-035): the robot doubles as a toy and the RGB chain is its display.
 Sources: docs/design-calcs.md (Status LED, RGB LEDs, Qwiic); WS2812B-2020-V6 datasheet; SCLS378L (SN74AHCT1G125);
-SLVA689A; M24C64 DocID16891 Rev 33 (Fig. 2, s2.3-2.4); ST25DV04KC DS13519 Rev 6 (Table 1, Fig. 2); docs/nfc.md.
+SLVA689A; M24C64 DocID16891 Rev 33 (Fig. 2, s2.3-2.4); M24SR64-Y DocID023790 Rev 20 (Table 1, s2.6, Table 80);
+NFC block copied from ST X-NUCLEO-NFC01A1 (MB1163 rev C-01, D-039); docs/nfc.md.
 """
 
-from parts import C, R, active, nobom, test_points
+from parts import PASSIVES, C, R, active, nobom, test_points
 from sch import Sheet
 
 LED = "LED_SMD:LED_0603_1608Metric"
 RGB = "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm"
 SOIC8 = "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+NFC = "e-inverted-pendulum:MB1163_"
 RGB_COUNT = 12
 RGB_PER_ROW = 6
 DY = 27.94
@@ -128,41 +130,75 @@ def qwiic_eeprom(sh):
 
 
 def nfc(sh):
-    sh.box(210.82, 101.6 + DY, 405.13, 198.12 + DY, "NFC tag: ST25DV04KC + printed 13.56 MHz coil (D-030)")
-    tag = active(sh, "U803", "ST25DV04KC-IE8S3", "e-inverted-pendulum:ST25DV04KC-IE8S3", SOIC8, 325.12, 147.32 + DY,
-                 purpose="NFC Type 5 tag on I2C3 (0x53/0x57); V_EH unused; GPO to PA2 (D-030)")
+    """MB1163 rev C-01 (ST X-NUCLEO-NFC01A1) sheet 1, as ST drew it, plus our I2C3 / PA2 / PA3 (D-039)."""
+    sh.box(210.82, 101.6 + DY, 405.13, 198.12 + DY,
+           "NFC tag: M24SR64-Y + ANT14 coil, copy of ST X-NUCLEO-NFC01A1 MB1163 rev C-01 (D-039)")
+    tag = active(sh, "U803", "M24SR64-YMN6T/2", "e-inverted-pendulum:M24SR64-Y", NFC + "SO8", 325.12, 175.26,
+                 purpose="MB1163 U1: NFC Type 4 tag on I2C3 (0x56); GPO to PA2, RF disable from PA3 (D-039)")
     tag.fpos = (2.54, -13.97, "left")
-    coil = nobom(sh, "AE801", "e-inverted-pendulum:NFC_Coil", "NFC coil", "e-inverted-pendulum:NFC_Coil_25x21mm",
-                 271.78, 147.32 + DY, 270, purpose="13.56 MHz printed loop, 10 turns, 25 x 21 mm (docs/nfc.md)")
+    coil = nobom(sh, "AE801", "e-inverted-pendulum:NFC_Coil", "ANT14", NFC + "ANT14", 233.68, 175.26, 270,
+                 purpose="MB1163 ANT14: printed coil, about 4 turns on F.Cu + 3.5 on B.Cu (docs/nfc.md)")
     coil.fpos = (-3.81, -1.27, "right")
-    trim = C(sh, "C804", "2.7p_0402_50V_C0G", 287.02, 147.32 + DY, "NFC_AC0", "NFC_AC1", dnp=True,
-             purpose="coil trim: f0 14.2 -> 13.56 MHz needs about 2.9 pF (scripts/nfc_coil.py); fit after a phone/VNA check")
-    c803 = C(sh, "C803", "100n_0402_16V_X7R", 322.58, 127.0 + DY, "+3V3", "GND", purpose="NFC tag bypass")
-    gpo = R(sh, "R810", "10k", 365.76, 135.89 + DY, "NFC_GPO", "+3V3", rot=180,
-            purpose="GPO is open drain (DS13519 Fig. 2)")
-    sh.nc(tag["1"])
-    sh.nets(tag, {"5": "QWIIC_SDA", "6": "QWIIC_SCL"})
-    sh.rail("NFC_AC0", 134.62 + DY, [coil["1"], trim["1"], (302.26, 134.62 + DY)])
-    sh.path("NFC_AC0", [tag["2"], (302.26, 147.32 + DY), (302.26, 134.62 + DY)])
-    sh.rail("NFC_AC1", 160.02 + DY, [coil["2"], trim["2"], (299.72, 160.02 + DY)])
-    sh.path("NFC_AC1", [tag["3"], (299.72, 149.86 + DY), (299.72, 160.02 + DY)])
-    sh.path("+3V3", [tag["8"], (309.88, 139.7 + DY), (309.88, 121.92 + DY)])
-    sh.rail("+3V3", 121.92 + DY, [(309.88, 121.92 + DY), c803["1"]], tap=(316.23, (0, -1)))
+    fb = active(sh, "FB801", "742792042", "Device:FerriteBead_Small", NFC + "L_0805", 251.46, 142.24, 90,
+                purpose="MB1163 L1: VCC ferrite")
+    fb.fpos = (-3.81, -7.62, "left")
+    tant = PASSIVES["C_1u_3216_16V_TANT"]
+    c803 = sh.part("Device:C_Polarized", "C803", "1uF 16V", (266.7, 147.32), fp=NFC + "CP_293D_A",
+                   lcsc=tant["lcsc"], mpn=tant["mpn"], Purpose="MB1163 C3: VCC 1 uF tantalum (293D-A)")
+    c804 = C(sh, "C804", "100n_0603_50V_X7R", 279.4, 147.32, "NFC_VCC", "GND", fp=NFC + "C_0603",
+             purpose="MB1163 C4: VCC 100 nF")
+    c818 = C(sh, "C818", "100p_0603_50V_C0G", 292.1, 147.32, "NFC_VCC", "GND", fp=NFC + "C_0603",
+             purpose="MB1163 C5: VCC 100 pF")
+    flag = sh.flag("NFC_VCC", (299.72, 142.24), label=False)
+    c820 = C(sh, "C820", "47p_0603_50V_C0G", 241.3, 167.64, "NFC_AC0", "GND", fp=NFC + "C_0603",
+             purpose="MB1163 C8: AC0 tuning 47 pF")
+    c822 = not_fitted(sh, "C822", 259.08, 167.64, "NFC_AC0", "GND", "MB1163 C9: AC0 tuning, not fitted (as on MB1163)")
+    c823 = not_fitted(sh, "C823", 289.56, 175.26, "NFC_AC0", "NFC_AC1",
+                      "MB1163 C2: across the coil, not fitted (as on MB1163)")
+    c819 = C(sh, "C819", "47p_0603_50V_C0G", 271.78, 193.04, "NFC_AC1", "GND", fp=NFC + "C_0603",
+             purpose="MB1163 C6: AC1 tuning 47 pF")
+    c821 = not_fitted(sh, "C821", 292.1, 193.04, "NFC_AC1", "GND", "MB1163 C7: AC1 tuning, not fitted (as on MB1163)")
+    gpo = R(sh, "R810", "20k", 365.76, 167.64, "NFC_GPO", "+3V3", rot=180, fp=NFC + "R_0603",
+            purpose="MB1163 R8: GPO pull-up (open drain, > 4.7k: DocID023790 Table 1)")
+    rf_off = R(sh, "R804", "30k", 355.6, 185.42, "NFC_RF_DIS", "GND", fp=NFC + "R_0603",
+               purpose="MB1163 R9: RF disable pull-down (DocID023790 s2.6)")
+    R(sh, "R805", "4.7k", 381.0, 152.4, "QWIIC_SDA", "+3V3", rot=180, dnp=True, fp=NFC + "R_0603",
+      purpose="MB1163 R6: SDA pull-up, not fitted (the bus has its 2.2k pull-ups)")
+    R(sh, "R806", "4.7k", 391.16, 152.4, "QWIIC_SCL", "+3V3", rot=180, dnp=True, fp=NFC + "R_0603",
+      purpose="MB1163 R7: SCL pull-up, not fitted (the bus has its 2.2k pull-ups)")
+
+    sh.rail("+3V3", 142.24, [fb["1"]], label="left", ext=5.08)
+    sh.rail("NFC_VCC", 142.24, [fb["2"], c803["1"], c804["1"], c818["1"], flag["1"], (307.34, 142.24)])
+    sh.path("NFC_VCC", [tag["8"], (307.34, 167.64), (307.34, 142.24)])
     sh.net(c803["2"], "GND")
-    sh.path("GND", [tag["4"], (309.88, 154.94 + DY), (309.88, 165.1 + DY)])
-    sh.rail("GND", 165.1 + DY, [(309.88, 165.1 + DY)], tap=(309.88, (0, 1)))
-    sh.rail("NFC_GPO", 147.32 + DY, [tag["7"], gpo["1"]], label="right", ext=5.08)
-    sh.net(gpo["2"], "+3V3")
-    sh.note(215.9, 175.26 + DY, [
-        "ST25DV04KC: ISO 15693 / NFC Type 5 tag on I2C3 (0x53 user, 0x57 system); V_EH unused; GPO open drain -> PA2 (EXTI2).",
-        "AE801: 10 turns, 25 x 21 mm, 4.25 uH; f0 14.2 MHz with C_TUN 28.5 pF + 1 pF (scripts/nfc_coil.py, docs/nfc.md).",
-        "C804 2.7 pF DNP across AC0-AC1 trims f0 to 13.56 MHz: fit after a phone / VNA check.  Keep metal off the coil."])
+    sh.rail("NFC_AC0", 162.56, [coil["1"], c820["1"], c822["1"], c823["1"], (302.26, 162.56)])
+    sh.path("NFC_AC0", [tag["2"], (302.26, 175.26), (302.26, 162.56)])
+    sh.rail("NFC_AC1", 187.96, [coil["2"], c823["2"], c819["1"], c821["1"], (299.72, 187.96)])
+    sh.path("NFC_AC1", [tag["3"], (299.72, 177.8), (299.72, 187.96)])
+    sh.path("GND", [tag["4"], (309.88, 182.88), (309.88, 193.04)])
+    sh.rail("GND", 193.04, [(309.88, 193.04)], tap=(309.88, (0, 1)))
+    sh.nets(tag, {"5": "QWIIC_SDA", "6": "QWIIC_SCL"})
+    sh.rail("NFC_GPO", 175.26, [tag["7"], gpo["1"]], label="right", ext=5.08)
+    sh.rail("NFC_RF_DIS", 180.34, [tag["1"], rf_off["1"]], label="right", ext=5.08)
+    sh.note(215.9, 203.2, [
+        "Copy of ST X-NUCLEO-NFC01A1 (MB1163 rev C-01): values, lands and copper as ST's (scripts/pcb/mb1163_nfc.json, D-039).",
+        "M24SR64-Y: NFC Forum Type 4 (ISO 14443-A) on I2C3 at 0x56; GPO open drain -> PA2; RF disable <- PA3 (high = RF off).",
+        "ANT14 + C_TUN 25 pF + C819 / C820 (47 pF each to GND): f0 about 14.9 MHz by calculation (scripts/nfc_coil.py).",
+        "C821 / C822 / C823 not fitted, as on MB1163: tuning spares.  R805 / R806 not fitted: I2C3 has its 2.2k pull-ups.",
+        "Derived from STMicroelectronics MB1163 rev C-01, Open Platform License (www.st.com/opla).  Keep metal off the coil."])
+
+
+def not_fitted(sh, ref, x, y, n1, n2, purpose):
+    part = sh.part("Device:C", ref, "NF", (x, y), fp=NFC + "C_0603", dnp=True, Purpose=purpose)
+    sh.net(part["1"], n1)
+    sh.net(part["2"], n2)
+    return part
 
 
 def build(project, values):
     sh = Sheet(project, 8, "ui", "User interface, expansion, test points")
     sh.desc = ["Status LED (PB0) + 12 RGB LEDs (PA7)", "Qwiic I2C3 + ESD, M24C64 EEPROM",
-               "ST25DV04KC NFC tag + printed coil", "No buttons, no buzzer (D-035)"]
+               "M24SR64-Y NFC tag + ANT14 coil (D-039)", "No buttons, no buzzer (D-035)"]
     status_led(sh)
     rgb_chain(sh)
     qwiic_eeprom(sh)

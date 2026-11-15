@@ -20,7 +20,7 @@ URL = "https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectS
 RESISTORS_0603 = ["0", "33", "100", "330", "1k", "1.5k", "2.2k", "4.7k", "5.1k", "10k", "22k", "27k",
                   "33k", "47k", "100k", "1M", "220", "470", "680", "2k", "3.3k", "15k", "20k", "56k", "68k",
                   "12k", "120k", "150k", "200k", "52.3k", "10.2k", "53.6k",
-                  "240k", "270k", "300k", "36k", "39k", "43k", "51k", "62k", "82k", "91k"]
+                  "240k", "270k", "300k", "36k", "39k", "43k", "51k", "62k", "82k", "91k", "30k"]
 RESISTORS_0402 = ["0"]
 
 CAPACITORS = {
@@ -47,6 +47,9 @@ CAPACITORS = {
     "4.7n_0603_50V_X7R": "CL10B472KB8NNNC",
     "47n_0603_50V_X7R": "CL10B473KB8NNNC",
     "220n_0603_25V_X7R": "CL10B224KA8NNNC",
+    "47p_0603_50V_C0G": "CL10C470JB8NNNC",
+    "100p_0603_50V_C0G": "CL10C101JB8NNNC",
+    "1u_3216_16V_TANT": "293D105X9016A2TE3",
 }
 
 

@@ -1,6 +1,6 @@
 item,qty,mass_g,z_mm,y_mm,shape,height_mm,depth_mm,source
 axle,1,0,0,18.8,axle,0,0,"Pivot (D-026): WHEELTEC U-bracket leg hole 18 mm from the base, base flat on the plate's back (0.8 mm half plate); z at the centre of the 25 mm strip, 12.5 mm above the bottom edge"
-pcb_plate,1,31.5,50.1,0,plate,130,1.6,"D-024 outline 85 mm wide, z -12.5..117.5 at the MB1355 antenna tab and -12.5..110.0 right of it (D-037): 10627 mm2 x 1.6 mm FR-4 at 1.85 g/cm3, area centroid z 50.1 (scripts/pcb/placement.py outline)"
+pcb_plate,1,32.3,51.7,0,plate,130,1.6,"D-024 outline 85 mm wide, z -12.5..117.5 at the MB1355 antenna tab (D-037) and right of the MB1163 NFC step at x 5.1 (D-039), -12.5..110.0 between them: 10906 mm2 x 1.6 mm FR-4 at 1.85 g/cm3, area centroid z 51.7 (board outline, scripts/pcb/placement.py)"
 pcb_components,1,30,60,-2,point,0,0,"ASSUMPTION populated-board estimate (all parts on the front, D-015), incl. NFC/EEPROM and PH connectors"
 battery_3s_1000mah,1,85,57.5,11.8,box,35,22,"ASSUMPTION 3S 1000 mAh 75 x 35 x 22 mm flat on the back (D-025), z 40..75 mm"
 battery_cradle,1,10,57.5,6,point,0,0,"ASSUMPTION printed cradle on 4 x M3"

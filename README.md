@@ -31,7 +31,7 @@ ngspice simulation suite. The firmware lives in its own repository and is the so
 - **12 RGB LEDs** (`WS2812B-2020-V6`) on one PA7 timer/DMA pin through a 5 V `SN74AHCT1G125`: it is also a toy (D-035).
   No buttons, no buzzer.
 - **Test pads** on every sheet (rails, motor phases and shunts, PWM, SPI, encoders, IMU, I2C), net names on the silk.
-- **Sensors and storage:** `MPU-6500` IMU on SPI2, `W25Q16JV` flash on SPI1, `M24C64` EEPROM and an `ST25DV04KC` NFC tag
+- **Sensors and storage:** `MPU-6500` IMU on SPI2, `W25Q16JV` flash on SPI1, `M24C64` EEPROM and an `M24SR64-Y` NFC tag
   with a printed 13.56 MHz coil on I2C3, plus a Qwiic port.
 - **Encoder inputs:** ESD at the connector, 100 Ω + 1 nF, `SN74LVC3G17` Schmitt buffers with 5 V-tolerant inputs.
 
@@ -52,7 +52,7 @@ e-psu-hardware pattern, D-033):
 | `drive` | Gate driver, four half-bridges, current sense | `DRV8711`, `CSD88537ND` |
 | `motors_encoders` | Motor + encoder connectors, encoder conditioning | JST PH 6-pin, `TPD4E05U06`, `SN74LVC3G17` |
 | `imu_flash` | IMU and SPI flash | `MPU-6500`, `W25Q16JV` |
-| `ui` | Status LED, 12 RGB LEDs, Qwiic, EEPROM, NFC tag | `WS2812B-2020-V6`, `SN74AHCT1G125`, `M24C64`, `ST25DV04KC` |
+| `ui` | Status LED, 12 RGB LEDs, Qwiic, EEPROM, NFC tag | `WS2812B-2020-V6`, `SN74AHCT1G125`, `M24C64`, `M24SR64-Y` |
 
 ---
 
@@ -90,16 +90,17 @@ e-inverted-pendulum-hardware/
 │       ├── e-inverted-pendulum.kicad_pro / .kicad_sch (root) / .kicad_pcb / .kicad_dru
 │       ├── power_entry / logic_power / mcu / rf / drive / motors_encoders / imu_flash / ui .kicad_sch
 │       ├── e-inverted-pendulum.kicad_sym    # project symbols
-│       ├── e-inverted-pendulum.pretty/      # project footprints (XT30, STDC14, NFC coil, MB1355_* from ST, ...)
+│       ├── e-inverted-pendulum.pretty/      # project footprints (XT30, STDC14, MB1355_* and MB1163_* from ST, ...)
 │       └── sym-lib-table, fp-lib-table
 ├── scripts/
 │   ├── schgen/                       # schematic generator: design/*.py -> hardware/ (D-020, D-033)
-│   ├── pcb/                          # board sync (add-only, D-032), MB1355 RF-corner paste (rf_block.py, D-037), renders
+│   ├── pcb/                          # board sync (add-only, D-032), RF / NFC corner pastes (rf_block.py D-037, nfc_block.py D-039), renders
 │   ├── export_review.py              # review package     -> review_exports/<board>/
 │   ├── export_jlcpcb.py              # fab + assembly     -> manufacturing/<board>/
 │   ├── export_release.py             # release bundle     -> release/<board>-<version>.zip
 │   ├── visual_diff.py                # PR visual diff     -> diff/<board>/
 │   ├── rf_reference.py               # ST MB1355 files (reference/, gitignored) -> pcb/mb1355_rf.json + MB1355_* footprints
+│   ├── nfc_reference.py              # ST MB1163 Gerbers (reference/, gitignored) -> pcb/mb1163_nfc.json + MB1163_* footprints
 │   └── check_*.py, design_calcs.py, nfc_coil.py, gcpw.py, export_bom.py, jlc_stock.py
 ├── simulation/                       # ngspice suite (S0–S5) + REPORT.md
 ├── pin-data/                         # pin map and the DS11929 package data it is checked against
@@ -174,6 +175,14 @@ python3 scripts/pcb/rf_block.py --apply
 `scripts/rf_reference.py` re-derives `scripts/pcb/mb1355_rf.json` and the `MB1355_*` footprints from ST's files, which are
 kept out of the repository in `reference/mb1355/` (ST's Open Platform License).
 
+The NFC corner is a copy of ST's X-NUCLEO-NFC01A1 (MB1163 rev C-01, D-039): the M24SR64-Y, its ANT14 coil, tuning caps,
+copper and pour, pasted the same way (`docs/nfc.md`). `scripts/nfc_reference.py` re-derives `scripts/pcb/mb1163_nfc.json`
+and the `MB1163_*` footprints from ST's Gerbers in `reference/mb1163/`; `scripts/nfc_coil.py` checks the coil.
+
+```bash
+python3 scripts/pcb/nfc_block.py --apply
+```
+
 ### Review and fabrication packages
 
 - `python3 scripts/export_review.py`: ERC/DRC, netlist, BOM, PDFs and renders for a design review, used by the
@@ -191,7 +200,7 @@ kept out of the repository in `reference/mb1355/` (ST's Open Platform License).
 3. JLCPCB options (PCB + assembly, D-036): 4 layers, JLC04161H-7628, 1.6 mm, 1 oz outer / 0.5 oz inner; impedance
    control only if JLCPCB holds MB1355's RF line as drawn (0.6 / 0.2 mm on L1 over L3, `docs/rf.md`). Check every CPL rotation in the preview
    (the WS2812B-2020 footprint is the datasheet pattern turned 180°).
-4. Leave the DNP parts off: antenna-match C401, shield clips SC401–SC404, NFC trim C804, sense filters C501/C504, motor
+4. Leave the DNP parts off: antenna-match C401, shield clips SC401–SC404, NFC tuning spares C821–C823 and pull-ups R805 / R806, sense filters C501/C504, motor
    snubbers C603/C607, encoder pull-ups, R602.
 
 ---

@@ -118,7 +118,7 @@ Ground every item in the guide and cite its section next to your package evidenc
    - STM32WB SMPS and RF (AN5165, DS12804 Fig. 13): L301/L302 at pins 41–44 and orthogonal to the RF line, the 1.5 mm RF1-to-MLPF trace, ground vias;
    - the RF corner against ST's MB1355 D-01 (D-037, `docs/rf.md`): antenna tab, keep-out, the listed deviations only;
    - connector ESD (SLVA680): pass-through, no via before the TVS, ground via at the TVS;
-   - ST25DV coil (`docs/nfc.md`) and MPU-6500 assembly guidance (no traces under the package, component clearance).
+   - the M24SR64-Y and ANT14 coil copied from ST's X-NUCLEO-NFC01A1, MB1163 rev C-01 (`docs/nfc.md`, D-039) and MPU-6500 assembly guidance (no traces under the package, component clearance).
 
    Cite the guidance (with URL or document ID) and whether the board follows it.
 

@@ -40,10 +40,12 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - JLCPCB is the fab and assembler (D-036). Prefer parts in stock, basic before extended; footprints
   must match the LCSC part's package exactly.
 - Stack-up: JLC04161H-7628, 4-layer 1.6 mm, 1 oz outer / 0.5 oz inner. L2 is solid GND and is
-  never cut, except the copied MB1355 cut-out under the RF line (D-037). Design rules are JLCPCB's
-  (`pcb-design-rules`, D-036).
+  never cut, except the copied MB1355 cut-out under the RF line (D-037) and the NFC coil keep-out (all layers,
+  D-039). Design rules are JLCPCB's (`pcb-design-rules`, D-036).
 - The RF corner (MCU, RF path, antenna tab, SMPS, crystals) is a literal copy of ST's NUCLEO-WB55 MB1355 rev D-01
   (D-037, `docs/rf.md`). Change it only with ST's reference in hand; ST's files stay in the gitignored `reference/`.
+- The NFC corner (M24SR64-Y, ANT14 coil, tuning caps, copper) is a literal copy of ST's X-NUCLEO-NFC01A1 MB1163 rev C-01
+  (D-039, `docs/nfc.md`), under the same rule.
 - Phases have gates (`docs/plan.md`). Do not start a phase before the previous gate is
   signed off by the user.
 - Layout: the user places the anchors and they are never moved (`power-pcb-layout` §1).
@@ -57,7 +59,7 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 simulation/sizing.py`: motor/drive sizing (S0).
 - `python3 scripts/check_pinmap.py`: pin map validation.
 - `python3 scripts/gcpw.py`: 50 Ω GCPW width/gap for the stack-up (`docs/rf.md`).
-- `python3 scripts/nfc_coil.py`: NFC coil inductance/resonance and its footprint (`docs/nfc.md`).
+- `python3 scripts/nfc_coil.py`: ANT14 inductance and resonance on ST's board and ours (`docs/nfc.md`).
 - `python3 scripts/design_calcs.py`: values -> `scripts/schgen/values.json`, `docs/design-calcs.md`.
 - `python3 scripts/schgen/build.py`: regenerate the schematic into `hardware/e-inverted-pendulum/` from
   `scripts/schgen/design/*.py` (D-020, D-033). Sheets follow e-psu-hardware: one titled box per functional block, circuits
@@ -74,6 +76,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/rf_reference.py`: ST's MB1355 files (`reference/mb1355/`, gitignored, OPLA) -> `scripts/pcb/mb1355_rf.json`
   and the `MB1355_*` footprints (D-037).
 - `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a locked group; no-op once present).
+- `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
+  and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.

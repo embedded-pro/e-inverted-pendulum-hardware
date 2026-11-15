@@ -45,8 +45,8 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - One JST PH 6-pin per motor (MG310 pinout, D-028). Hall A/B → TPD4E05U06 ESD → 100 Ω + 1 nF → SN74LVC3G17 → LPTIM1 /
   TIM2. No index: the third buffer input is grounded, so PC5 / PC3 read low.
 - MPU-6500 on SPI2 (INT to PC6); W25Q16JV on SPI1 shared with the DRV8711 (33 Ω SCK termination).
-- I2C3: Qwiic + ESD, M24C64 EEPROM at 0x50, ST25DV04KC NFC tag at 0x53 / 0x57 with a printed 10-turn 25 × 21 mm coil
-  (f0 14.2 MHz, DNP 2.7 pF trim); GPO to PA2.
+- I2C3: Qwiic + ESD, M24C64 EEPROM at 0x50, M24SR64-Y NFC tag (Type 4) at 0x56: the NFC corner (tag, ST's ANT14 coil,
+  tuning caps, pour) is copied from ST's X-NUCLEO-NFC01A1, MB1163 rev C-01 (D-039); GPO on PA2, RF disable on PA3.
 - 12 × WS2812B-2020-V6 RGB LEDs on +5V from PA7 (TIM17 + DMA) through an SN74AHCT1G125; green status LED on PB0.
   No buttons, no buzzer: the robot doubles as a toy (D-035).
 - Test pads with net names on the silkscreen on every sheet: rails, motor phases and shunts, PWM, SPI, encoders,
@@ -84,7 +84,7 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
   and component masses, the bracket's 18 mm reference face.
 - Encoder resolution: 13 PPR is assumed (1040 counts per wheel revolution).
 - REQ-ODOM-005 (index pulse) can't be met with the MG310; reported to the firmware.
-- Bench items: buck load step, HSE trim, pi-network VNA tuning, NFC coil tuning (C804), thermal soak (`docs/plan.md`
+- Bench items: buck load step, HSE trim, pi-network VNA tuning, NFC coil tuning (spares C821–C823), thermal soak (`docs/plan.md`
   Phase 4).
 - Re-run the JLC stock check before the order.
 

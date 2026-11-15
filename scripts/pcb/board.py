@@ -3,7 +3,8 @@
 
 Placement belongs to the owner (D-032): the .kicad_pcb is the source of truth for where parts are and for the
 board geometry. This script never moves or reshapes anything that already exists on the board. It:
-  - creates what is missing: the outline (85 mm wide, MB1355's antenna tab at the top-left corner, D-037), the rule
+  - creates what is missing: the outline (85 mm wide, MB1355's antenna tab at the top-left corner, D-037, the top
+    edge back at 117.5 right of the MB1163 NFC step, D-039), the rule
     areas and reference drawings from placement.py, and the bracket holes (placement.MECHANICAL), each only if absent;
   - syncs the schematic: one footprint per symbol with its fields, sheet path, DNP/BOM flags and pad nets; a footprint
     whose library entry changed is swapped in place (position, rotation and lock kept), and one whose library 3D
@@ -112,6 +113,10 @@ CUSTOM_RULES = """
   (condition "A.memberOfGroup('MB1355 RF corner')")
   (constraint track_angle (min 0)))
 
+(rule "MB1163 NFC corner: ST's routing keeps its corners and its GND branch (D-039)"
+  (condition "A.memberOfGroup('MB1163 NFC corner')")
+  (constraint track_angle (min 0)))
+
 (rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
   (condition "A.Type == 'Track' && A.intersectsArea('ANTENNA_TAB') && A.NetName != '/4 2.4 GHz RF path and antenna/RF_ANT'")
   (constraint disallow track))
@@ -197,11 +202,13 @@ def load_footprint(board, lib_id):
 
 
 def outline_shapes():
-    """85 mm wide plate; the top-left corner is MB1355's antenna tab and step (D-037), the other corners r 1 mm."""
-    w, top, bottom, r = placement.WIDTH / 2.0, placement.TOP_RIGHT_Z, placement.BOTTOM_Z, CORNER_RADIUS
-    tab = placement.TAB_OUTLINE
+    """85 mm wide plate; the top-left corner is MB1355's antenna tab and step (D-037); right of NFC_STEP_X the top
+    edge is back at TOP_Z for the MB1163 NFC corner (D-039); the other corners r 1 mm."""
+    w, top, bottom, r = placement.WIDTH / 2.0, placement.TOP_Z, placement.BOTTOM_Z, CORNER_RADIUS
+    tab, step, foot = placement.TAB_OUTLINE, placement.NFC_STEP_X, placement.TOP_RIGHT_Z
     shapes = [
-        ("line", tab[-1], (w - r, top)), ("line", (w, top - r), (w, bottom + r)),
+        ("line", tab[-1], (step, foot)), ("line", (step, foot), (step, top)), ("line", (step, top), (w - r, top)),
+        ("line", (w, top - r), (w, bottom + r)),
         ("line", (w - r, bottom), (-w + r, bottom)), ("line", (-w, bottom + r), tab[0]),
         ("arc", (w - r, top - r), (w, top - r), 90),
         ("arc", (-w + r, bottom + r), (-w, bottom + r), 90), ("arc", (w - r, bottom + r), (w - r, bottom), 90),
@@ -356,11 +363,14 @@ def replace_footprint(board, fp, lib_id):
 
 SILK_TEXT_MIN = (1.0, 0.15)
 RF_CORNER_GROUP = "MB1355 RF corner"
+NFC_CORNER_GROUP = "MB1163 NFC corner"
+COPIED_GROUPS = {RF_CORNER_GROUP, NFC_CORNER_GROUP}
 
 
 def label_fields(fp):
-    """Only the reference is shown on the board; test pads show their net name instead (D-035). The MB1355 RF corner
-    (rf_block.py, D-037) is too dense for silk: its references go on F.Fab (assembly drawing).
+    """Only the reference is shown on the board; test pads show their net name instead (D-035). The copied corners,
+    MB1355 RF (rf_block.py, D-037) and MB1163 NFC (nfc_block.py, D-039), are too dense for silk: their references go on
+    F.Fab (assembly drawing).
 
     Net ties keep their reference hidden. Silkscreen text is raised to JLCPCB's minimum (1.0 mm high, 0.15 mm line) and
     never lowered. A test pad's label is moved onto the silkscreen once; after that its
@@ -369,7 +379,7 @@ def label_fields(fp):
     reference, value = fp.Reference(), fp.Value()
     lib_id = fp.GetFPIDAsString()
     group = fp.GetParentGroup()
-    if group is not None and group.GetName() == RF_CORNER_GROUP:
+    if group is not None and group.GetName() in COPIED_GROUPS:
         value.SetVisible(False)
         reference.SetLayer(pcbnew.F_Fab)
         reference.SetVisible(True)
@@ -608,7 +618,7 @@ def build_board(stage=False):
     block.SetCompany("embedded-pro")
     block.SetRevision("A (draft)")
     block.SetComment(0, "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 (D-008, D-036)")
-    block.SetComment(1, "Outline 85 x 130 mm with MB1355's antenna tab (D-024, D-037); docs/mechanical.md, docs/rf.md")
+    block.SetComment(1, "Outline 85 x 130 mm, MB1355 antenna tab and MB1163 NFC corner (D-024, D-037, D-039); docs/mechanical.md")
 
     ensure_outline(board)
     footprints = sync_footprints(board, components, nets, pins)

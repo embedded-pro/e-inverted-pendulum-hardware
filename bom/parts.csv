@@ -17,7 +17,8 @@ sensing,Encoder Schmitt buffer x3,SN74LVC3G17DCTR,C18213,2,D-012
 sensing,Connector ESD (encoders + Qwiic),TPD4E05U06QDQARQ1,C81353,3,one per encoder connector and one for Qwiic; alternate TPD4E05U06DQAR C138714 (same pinout and footprint)
 memory,SPI NOR flash 2 MB,W25Q16JVSSIQ,C131025,1,D-005
 memory,I2C EEPROM 64 Kbit,M24C64-RMN6TP,C79988,1,D-031; I2C3 at 0x50
-rf,NFC Type 5 tag with I2C,ST25DV04KC-IE8S3,C5221752,1,D-030; I2C3 at 0x53/0x57; GPO on PA2
+rf,NFC Type 4 tag with I2C,M24SR64-YMN6T/2,C222221,1,MB1163 U1 (D-039); I2C3 at 0x56; GPO on PA2; RF disable on PA3
+rf,NFC tag VCC ferrite,742792042,C5374796,1,MB1163 L1 (D-039)
 power,Buck 5 V (forced PWM),TPS62933FDRLR,C5219272,1,F = FCCM: fixed frequency near the radio
 power,Buck inductor 4.7 uH,SWPA4030S4R7MT,C57269,1,design-calcs TPS62933F L
 mcu,VDDA ferrite,BLM18PG221SN1D,C80165,1,mcu-circuit-design s2

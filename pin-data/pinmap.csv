@@ -34,4 +34,5 @@ I2C3_SCL,PB10,af,I2C3_SCL,,QWIIC_SCL,new; Qwiic expansion
 I2C3_SDA,PB11,af,I2C3_SDA,,QWIIC_SDA,new; Qwiic expansion
 DRV_STALLN,PB2,gpio_in,GPIO,,DRV_NSTALL,new; optional; open-drain with 10k pull-up
 BOOT0,PH3,boot,BOOT0,,BOOT0,10k pull-down + test pad
-NFC_GPO,PA2,exti,EXTI2,,NFC_GPO,new; ST25DV04KC GPO (open drain, 10k pull-up to 3V3), D-030
+NFC_GPO,PA2,exti,EXTI2,,NFC_GPO,new; M24SR64-Y GPO (open drain, 20k pull-up to 3V3 as MB1163 R8), D-039
+NFC_RF_DISABLE,PA3,gpio_out,GPIO,,NFC_RF_DIS,new; M24SR64-Y RF disable (high = RF off; 30k pull-down as MB1163 R9), D-039

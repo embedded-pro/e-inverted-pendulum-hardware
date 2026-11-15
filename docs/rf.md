@@ -129,14 +129,14 @@ as copied (D-037). The decoupling is inside the locked group; its routing is the
   - 28.5 mm wide, from the left edge to x −14.0, with ST's 45° chamfers;
   - the board edge is 1.1 mm above the antenna;
   - ground starts 7.5 mm down, at z 109.98;
-  - right of the tab, the whole top edge steps down to z 110.02, the ground line, as on ST (where ST's edge SMA sits;
-    not fitted here, D-038).
+  - right of the tab the top edge steps down to z 110.02, the ground line, as on ST (where ST's edge SMA sits; not
+    fitted here, D-038), up to x +5.1, where it rises back to z 117.5 for the MB1163 NFC corner (D-039).
 - **Keep-out:** rule area `ANTENNA_TAB` on all four layers: no pour and no vias.
   - A project DRC rule allows only the antenna feed (RF_ANT) to cross it.
   - It replaces the full-width `ANTENNA_KEEPOUT` / `ANTENNA_BASE` band of D-029.
 - **Positions:** antenna feed at mechanical (−22.87, 110.26); the MCU centre is at about (−17.6, 97.2).
 - **Near field:** no metal within about 5 mm of the tab.
-  - The NFC coil (x ≥ 16) is ≥ 30 mm away.
+  - The NFC coil (ANT14, x ≥ 9.5, D-039) is ≥ 23.5 mm away from the antenna (x ≤ −14.0).
   - The battery (top edge z 75, on the back) is ≥ 35 mm below.
   - The bracket holes are at the bottom.
   - The bumper screws must stay clear of the tab (the owner places them).

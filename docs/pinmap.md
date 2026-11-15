@@ -31,8 +31,9 @@ None to existing pins. New signals for the firmware's board target:
 | FLASH_CS | PA15 | W25Q16 on SPI1 (shared with the DRV8711; mode 0 suits both) |
 | VBAT_SENSE | PC1 / ADC1_IN2 | battery voltage, 100 k/27 k divider |
 | LED_RGB | PA7 / TIM17_CH1 | 12 × WS2812B-2020-V6 chain through an SN74AHCT1G125 (D-035); green status LED stays on PB0 |
-| I2C3 SCL/SDA | PB10 / PB11 | Qwiic expansion, M24C64 EEPROM (0x50), ST25DV04KC NFC tag (0x53/0x57) |
-| NFC_GPO | PA2 / EXTI2 | ST25DV04KC GPO, open drain with a 10 k pull-up (D-030) |
+| I2C3 SCL/SDA | PB10 / PB11 | Qwiic expansion, M24C64 EEPROM (0x50), M24SR64-Y NFC tag (0x56) |
+| NFC_GPO | PA2 / EXTI2 | M24SR64-Y GPO, open drain with a 20 k pull-up (MB1163 R8, D-039) |
+| NFC_RF_DISABLE | PA3 | M24SR64-Y RF disable, output; high = RF off; 30 k pull-down (MB1163 R9, D-039) |
 | DRV_STALLN | PB2 | optional DRV8711 nSTALL input |
 
 ## Consequences

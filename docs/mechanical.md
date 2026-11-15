@@ -8,7 +8,8 @@ become anchors once the parts are measured. `mechanical/mass_budget.csv` is the 
 
 - **x:** across the plate, along the wheel axle; x = 0 on the vertical centreline. The plate spans x −42.5 … +42.5 mm.
 - **z:** up the plate, with z = 0 on the wheel axle at the centre of the 25 mm bracket strip. The bottom edge is
-  z −12.5 and the top edge z +117.5 at the antenna tab, z +110.02 right of it (D-024, D-037 outline, D-026 axle).
+  z −12.5. The top edge is z +117.5 at the antenna tab and right of x +5.1 (the NFC corner), and z +110.02 between
+  them (D-024, D-037 and D-039 outline, D-026 axle).
 - **y:** through the plate, from its mid-plane, positive toward the **back** (where the bracket, motors and battery
   are). The front is the component side.
 
@@ -21,7 +22,7 @@ Side view (robot drives left/right on the page):
 ```
                  front │ │ back
                 (parts)│ │
-   z 117.5 ────────────┤ │  2.4 GHz antenna tab (top-left, all layers; z 110 elsewhere)
+   z 117.5 ────────────┤ │  2.4 GHz antenna tab (top-left) and NFC coil (top-right); z 110 between them
                        │ │
    z 75    ────────────┤ ├────────┐
                        │ │BATTERY │ 22 mm thick, on a printed cradle (4 × M3)
@@ -36,10 +37,11 @@ Front view (component side):
 
 ```
  x −42.5                                              +42.5
-   ┌──────────────────────┐ z 117.5
-   │ ░ antenna tab ░░░░░░░ ╲
-   │ ░ (MB1355) no ground ░ ╲___________________________┐ z 110.0
-   │  MCU + RF corner (MB1355 copy)            NFC coil │
+   ┌──────────────────────┐ z 117.5         ┌──────────────────┐ z 117.5
+   │ ░ antenna tab ░░░░░░░ ╲               │ ANT14 NFC coil   │
+   │ ░ (MB1355) no ground ░ ╲______________│ (MB1163 copy)    │ z 110.0 between, step at x +5.1
+   │  MCU + RF corner (MB1355 copy)         │ 31 x 30 mm       │
+   │                                         └ M24SR64-Y tag ─ │ z 85.5 (coil bottom)
    │                                                    │ z ~76
    │       (battery behind this band: SMD parts only)   │ ◄ STDC14 at the middle of the right edge
    │                                                    │ z ~40
@@ -52,8 +54,9 @@ Front view (component side):
 
 - **Front:** every SMD part (JLC single-side PCBA), with no parts in the bottom 25 mm strip.
 - **Back:** the bracket in the strip, the motors behind it, and the battery above them. No parts.
-- **Plate:** 85 mm wide × 1.6 mm; 130 mm tall at the top-left antenna tab (x −42.5 to −14.0), 122.5 mm right of it, where
-  the top edge steps down to z 110.02 (MB1355's outline, D-037).
+- **Plate:** 85 mm wide × 1.6 mm; 130 mm tall at the top-left antenna tab (x −42.5 to −14.0) and right of x +5.1, where
+  the MB1163 NFC corner sits (D-039); 122.5 mm between them, where the top edge steps down to z 110.02 (MB1355's
+  outline, D-037).
 - **Mechanical holes:** NPTH with an outer-layer copper keep-out (7 mm for M3, 5.5 mm for M2). The strip has no
   B.Cu copper at all, because the steel base presses on it.
 
@@ -88,7 +91,7 @@ From the owner's drawing (2026-11-13):
 
 | Item | Mass | Position (z above the axle, y from the axle; + = back) | Source |
 |---|---|---|---|
-| PCB plate 85 × 130 × 1.6, minus MB1355's step (10 627 mm²) | 31.5 g | z 50.1, y −18.8 mm | D-024, D-037, FR-4 1.85 g/cm³ |
+| PCB plate 85 × 130 × 1.6, minus the step between the tab and the NFC corner (10 906 mm²) | 32.3 g | z 51.7, y −18.8 mm | D-024, D-037, D-039, FR-4 1.85 g/cm³ |
 | Components | 30 g | z 60, y −20.8 mm | ASSUMPTION |
 | 3S 1000 mAh LiPo, 75 × 35 × 22 | 85 g | z 57.5, y −7.0 mm (on the back, z 40–75) | ASSUMPTION |
 | Battery cradle | 10 g | z 57.5, y −12.8 mm | ASSUMPTION |
@@ -99,8 +102,8 @@ From the owner's drawing (2026-11-13):
 
 Result (S0, `simulation/results/sizing_summary.json`):
 - body m = 0.386 kg;
-- ℓ = 28.3 mm;
-- J about the CoM = 4.28e-04 kg·m²;
+- ℓ = 28.5 mm;
+- J about the CoM = 4.32e-04 kg·m²;
 - **fall time constant τ = 83 ms**: about 41 updates per τ at 500 Hz.
 
 ## Consequences for the firmware
@@ -124,5 +127,5 @@ Result (S0, `simulation/results/sizing_summary.json`):
 2. Confirm the bracket's 18 mm axis-to-base dimension and which base holes carry the screws.
 3. Design the battery cradle on the 4 × M3 holes (`docs/layout.md`). Falling backward lands on the battery,
    so the cradle should have a lip that takes the impact.
-4. Bumpers (HW-MEC-004): MH1 top-left and MH2 on the right edge below the NFC coil. Use nylon hardware, because MH2
-   is near the NFC coil.
+4. Bumpers (HW-MEC-004): MH1 top-left and MH2 on the right edge below the NFC coil (coil bottom z 85.5). Use nylon
+   hardware, and keep metal at least ST's 4.4 mm pour gap from the coil (`docs/nfc.md`).

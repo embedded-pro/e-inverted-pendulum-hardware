@@ -50,8 +50,9 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 - Body parameters come from `mechanical/mass_budget.csv` (bracket, motors, battery on the back; pivot on the axle).
 
 **Hand cross-checks.**
-- Body: m = 0.386 kg, ℓ = 28.3 mm, J = 4.28e-04 kg·m² (outline with MB1355's antenna tab, D-037).
-  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.28e-04 + 0.386·0.0283²) / (0.386·9.81·0.0283)) =
+- Body: m = 0.386 kg, ℓ = 28.5 mm, J = 4.32e-04 kg·m² (outline with MB1355's antenna tab, D-037, and the top edge
+  raised for the MB1163 NFC corner, D-039).
+  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.32e-04 + 0.386·0.0285²) / (0.386·9.81·0.0285)) =
   83 ms. The script prints 83 ms.
 - Cruise voltage at 1.0 m/s = Ke·G·v/r + R·I₀ = 0.00609·20·1.0/0.0325 + 3.70·0.12 = 4.19 V. The script prints 4.19 V.
 - TORQUE at 2.0 A = 256·20·0.05·2.0/2.75 = 186 (ISGAIN 20). The script prints 186.
@@ -59,8 +60,8 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 ### Findings
 
 1. **The trip must be 2.0 A.** At every voltage cap, 1.0 A and 1.5 A trips recover only 12–18° worst case, short of
-   the 2 × 10° target. **2.0 A recovers 21.9–23.3°**, which passes but with little margin.
-2. **A 7.4 V cap is enough.** The cap barely changes recovery (23.3° at 7.4 V, 22.0° at 8.4 V, 21.9° at 9.9 V), and
+   the 2 × 10° target. **2.0 A recovers 21.8–23.2°**, which passes but with little margin.
+2. **A 7.4 V cap is enough.** The cap barely changes recovery (23.2° at 7.4 V, 21.9° at 8.4 V, 21.8° at 9.9 V), and
    cruising at 1.0 m/s needs 4.2 V (57 % of the cap) and at 1.5 m/s 6.1 V. **The firmware limits the average motor
    voltage to 7.4 V** (duty ≤ 0.59 at 12.6 V): the motor stays at its rating, and stall current at the cap equals
    the trip.

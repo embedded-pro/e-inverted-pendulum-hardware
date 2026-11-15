@@ -56,7 +56,7 @@
 		)
 		(uuid "215e1f0b-f165-5a79-8ec4-c258433e4d35")
 	)
-	(text "Status LED (PB0) + 12 RGB LEDs (PA7)\nQwiic I2C3 + ESD, M24C64 EEPROM\nST25DV04KC NFC tag + printed coil\nNo buttons, no buzzer (D-035)"
+	(text "Status LED (PB0) + 12 RGB LEDs (PA7)\nQwiic I2C3 + ESD, M24C64 EEPROM\nM24SR64-Y NFC tag + ANT14 coil (D-039)\nNo buttons, no buzzer (D-035)"
 		(exclude_from_sim no)
 		(at 322.58 130.81 0)
 		(effects
