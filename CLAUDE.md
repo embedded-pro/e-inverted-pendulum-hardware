@@ -75,6 +75,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   moves or reshapes what is on the board; it adds missing items (new parts go to the first free spot in the staging
   area) and removes parts deleted from the schematic. Only references show on the silkscreen; test pads show their net
   (D-035). `--stage-all` is a one-shot reset to staging.
+- `python3 scripts/pcb/silk.py [--check]`: silkscreen labels at JLCPCB's 1.0 mm / 0.15 mm, clear of every label, outline,
+  pad, via, body and the edge, next to their part (D-041). `board.py` and the paste scripts run it last; run it after
+  moving parts in KiCad. Clean labels never move.
 - `python3 scripts/rf_reference.py`: ST's MB1355 files (`reference/mb1355/`, gitignored, OPLA) -> `scripts/pcb/mb1355_rf.json`
   and the `MB1355_*` footprints (D-037).
 - `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot, a locked group; no-op once present).

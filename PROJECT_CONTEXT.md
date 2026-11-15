@@ -69,7 +69,8 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - Net classes from `docs/power-map.md`; JLC rules from the `pcb-design-rules` skill; custom DRC rules for the RF1
   trace, keep-outs and the bracket strip. RF line: MB1355's 0.6 / 0.2 mm on L1 over L3 (L2 cut out locally): 56.9 Ω
   vs 56.3 Ω on ST's board (`scripts/gcpw.py`).
-- Silkscreen shows references only; test pads show their net name (D-035).
+- Silkscreen shows references only; test pads show their net name (D-035). Labels are JLCPCB's smallest text, placed by
+  `scripts/pcb/silk.py` clear of everything; 19 with no room sit on F.Fab (D-041).
 - **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position as one locked group
   (D-037). The board has the outline, rule areas and bracket holes; every other part sits
   in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new

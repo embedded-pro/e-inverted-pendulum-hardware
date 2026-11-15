@@ -11,8 +11,9 @@ board geometry. This script never moves or reshapes anything that already exists
     bodies changed gets the new bodies in place (nothing moves or leaves its group); new parts go to the first
     free spot in the staging area right of the board; parts removed from the schematic are deleted (board-only
     footprints are never deleted);
-  - shows only the reference on the silkscreen, at the fab's minimum text size; test pads show their net name instead
-    (label_fields, D-035);
+  - shows one label per part on the silkscreen: the reference, a test pad's net name instead, nothing on a net tie
+    (label_fields, D-035); then lays every label out with silk.py: JLCPCB's minimum text, clear of other labels,
+    outlines, pads, vias, bodies and the edge, next to its own part (D-041);
   - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the fab rules, the
     JLCPCB's (pcb-design-rules skill, pcb_rules.py, D-036), plus the project rules below.
 
@@ -124,6 +125,11 @@ CUSTOM_RULES = """
 (rule "BOOST-DRV8711 drive: TI's routing keeps its corners (D-040)"
   (condition "A.memberOfGroup('BOOST-DRV8711 drive')")
   (constraint track_angle (min 0)))
+
+(rule "Silkscreen: two parts' outlines may sit closer than 0.15 mm but never overlap; labels keep 0.15 mm (D-041)"
+  (layer "?.Silkscreen")
+  (condition "A.Type == 'Graphic' && B.Type == 'Graphic'")
+  (constraint silk_clearance (min 0mm)))
 
 (rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
   (condition "A.Type == 'Track' && A.intersectsArea('ANTENNA_TAB') && A.NetName != '/4 2.4 GHz RF path and antenna/RF_ANT'")
@@ -378,44 +384,39 @@ def replace_footprint(board, fp, lib_id):
 
 
 SILK_TEXT_MIN = (1.0, 0.15)
+SILK_CHECKS = ("silk_overlap", "silk_over_copper", "silk_edge_clearance", "text_height", "text_thickness")
 RF_CORNER_GROUP = "MB1355 RF corner"
 NFC_CORNER_GROUP = "MB1163 NFC corner"
 DRIVE_GROUP = "BOOST-DRV8711 drive"
 COPIED_GROUPS = {RF_CORNER_GROUP, NFC_CORNER_GROUP, DRIVE_GROUP}
 
 
-def label_fields(fp):
-    """Only the reference is shown on the board; test pads show their net name instead (D-035). The copied corners,
-    MB1355 RF (rf_block.py, D-037) and MB1163 NFC (nfc_block.py, D-039), are too dense for silk: their references go on
-    F.Fab (assembly drawing).
-
-    Net ties keep their reference hidden. Silkscreen text is raised to JLCPCB's minimum (1.0 mm high, 0.15 mm line) and
-    never lowered. A test pad's label is moved onto the silkscreen once; after that its
-    position is the owner's.
-    """
-    reference, value = fp.Reference(), fp.Value()
+def silk_label(fp):
+    """The field a part shows on the silkscreen (D-035): its reference, a test pad's net name, nothing on a net tie
+    (copper only, nothing to assemble). ANT14 also ties its pads, through the coil, but it is a part: it keeps its label."""
     lib_id = fp.GetFPIDAsString()
-    group = fp.GetParentGroup()
-    if group is not None and group.GetName() in COPIED_GROUPS:
-        value.SetVisible(False)
-        reference.SetLayer(pcbnew.B_Fab if fp.IsFlipped() else pcbnew.F_Fab)
-        reference.SetVisible(True)
-        return
-    if lib_id.startswith("TestPoint:"):
-        reference.SetVisible(False)
-        if not value.IsVisible() or value.GetLayer() != pcbnew.F_SilkS:
-            value.SetLayer(pcbnew.F_SilkS)
-            value.SetPosition(reference.GetPosition())
-            value.SetVisible(True)
-    else:
-        value.SetVisible(False)
-        reference.SetVisible(not lib_id.startswith("NetTie:"))
+    if lib_id.startswith("NetTie:") or "Net-Tie" in lib_id:
+        return None
+    return fp.Value() if fp.GetFPIDAsString().startswith("TestPoint:") else fp.Reference()
+
+
+def label_fields(fp):
+    """Only the part's silkscreen label is visible (silk_label); silk.py places and sizes it (D-041). The footprint's
+    other silkscreen is raised to JLCPCB's minimum and never lowered: text 1.0 mm high, lines and strokes 0.15 mm
+    (KiCad's library draws outlines at 0.12 mm)."""
+    label = silk_label(fp)
+    for field in (fp.Reference(), fp.Value()):
+        field.SetVisible(label is not None and field.GetName() == label.GetName())
     height, thickness = (pcbnew.FromMM(v) for v in SILK_TEXT_MIN)
-    for item in [reference, value] + [g for g in fp.GraphicalItems() if g.GetClass() == "PCB_TEXT"]:
-        if item.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+    for item in fp.GraphicalItems():
+        if item.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            continue
+        if item.GetClass() == "PCB_TEXT":
             size = item.GetTextSize()
             item.SetTextSize(pcbnew.VECTOR2I(max(size.x, height), max(size.y, height)))
             item.SetTextThickness(max(item.GetTextThickness(), thickness))
+        elif item.GetClass() == "PCB_SHAPE" and 0 < item.GetWidth() < thickness:
+            item.SetWidth(thickness)
 
 
 def ensure_mechanical(board, existing):
@@ -525,6 +526,10 @@ def write_net_classes():
         values = {k: v for k, v in spec.items() if k != "patterns"}
         classes.append(dict(template, name=name, priority=priority, **values))
         patterns += [{"netclass": name, "pattern": pattern} for pattern in spec["patterns"]]
+    design = project.setdefault("board", {}).setdefault("design_settings", {})
+    design.setdefault("rule_severities", {}).update({check: "error" for check in SILK_CHECKS})
+    design.setdefault("defaults", {}).update({"silk_text_size_h": SILK_TEXT_MIN[0], "silk_text_size_v": SILK_TEXT_MIN[0],
+                                              "silk_text_thickness": SILK_TEXT_MIN[1], "silk_line_width": SILK_TEXT_MIN[1]})
     settings = project.setdefault("net_settings", {})
     settings.update({"classes": classes, "meta": {"version": 4}, "net_colors": None,
                      "netclass_assignments": None, "netclass_patterns": patterns})
@@ -645,6 +650,8 @@ def build_board(stage=False):
     ensure_rule_areas(board)
     ensure_drawings(board)
     staged = stage_all(board) if stage else 0
+    import silk
+    silk.report(*silk.layout(board, check=False), check=False)
     board.GetDesignSettings().SetGridOrigin(to_board(0.0, 0.0))
     board.GetDesignSettings().SetAuxOrigin(to_board(-placement.WIDTH / 2.0, placement.BOTTOM_Z))
     pcbnew.SaveBoard(str(BOARD), board)

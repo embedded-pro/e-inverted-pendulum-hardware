@@ -13,7 +13,8 @@ One shot, on the owner's request: `python3 scripts/pcb/rf_block.py --apply`. It 
   - puts the VDDRF decoupling on top (owner decision; ST has it on the bottom): C308 100 pF next to pin 33 after
     removing three of ST's GND vias, C307 100 nF at the nearest free spot (DEVIATIONS below; routed by the owner);
   - nudges the few ST vias whose hole is closer than JLCPCB's 0.20 mm to other-net copper, by the least amount;
-  - groups and locks it all as "MB1355 RF corner": move or rotate the group as one unit.
+  - groups and locks it all as "MB1355 RF corner": move or rotate the group as one unit;
+  - lays the silkscreen labels out (silk.py, D-041).
   - places the rest of the MCU decoupling (DS11929 Rev 11 Fig. 16 values) on top: at the Nucleo's spot where the Nucleo
     has that cap on top (C303 / C304 / C305 / C306 at C18 / C28 / C31 / C17), else at the nearest free spot to its pin
     (the Nucleo has those on the bottom; owner decision: top-side assembly, D-038).
@@ -32,6 +33,7 @@ import pcbnew
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import board as B  # noqa: E402
+import silk  # noqa: E402
 import placement  # noqa: E402
 
 DATA = json.loads((pathlib.Path(__file__).resolve().parent / "mb1355_rf.json").read_text(encoding="utf-8"))
@@ -217,7 +219,8 @@ def nudge_vias(board, vias):
 
 def place_near(board, fp, pin, first=None):
     """`first` (position, rotation) if it is free, else the first spot nearest to `pin` where every pad clears
-    other-net copper by PART_CLEARANCE and the courtyard clears every other footprint's."""
+    other-net copper by PART_CLEARANCE, the courtyard clears every other footprint's and the silk outline overlaps
+    none (D-041)."""
     others = [f for f in board.GetFootprints() if f.GetReference() != fp.GetReference()]
     if first is not None:
         fp.SetOrientationDegrees(first[1])
@@ -237,11 +240,25 @@ def place_near(board, fp, pin, first=None):
     sys.exit(f"no free spot for {fp.GetReference()}")
 
 
+_SILK = {}
+
+
+def silk_outline(fp):
+    key = (fp.GetReference(), fp.GetPosition().x, fp.GetPosition().y, fp.GetOrientationDegrees())
+    if key not in _SILK:
+        poly = pcbnew.SHAPE_POLY_SET()
+        for item in fp.GraphicalItems():
+            if item.GetLayer() == pcbnew.F_SilkS and item.GetClass() == "PCB_SHAPE":
+                item.TransformShapeToPolygon(poly, pcbnew.F_SilkS, 0, mm(0.005), pcbnew.ERROR_OUTSIDE)
+        _SILK[key] = poly
+    return _SILK[key]
+
+
 def spot_ok(board, fp, others):
     court = fp.GetCourtyard(pcbnew.F_CrtYd)
-    for other in others:
-        if other.IsFlipped() or (other.GetPosition() - fp.GetPosition()).EuclideanNorm() > mm(15):
-            continue
+    near = [other for other in others
+            if not other.IsFlipped() and (other.GetPosition() - fp.GetPosition()).EuclideanNorm() <= mm(15)]
+    for other in near:
         if court.Collide(other.GetCourtyard(pcbnew.F_CrtYd), 0):
             return False
     for pad in fp.Pads():
@@ -252,6 +269,17 @@ def spot_ok(board, fp, others):
         vias = [t for t in items if t.GetClass() == "PCB_VIA"]
         if collides(pad.GetEffectiveShape(pcbnew.F_Cu), vias, pad.GetNetCode(), HOLE_TO_COPPER, (pcbnew.F_Cu,)):
             return False
+    outline = silk_outline(fp)
+    if outline.OutlineCount():
+        reach = court.BBox()
+        reach.Inflate(mm(1.0))
+        for other in near:
+            if not reach.Intersects(other.GetCourtyard(pcbnew.F_CrtYd).BBox()):
+                continue
+            both = pcbnew.SHAPE_POLY_SET(outline)
+            both.BooleanIntersection(silk_outline(other))
+            if both.OutlineCount():
+                return False
     return True
 
 
@@ -360,6 +388,7 @@ def apply(board):
     group.SetLocked(True)
     for fp in placed + [mcu]:
         B.label_fields(fp)
+    silk.report(*silk.layout(board, check=False), check=False)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     antenna = footprints["AE401"].GetPosition()
     print(f"pasted '{GROUP}': {len(placed) + 1} footprints (U301 pad fit {worst:.4f} mm), {len(DATA['tracks'])} tracks, "

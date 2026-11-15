@@ -159,7 +159,8 @@ as copied (D-037). The decoupling is inside the locked group; its routing is the
 - **Routing-quality gate:** ST's routing has four short sideways jogs (0.15–0.23 mm, on VFBSMPS, VDDSMPS and
   OSC32_IN, at the MCU pins). They stay as copied, so the gate is run as
   `pcb_rules.py check --allow-unrouted --gate jogs=4`. Shorts, clearance and the fab floor are not relaxed.
-- **Silkscreen:** the corner's references are on F.Fab (too dense for silk); elsewhere D-035 holds.
+- **Silkscreen:** references on the silk where a 1.0 mm label fits clear of everything (D-041). 17 do not: C301, C307,
+  C308, C310, C312, C314–C317, C401, C402, FL401, L302, L401, SC404, Y301, Y302. Their references are on F.Fab.
 - **Ground and stitching:**
   - The L1 / L3 / L4 ground outside the copied strip, and the board-wide L2 plane, are the owner's pours.
   - Until then DRC lists ST's stitching vias in the shield area as dangling.

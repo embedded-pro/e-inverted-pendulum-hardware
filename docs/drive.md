@@ -92,7 +92,9 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
   - Shorts, clearance and the fab floor are not relaxed.
 - **Phase outputs:** TI's phase pours end at the top of the box, where TI's terminal block sat. From there to J601 /
   J602 (PH 6-pin at the board edges) the routing is the owner's.
-- **Net ties on the bottom:** copper only, nothing to assemble. Fab references are on B.Fab.
+- **Net ties on the bottom:** copper only, nothing to assemble, no label.
+- **Silkscreen (D-041):** every reference on the silk except C503 / C506, whose only spots beside the FETs Q501 / Q503
+  take (their references are on F.Fab). The extras are placed so that no two outlines overlap.
 
 ## Open items
 

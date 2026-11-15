@@ -28,7 +28,7 @@ anything on the board.
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
 | Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
-| Silkscreen | References only; test pads show their net name; net ties unlabelled | D-035, `scripts/pcb/board.py` |
+| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 19 references with no room in the MB1355 core and beside TI's FETs are on F.Fab | D-035, D-041, `scripts/pcb/silk.py` |
 | Page | A3, so the staging area fits on the sheet | — |
 
 ## What DRC enforces (rule areas and project rules)
@@ -46,6 +46,7 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 | `BATTERY_BACK` | x ±38.5, z 39–76, B.Cu | **no through-hole pins** (project rule; NPTH holes allowed) | The battery lies on the back (D-025) |
 | project rule | RF1 net | 0.104 mm clearance | MB1355's 0.265 mm fan-out from pin 31 between the 0.4 mm-pitch pins |
 | project rule | NPTH holes | 0.5 mm hole-to-copper | Screw threads touch the hole wall |
+| project rule | silkscreen outlines of two parts | may sit closer than 0.15 mm, never overlap; labels keep 0.15 mm to everything (silk checks are errors) | JLCPCB gives no silk-to-silk figure; KiCad applies its silk-to-pad 0.15 mm to both (D-041) |
 
 ## Placement guidance (from the design docs)
 
@@ -85,6 +86,9 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
    ```bash
    python3 scripts/pcb/board.py --rules <path to pcb_rules.py>
    ```
+
+   It ends by laying the silkscreen labels out (`scripts/pcb/silk.py`, D-041): labels that are clean stay put, the
+   others move next to their part. `python3 scripts/pcb/silk.py --check` reports without changing anything.
 
    ```bash
    kicad-cli pcb drc --schematic-parity --severity-all hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb

@@ -106,7 +106,7 @@ External Qwiic devices must avoid 0x50 and 0x56.
   - ST's GND pour, cut to the cluster box, on F.Cu and B.Cu. Its thermal-relief settings are an **ASSUMPTION** (0.3 mm
     gap, 0.4 mm spoke): ST's Gerbers don't carry them. Its 0.3 mm clearance is ST's.
 
-  It is locked, references on F.Fab. Move or rotate it only as one unit.
+  It is locked; every reference is on the silkscreen (D-041). Move or rotate it only as one unit.
 - **Position:**
   - ST's layout is turned 90° counter-clockwise (a rotation, no mirror; owner, 2026-11-15: D-039's 180°, then 90°
     clockwise). The coil is at the right edge; the tag cluster sits to its left, toward the MCU.
