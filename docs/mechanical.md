@@ -136,3 +136,6 @@ Result (S0, `simulation/results/sizing_summary.json`):
 6. **Battery cradle relief (D-044):** J601 / J602's upper four pins (x ±35.7, z 39.5–45.5) sit over the battery's side
    edges. Their through-hole tails stick out on the back (**ASSUMPTION**: about 1.5 mm; measure the S6B-PH-K), so the
    cradle needs a relief at x ±34.3…±37.1, z 38.4–46.6 (pads plus 0.5 mm).
+   **J101 (D-047):** the owner placed the XT30 at the left edge with both pins (1.9 mm holes, 3.2 mm pads) at x −38,
+   z 56.4 / 61.4, over the battery's left edge (x −38.5). Its tails stick out on the back (**ASSUMPTION**: about 1.5 mm;
+   measure the XT30UPB-F), so the cradle needs a second relief at x −40.1…−35.9, z 54.3–63.5 (pads plus 0.5 mm).

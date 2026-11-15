@@ -70,11 +70,13 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
   trace, keep-outs and the bracket strip. RF line: MB1355's 0.6 / 0.2 mm on L1 over L3 (L2 cut out locally): 56.9 Ω
   vs 56.3 Ω on ST's board (`scripts/gcpw.py`).
 - Silkscreen shows references only; test pads show their net name (D-035). Labels are JLCPCB's smallest text, placed by
-  `scripts/pcb/silk.py` clear of everything; 19 with no room sit on F.Fab (D-041).
+  `scripts/pcb/silk.py` clear of everything; 12 with no room sit on F.Fab (D-041, D-047).
 - **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position (ungrouped, no pours since D-046)
   (D-037), the NFC and drive copies (D-039, D-040) the motor connectors with their encoder inputs at the side edges
-  (D-042), and the IMU, flash and EEPROM (D-043). The board has the outline, rule areas and bracket holes; every other part sits
-  in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
+  (D-042), and the IMU, flash and EEPROM (D-043). Since 49b38c1 the owner places in KiCad (D-047): the power entry and
+  J301 are on the board, some support parts are parked off it, and the rule areas `ANTENNA_TAB`, `NFC_COIL`,
+  `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out come back with the pours. The board has the outline, the bracket
+  rule areas and bracket holes; every other part sits in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.
 

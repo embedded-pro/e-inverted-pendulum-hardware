@@ -73,11 +73,14 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
 ## Layout
 
 - **Position:** TI's stage is turned 180° about its centre (owner, 2026-11-15; `placement.DRIVE_TURN`).
-  - Its box (TI's parts and pours) is centred on x 0, from z 13.5 (1 mm above the bracket strip) to z 50.5.
-  - The FETs are nearest the strip, in a row at z 25.0; the DRV8711 is above them, at (−4.0, 40.0).
+  - Its box (TI's parts and pours) was centred on x 0, from z 13.5 (1 mm above the bracket strip) to z 50.5. The owner
+    moved the stage with its tracks 2.85 mm right (D-047, 49b38c1): it is centred on x +2.85 now.
+  - The FETs are nearest the strip, in a row at z 25.0; the DRV8711 is above them, at (−1.1, 40.0) (was −4.0).
+  - The 12 corner exclusions in the project still name the old positions, so DRC flags TI's 90° corners there
+    (24 errors). The owner chose not to re-key them for now (2026-11-15).
   - Bridge A is on the right and drives the right motor (J602); bridge B is on the left and drives the left motor
     (J601). The phase pours end at z 13.5 on their own side, so the outputs don't cross (D-042). The bulk C507 is
-    bottom-right, at (13.8, 18.9).
+    bottom-right, at (16.7, 18.9).
   - The DRV8711's 12 PowerPAD thermal vias (0.33 mm, plated, no lead) now sit inside `BATTERY_BACK`. The battery rule
     was scoped to plated holes over 0.4 mm, so they count as vias (already allowed there); real leads are still caught.
 - **Copper:** TI's 2-layer copper went on our F.Cu and B.Cu: 173 tracks, 144 vias and 12 pours (VM, phase, GND_A / B,
@@ -97,8 +100,8 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
 - **Phase outputs:** the phase copper (TI's pours until D-046) is the owner's, from the FETs to J601 / J602 (PH 6-pin at
   the side edges, D-044).
 - **Net ties on the bottom:** copper only, nothing to assemble, no label.
-- **Silkscreen (D-041):** every reference on the silk except C503 / C506, whose only spots beside the FETs Q501 / Q503
-  take (their references are on F.Fab). The extras are placed so that no two outlines overlap.
+- **Silkscreen (D-041):** every reference on the silk except C503 and Q504, which have no clean spot beside the FETs
+  since the owner's moves (D-047; their references are on F.Fab). The extras are placed so that no two outlines overlap.
 
 ## Open items
 

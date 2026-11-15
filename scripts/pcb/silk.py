@@ -13,8 +13,8 @@ is clean when its ink box:
     JLCPCB's silk-to-pad and the board's min_silk_clearance;
   - does not touch a via (ink over a tented hole breaks up);
 and, for a part on the board (the staging area is not built, so there only the rules above apply):
-  - does not touch any part's courtyard, where it would sit under a body, nor the antenna tab (ANTENNA_TAB) unless it
-    is the antenna's own label;
+  - does not touch any part's courtyard, where it would sit under a body, nor the antenna tab (ANTENNA_TAB, or its
+    polygon in placement.RULE_AREAS while the rule area is off the board, D-047) unless it is the antenna's own label;
   - stays EDGE_CLEARANCE inside the board edge;
   - reads as its own part's (Side.belongs): its centre is nearer that part than any other, or it sits squarely beside
     the part, within ADJACENT, with no other part nearer.
@@ -194,9 +194,18 @@ class Side:
         for track in board.GetTracks():
             if track.GetClass() == "PCB_VIA":
                 self.obstacle(poly_of(track, copper), 0)
+        present = set()
         for zone in board.Zones():
             if zone.GetIsRuleArea() and zone.GetZoneName() in LABEL_FREE_AREAS:
                 poly = zone.Outline()
+                self.free.add(box_of(poly.BBox()), (poly, None))
+                present.add(zone.GetZoneName())
+        for area in B.placement.RULE_AREAS:
+            if area["name"] in LABEL_FREE_AREAS - present:
+                poly = pcbnew.SHAPE_POLY_SET()
+                poly.NewOutline()
+                for x, z in area["polygon"]:
+                    poly.Append(B.to_board(x, z))
                 self.free.add(box_of(poly.BBox()), (poly, None))
 
     def belongs(self, box, label):

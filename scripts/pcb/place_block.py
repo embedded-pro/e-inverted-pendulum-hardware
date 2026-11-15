@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Place a block of parts at the owner's chosen spots, once (D-042, D-043).
+"""Place a block of parts at the owner's chosen spots, once (D-042, D-043, D-047).
 
     python3 scripts/pcb/place_block.py --apply motor_io      J601 / J602 at the side edges, their encoder chains and the
-                                                            encoder supply (D-042)
-    python3 scripts/pcb/place_block.py --apply imu_memory    the IMU on the centre line, the flash below the MCU and the
-                                                            EEPROM left of it, with their support parts and test pads
-                                                            (D-043)
+                                                            encoder supply (D-042, D-044)
+    python3 scripts/pcb/place_block.py --apply imu_memory    the IMU on the centre line, the flash and the EEPROM left of
+                                                            the MCU, with their support parts (D-043)
 
 Each block is a list from placement.py of (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. The
-parts move from the staging area to their spots, and the script refuses if any part:
+tables hold the owner's positions from KiCad (D-047), so --replace on the owner's board changes nothing; the parts the
+owner parked off the board (placement.*_PARKED) are not in them and stay where they are. The parts move to their spots,
+and the script refuses if any part:
   - leaves the board, or its courtyard reaches into the bracket strip (no parts there, D-026);
   - puts a through-hole pin over the battery (BATTERY_BACK, D-025), except the parts the cradle has a relief for
-    (placement.BATTERY_RELIEF, D-044);
+    (placement.BATTERY_RELIEF, D-044, D-047);
   - touches another part's courtyard, comes closer than rf_block.PART_CLEARANCE to another net's copper, or overlaps
     another silk outline (rf_block.spot_ok).
 It lays the silkscreen labels out (silk.py, D-041) and locks nothing: locking is the owner's (D-045). Re-running is a

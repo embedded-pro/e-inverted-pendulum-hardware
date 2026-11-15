@@ -147,3 +147,6 @@ External Qwiic devices must avoid 0x50 and 0x56.
 4. Owner: keep the bumper screws, the battery cradle and any metal out of `NFC_POUR_GAP`.
 5. **ASSUMPTION:** the coil's 2 mm from the board edge. Check the phone read range with the bumper fitted.
 6. The coil is 1.5 mm above the battery (owner, 2026-11-15). Measure f0 with the battery fitted, not on a bare board.
+7. **`NFC_COIL` and `NFC_POUR_GAP` are off the board until the pours (owner, D-047).** The next `board.py` run re-adds
+   them; until then nothing stops copper under or near the coil, which would detune it (D-039). C803 is parked off the
+   board: place it back in ST's cluster.

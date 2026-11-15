@@ -47,7 +47,7 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
 | C307, C308 | C33, C34 | 100 nF, 100 pF | VDDRF (pin 33) |
 | Y301 | X1 | NX2016SA 32 MHz (same part) | HSE, no external caps (HSETUNE) |
 | Y302, C315, C316 | X2, C6, C7 | NX2012SA 32.768 kHz + 2 × 6.8 pF | LSE |
-| SC401–SC404 | SC1–SC4 | Harwin S0951-46R clips, not fitted | 17.2 × 17.2 mm shield (custom part) |
+| SC401–SC404 | SC1–SC4 | Harwin S0951-46R clips, not fitted; removed from the board by the owner (D-047) | 17.2 × 17.2 mm shield (custom part) |
 
 **PCB antenna only (D-038):** MB1355's SMA branch (R13, C39, L4, C40, J2) and its copper are left out. R401 stays as
 ST laid it out; its RF_50 pad is where a conducted test attaches (see Tuning and test).
@@ -188,3 +188,12 @@ as copied (D-037). Its routing is the owner's.
    bumper screws clear of the tab.
 5. Check the VDDA / VREF+ caps (4.35–6.0 mm from pins 13 / 14). They are the farthest; unlock the group to bring
    them closer if routing frees a spot.
+6. **The L2 cut-out under the RF line is off the board (owner, D-047).** It comes back with the L2 ground pour: without
+   it the line references L2 and is 33.9 Ω, not 56.9 Ω (`scripts/gcpw.py`, table above). Copy it from b177b8d's rule
+   area "MB1355 L2 cut-out (RF line references L3)" (no tracks, no pour on In1.Cu).
+7. **ST's RF-strip ground field (236 GND vias) was removed by the owner (D-047);** the 54 vias beside the RF line stay.
+   Re-create the strip's L1 ground pour with ST's stitching when the pours are made, and the `ANTENNA_TAB` rule area
+   (the next `board.py` run adds it).
+8. **Owner's GND via at (−19.3, 105.2)** is 0.18 mm hole-to-copper from RF_50; JLCPCB's floor is 0.20 mm (DRC error).
+9. The MCU decoupling C302–C307, C309, C317, C318 and R301 are parked off the board (owner, D-047): place them back at
+   their pins (table above) before routing.
