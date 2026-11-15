@@ -23,7 +23,7 @@ import pcbnew
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "schgen"))
-from sexpr import dump, parse  # noqa: E402
+from sexpr import Str, dump, parse  # noqa: E402
 
 REFERENCE = ROOT / "reference" / "mb1355" / "MB1355D" / "MB1355.PcbDoc"
 OUT = ROOT / "scripts" / "pcb" / "mb1355_rf.json"
@@ -39,7 +39,6 @@ CUT_SEARCH = (126.5, 80.6, 156.5, 88.8)
 NET_MAP = {
     "GND": "GND",
     "NetU1_31": "RF1", "NetR5_1": "RF_50", "NetC36_1": "RF_MATCH", "ANT": "RF_ANT",
-    "NetC39_2": "RF_SMA_A", "NetC40_2": "RF_SMA",
     "NetU1_34": "HSE_OUT", "NetU1_35": "HSE_IN",
     "NetC6_1": "OSC32_IN", "NetC7_1": "OSC32_OUT",
     "NetL5_2": "SMPS_LX", "NetL1_2": "SMPS_MID", "NetC29_1": "VFBSMPS",
@@ -49,12 +48,13 @@ VIA_NETS = {"GND", "NetC23_1"}
 
 PARTS = [
     ("U12", "FL401"), ("R5", "R401"), ("C36", "C401"), ("L3", "L401"), ("C37", "C402"),
-    ("R13", "R402"), ("C39", "C403"), ("L4", "R403"), ("C40", "C404"), ("J2", "J401"),
     ("X1", "Y301"), ("X2", "Y302"), ("C6", "C315"), ("C7", "C316"),
     ("L5", "L302"), ("L1", "L301"), ("C29", "C314"), ("C23", "C309"), ("C24", "C318"),
     ("SC1", "SC401"), ("SC2", "SC402"), ("SC3", "SC403"), ("SC4", "SC404"),
 ]
 EXTRA_FOOTPRINTS = {"C33": "VDDRF decoupling (placed on top by rf_block.py, D-037)"}
+SMA_BRANCH = ("R13", "C39", "L4", "C40", "J2")
+DECOUPLING = ("C17", "C18", "C19", "C20", "C28", "C31", "C32", "L2", "C3")
 
 mm = pcbnew.ToMM
 
@@ -149,9 +149,30 @@ def tidy(fp, name, description):
     return courtyard
 
 
+MODEL_DIR = "${KICAD10_3DMODEL_DIR}"
+# KiCad library bodies for ST's land patterns (renders only; D-038). KiCad has no 2012 two-pad crystal, so the 3215 body
+# is scaled to NX2012SA's 2.0 x 1.2 x 0.6 mm (NDK datasheet); the MLPF, the clips and the antenna get none.
+MODELS = {
+    "MB1355_0402_CAP_NPOL": ("Capacitor_SMD.3dshapes/C_0402_1005Metric.step", (1, 1, 1)),
+    "MB1355_0402_RES": ("Resistor_SMD.3dshapes/R_0402_1005Metric.step", (1, 1, 1)),
+    "MB1355_0402_COIL": ("Inductor_SMD.3dshapes/L_0402_1005Metric.step", (1, 1, 1)),
+    "MB1355_IND_0402_MURATA_LQW15AN_H0P5": ("Inductor_SMD.3dshapes/L_0402_1005Metric.step", (1, 1, 1)),
+    "MB1355_0805_COIL": ("Inductor_SMD.3dshapes/L_0805_2012Metric.step", (1, 1, 1)),
+    "MB1355_NX2016_4P": ("Crystal.3dshapes/Crystal_SMD_2016-4Pin_2.0x1.6mm.step", (1, 1, 1)),
+    "MB1355_NX2012_2P": ("Crystal.3dshapes/Crystal_SMD_3215-2Pin_3.2x1.5mm.step", (0.625, 0.8, 0.667)),
+}
+
+
+def model_node(name):
+    path, (sx, sy, sz) = MODELS[name]
+    return ["model", Str(f"{MODEL_DIR}/{path}"), ["offset", ["xyz", 0, 0, 0]], ["scale", ["xyz", sx, sy, sz]],
+            ["rotate", ["xyz", 0, 0, 0]]]
+
+
 def clean_file(path, keep_courtyard_uuid=None):
     """Drop ST's texts, silk and courtyard and the 3D models (paths into ST's Altium install, or embedded vendor STEP
-    files) from a saved footprint; our courtyard and the Reference / Value properties stay."""
+    files) from a saved footprint; our courtyard and the Reference / Value properties stay, and a KiCad library body
+    from MODELS is added."""
     tree = parse(path.read_text(encoding="utf-8"))
     graphics = {"fp_line", "fp_arc", "fp_circle", "fp_poly", "fp_rect", "fp_curve"}
     kept = []
@@ -165,6 +186,8 @@ def clean_file(path, keep_courtyard_uuid=None):
             if layer in ("F.SilkS", "B.SilkS", "B.CrtYd") or (layer == "F.CrtYd" and uuid not in (keep_courtyard_uuid or ())):
                 continue
         kept.append(node)
+    if path.stem in MODELS:
+        kept.append(model_node(path.stem))
     path.write_text(dump(kept) + "\n", encoding="utf-8")
 
 
@@ -256,6 +279,16 @@ def main():
 
     u1 = footprints["U1"]
     mcu_pads = {pad.GetNumber(): point(pad.GetPosition()) for pad in u1.Pads()}
+    decoupling = {}
+    for st_ref in DECOUPLING:
+        fp = footprints[st_ref]
+        decoupling[st_ref] = {"value": fp.GetValue(), "at": point(pad_centre(fp)), "rot": round(fp.GetOrientationDegrees(), 3),
+                              "st_side": "B" if fp.IsFlipped() else "F",
+                              "nets": sorted({pad.GetNetname() for pad in fp.Pads()})}
+    sma_boxes = []
+    for st_ref in SMA_BRANCH:
+        x0, y0, x1, y1 = pad_box(footprints[st_ref])
+        sma_boxes.append((mm(x0), mm(y0), mm(x1), mm(y1)))
 
     ant_zone = [z for z in board.Zones() if z.GetNetname() == "ANT" and not z.GetIsRuleArea()][0]
     feed, antenna = antenna_footprint(io, board, ant_zone)
@@ -290,7 +323,8 @@ def main():
         bb = zone.GetBoundingBox()
         centre = (mm(bb.Centre().x), mm(bb.Centre().y))
         if zone.GetIsRuleArea():
-            if mm(bb.GetWidth()) < 1.0 and mm(bb.GetHeight()) < 1.0 and in_region(*centre) \
+            in_sma = any(b[0] <= centre[0] <= b[2] and b[1] <= centre[1] <= b[3] for b in sma_boxes)
+            if mm(bb.GetWidth()) < 1.0 and mm(bb.GetHeight()) < 1.0 and in_region(*centre) and not in_sma \
                     and zone.GetLayerSet().Seq().size() == 1:
                 rule_areas.append({"name": "MB1355 pad keep-out", "layers": ["F.Cu"],
                                    "deny": ["pour"], "polygon": polygons(zone.Outline())[0]})
@@ -344,6 +378,8 @@ def main():
         "parts": parts,
         "st_parts": bom,
         "mcu": {"st": "U1", "ours": "U301", "pads": mcu_pads, "rot": round(u1.GetOrientationDegrees(), 3)},
+        "decoupling": decoupling,
+        "not_copied": "SMA branch R13 / C39 / L4 / C40 / J2 and its copper (owner: PCB antenna only, D-038)",
         "antenna_polygon": antenna,
         "tracks": tracks, "vias": vias, "zones": zones, "rule_areas": rule_areas,
     }

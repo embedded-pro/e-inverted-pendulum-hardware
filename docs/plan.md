@@ -16,7 +16,7 @@ Goal: one 4-layer PCB that is also the robot's structural body. It carries the m
 | Battery | 3S LiPo pack, 9.0–12.6 V, XT30, external balance charger | DRV8711 needs VM ≥ 8 V |
 | IMU | **MPU-6500** (C50278) | Same accel/gyro die and registers as the MPU9250. Only WHO_AM_I changes (0x70). |
 | Chassis | Single vertical plate, about 100 × 160 mm (final size from sizing) | Motors on L-brackets at the bottom edge, battery strapped to the back face, antenna on the top edge |
-| Radio | RF corner copied from ST's NUCLEO-WB55 (MB1355 D-01): MLPF-WB55-01E3, 3.6 nH / 1.2 pF match, printed meander antenna, SMA branch not fitted; no certification (D-037) | Lowest risk: ST's proven layout; VNA check in the final assembly |
+| Radio | RF corner copied from ST's NUCLEO-WB55 (MB1355 D-01): MLPF-WB55-01E3, 3.6 nH / 1.2 pF match, printed meander antenna, no SMA (D-038); no certification (D-037) | Lowest risk: ST's proven layout; VNA check in the final assembly |
 | Fab | JLCPCB 4-layer 1.6 mm (JLC04161H-7628), 1 oz outer / 0.5 oz inner, top-side PCBA | Solid L2 GND under RF and motor hot loops |
 | Debug | STDC14 (Samtec FTSH-107-01-L-DV-K, C5307809): SWD + NRST + USART1 VCP | No USB: TIM1_CH4 is only on PA11 = USB_DM |
 
@@ -78,7 +78,6 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | Encoder ESD | TPD4E05U06QDQARQ1 (SLVSCO7A; alternate TPD4E05U06DQAR C138714, same pinout and footprint) | C81353 | 2.4k (2026-11-14) |
 | SPI flash | W25Q16JVSSIQ, 2 MB, SOIC-8 208 mil (alternative: W25Q80DVSSIG, 1 MB, C98163, 29.7k, same footprint) | C131025 | 8.4k |
 | Debug | FTSH-107-01-L-DV-K (STDC14) | C5307809 | 616 |
-| Antenna test port (not fitted) | edge SMA on MB1355's J2 land (D-037) | — | — |
 | RGB LED / LED buffer / switch / Qwiic | WS2812B-2020-V6 / SN74AHCT1G125DBVR / SS-12D10L5 / SM04B-SRSS-TB | C52917434 / C7484 / C319012 / C160404 | ok (2026-11-14) |
 
 Stock risk: the MCU (225) and DRV8711 (128) are thin. Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.

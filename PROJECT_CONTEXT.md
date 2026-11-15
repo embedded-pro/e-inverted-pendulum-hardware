@@ -29,7 +29,7 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - STM32WB55RGV6: internal SMPS (10 µH + 10 nH), HSE 32 MHz without external caps (HSETUNE), LSE 32.768 kHz,
   STDC14 (SWD + virtual COM on USART1), BOOT0 pull-down + test pad (no button).
 - RF corner copied from ST's NUCLEO-WB55, MB1355 rev D-01 (D-037): RF1 → MLPF-WB55-01E3 → 0R switch → 3.6 nH / 1.2 pF
-  → printed meander antenna on ST's ground-free tab at the top-left corner; SMA branch not fitted. SMPS, HSE, LSE and
+  → printed meander antenna on ST's ground-free tab at the top-left corner; no SMA (D-038). SMPS, HSE, LSE and
   their copper as ST laid them out, pasted by `scripts/pcb/rf_block.py`; ST's files stay in the gitignored `reference/`.
 - Pin map in `pin-data/pinmap.csv`, kept 1:1 with the firmware's NUCLEO-WB55RG target (`scripts/check_pinmap.py`).
 

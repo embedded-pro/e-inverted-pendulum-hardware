@@ -9,7 +9,7 @@
 		(at 0 -1.154 0)
 		(unlocked yes)
 		(layer "F.SilkS")
-		(uuid "675d848e-08fb-44ad-9d8a-6cf800255a63")
+		(uuid "6b1e9be0-9e85-4eb0-b17f-0256c5fdc914")
 		(effects
 			(font
 				(size 1 1)
@@ -22,7 +22,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "15f10aad-7909-433e-bfca-7dd8ad624764")
+		(uuid "8a049e07-805a-497f-a4ae-d31adcb4342d")
 		(effects
 			(font
 				(size 1 1)
@@ -34,7 +34,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "e0a5bd31-c879-4665-b0c4-75f2249b9b68")
+		(uuid "afe795d9-ded8-4cd5-b96b-33df8cabd23f")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -45,7 +45,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "2e0a4e84-7a96-43cc-8d33-61c9fcbed40e")
+		(uuid "0f7c71bd-ae2f-4853-b599-6c9240ce28fa")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -64,7 +64,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "fe2884cb-227e-4085-bbe9-8ff4ea411e20")
+		(uuid "3174ee85-7143-413a-94a4-9259b67897ae")
 	)
 	(fp_line
 		(start -1.01647 0.354)
@@ -74,7 +74,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "d040813a-178d-41d2-8ecc-d57ce72a6201")
+		(uuid "8899d48c-ff0b-4f66-85ce-e870b9bc5f2d")
 	)
 	(fp_line
 		(start 1.01647 -0.354)
@@ -84,7 +84,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "aa7d19b5-78e1-40d6-8901-eb2cfb6db2b8")
+		(uuid "f982ce47-c2fc-46b0-b320-ffdeb3829081")
 	)
 	(fp_line
 		(start 1.01647 0.354)
@@ -94,19 +94,30 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "33d77438-b8f1-4585-b6c1-8f2dd091373c")
+		(uuid "de9624ea-094e-49af-8551-b87e31fa4be5")
 	)
 	(pad "1" smd rect
 		(at -0.59897 0)
 		(size 0.635 0.508)
 		(layers "F.Cu" "F.Mask" "F.Paste")
-		(uuid "6b3ae1e8-a473-4211-9c7d-81c63333e4be")
+		(uuid "bab26fe7-48f6-4a26-bbd9-ef119d446867")
 	)
 	(pad "2" smd rect
 		(at 0.59897 0)
 		(size 0.635 0.508)
 		(layers "F.Cu" "F.Mask" "F.Paste")
-		(uuid "cc7ad1e5-c717-49a5-a036-f5fe213653b5")
+		(uuid "221777b0-d4d5-4901-9672-bf785195aeea")
 	)
 	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Inductor_SMD.3dshapes/L_0402_1005Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

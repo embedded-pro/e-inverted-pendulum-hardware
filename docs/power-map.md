@@ -26,7 +26,7 @@ come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way 
 | +5V | supply | 0.3 A / 0.6 A | 5.0 V | Pour on L3 or 0.5 mm | `SUPPLY` |
 | +3V3, VDDA, ENC_VCC, DRV_V5, DRV_VINT, DRV_VCP | supply | ≤ 0.2 A | 3.3–24 V | 0.5 mm or a pour on L3; decoupling at each pin with its own via | `SUPPLY` |
 | DRV_CP1, DRV_CP2 | charge-pump switch node | mA | 24 V | Flying cap at the pins, short | `GATE` |
-| RF1, RF_50, RF_MATCH, RF_ANT, RF_SMA_A, RF_SMA | RF (MB1355 copy) | — | — | MB1355's 0.6 mm L1 line, 0.2 mm gaps, referenced to L3 (L2 cut out); RF1 fan-out 0.265 mm (`docs/rf.md`, D-037) | `RF` |
+| RF1, RF_50, RF_MATCH, RF_ANT | RF (MB1355 copy) | — | — | MB1355's 0.6 mm L1 line, 0.2 mm gaps, referenced to L3 (L2 cut out); RF1 fan-out 0.265 mm (`docs/rf.md`, D-037) | `RF` |
 | HSE_IN/OUT, OSC32_IN/OUT | crystal | µA | 3.3 V | At the pins, short and symmetric, GND guard, no vias | `CRYSTAL` |
 | ENC_* (raw, filtered, buffered) | off-board digital input | mA | 5 V | Away from MOT_* on every layer; ESD part at the connector, pass-through | Default |
 | GND | plane | — | — | L2 solid and never cut; GND fill on L1/L4; stitching about every 5 mm | — |

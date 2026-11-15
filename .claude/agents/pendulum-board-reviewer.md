@@ -132,7 +132,7 @@ Ground every item in the guide and cite its section next to your package evidenc
    - switch nodes (MOT_*, BUCK_SW, SMPS_LX): only the copper the current needs, nothing under them on any layer;
    - Kelvin taps from the inner pad edges of Rsense; gate loops paired with their return; gate resistors and SS34 clamps at the FETs;
    - high-current paths against `docs/power-map.md` (PWR_BUS widths, ≥ 5 vias per layer change, no necks);
-   - the RF line: MB1355's 0.6 / 0.2 mm GCPW over L3 with the L2 cut-out, fence vias, match and SMA branch as copied, the antenna tab clear on all four layers;
+   - the RF line: MB1355's 0.6 / 0.2 mm GCPW over L3 with the L2 cut-out, fence vias and match as copied (no SMA branch, D-038), the MCU decoupling on top at the Nucleo's spots or the nearest free spot (`docs/rf.md`), the antenna tab clear on all four layers;
    - crystals at their pins with short symmetric loops;
    - encoder traces away from MOT_* copper on every layer; ESD at the connectors;
    - the IMU's surroundings (switch nodes, connectors within 6 mm, heat sources, traces under it) and its silkscreened axes;

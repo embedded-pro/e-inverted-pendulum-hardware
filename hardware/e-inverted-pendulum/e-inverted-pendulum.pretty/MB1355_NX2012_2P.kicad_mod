@@ -9,7 +9,7 @@
 		(at 0 -1.525 0)
 		(unlocked yes)
 		(layer "F.SilkS")
-		(uuid "d923743e-c86f-4c70-8386-1e5e7549ef2c")
+		(uuid "7b31e494-4e19-4916-b912-1f1900f3f3cd")
 		(effects
 			(font
 				(size 1 1)
@@ -22,7 +22,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "29568649-9124-4cd8-a9fa-24fe7856e328")
+		(uuid "5382fb62-8404-468c-8077-f465a8386e24")
 		(effects
 			(font
 				(size 1 1)
@@ -34,7 +34,7 @@
 		(at -0.75 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "8d64278c-8550-436b-8448-a67fea73db39")
+		(uuid "d184ef67-2177-412a-b50a-c8539f9e3b92")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -45,7 +45,7 @@
 		(at -0.75 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "258e2be8-56b4-4238-a93d-d85c8f687d20")
+		(uuid "dab53961-23cb-4e86-a614-8b428886a7fa")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -64,7 +64,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "c1f56e6d-1fc6-404b-b12c-0802cefe53fe")
+		(uuid "61b11da5-fb6b-438d-abd3-6aa26fddac11")
 	)
 	(fp_line
 		(start -1.35 0.725)
@@ -74,7 +74,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "3282ab7c-9dfa-4851-a8ca-7ef31b02af11")
+		(uuid "3118f632-2e45-4b45-a4e5-f9c0d0583d5f")
 	)
 	(fp_line
 		(start 1.35 -0.725)
@@ -84,7 +84,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "0c5966c3-8808-471d-81b8-4dadc3c9ba34")
+		(uuid "18eae5ac-b3f6-429b-bd44-d8b3b591006a")
 	)
 	(fp_line
 		(start 1.35 0.725)
@@ -94,19 +94,30 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "fb2e1b44-a5b0-454b-ae7b-80c813ff5a33")
+		(uuid "2e1a7b6f-c6fa-4591-87be-02678353510d")
 	)
 	(pad "1" smd rect
 		(at -0.75 0)
 		(size 1 1.25)
 		(layers "F.Cu" "F.Mask" "F.Paste")
-		(uuid "519a2744-f97b-452a-a801-c05a64d84e80")
+		(uuid "3d5d2b06-fac1-4644-b3af-aa997d123ea3")
 	)
 	(pad "2" smd rect
 		(at 0.75 0)
 		(size 1 1.25)
 		(layers "F.Cu" "F.Mask" "F.Paste")
-		(uuid "64172ffa-9962-4891-8ba2-78ca5eca5865")
+		(uuid "f3357274-aee0-4cdb-b624-dee4704efc01")
 	)
 	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Crystal.3dshapes/Crystal_SMD_3215-2Pin_3.2x1.5mm.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 0.625 0.8 0.667)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

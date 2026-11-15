@@ -34,7 +34,7 @@
 		)
 		(uuid "0369046c-a1f2-576d-ab2d-09e504a3c4f8")
 	)
-	(text "Copied from ST NUCLEO-WB55 MB1355 D-01 (D-037)\nRF1 -> MLPF-WB55-01E3 -> 0R switch\n3.6 nH + 1.2 pF match -> meander antenna\nSMA branch not fitted (as on MB1355)"
+	(text "Copied from ST NUCLEO-WB55 MB1355 D-01 (D-037)\nRF1 -> MLPF-WB55-01E3 -> 0R\n3.6 nH + 1.2 pF match -> meander antenna\nPCB antenna only, no SMA (D-038)"
 		(exclude_from_sim no)
 		(at 322.58 74.93 0)
 		(effects

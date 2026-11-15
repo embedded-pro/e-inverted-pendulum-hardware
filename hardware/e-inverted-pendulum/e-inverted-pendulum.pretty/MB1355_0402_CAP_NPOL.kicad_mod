@@ -9,7 +9,7 @@
 		(at 0 -1.154 0)
 		(unlocked yes)
 		(layer "F.SilkS")
-		(uuid "60b73091-2c35-446f-8954-99db32635143")
+		(uuid "6a5013d9-7e47-48ff-8a25-7752a3df8a6f")
 		(effects
 			(font
 				(size 1 1)
@@ -22,7 +22,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "906ed00b-c3ed-4fd9-9790-94906074e848")
+		(uuid "56239d53-6b1d-4266-ba1d-d8a532bf3f99")
 		(effects
 			(font
 				(size 1 1)
@@ -34,7 +34,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "c925867c-4cfa-4ca5-b73a-75c5ab565fd4")
+		(uuid "85bb4776-42b8-4790-8754-8b44bc6ff9c3")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -45,7 +45,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "c90ff56a-b431-4269-865b-76b0df530909")
+		(uuid "7326c330-863a-496c-8f09-e876919a75f4")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -64,7 +64,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "75197451-cb3d-4af6-b8b0-0e715d415b5e")
+		(uuid "add147a0-a3bf-429d-9adc-42224be82667")
 	)
 	(fp_line
 		(start -1.01647 0.354)
@@ -74,7 +74,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "b7fb3cd8-b819-4656-a1cf-f2b6437ccd67")
+		(uuid "e4f44eff-6c63-4802-bc8a-fdfa73fbdd33")
 	)
 	(fp_line
 		(start 1.01647 -0.354)
@@ -84,7 +84,7 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "f8a5fbe0-7022-471e-888d-9c2caeb6bac8")
+		(uuid "74739621-c104-4cd3-8a98-fbed97461fab")
 	)
 	(fp_line
 		(start 1.01647 0.354)
@@ -94,19 +94,30 @@
 			(type default)
 		)
 		(layer "F.CrtYd")
-		(uuid "2b3fbe7b-9e93-4ee9-94eb-e24b6b065637")
+		(uuid "f37bb077-1eca-41c2-9941-0cf698b9955c")
 	)
 	(pad "1" smd rect
 		(at -0.59897 0)
 		(size 0.635 0.508)
 		(layers "F.Cu" "F.Mask" "F.Paste")
-		(uuid "bf8dddb8-d4ea-4108-a1b8-7621d28e9735")
+		(uuid "896d21e9-cfdb-4720-a93b-c093102e49b8")
 	)
 	(pad "2" smd rect
 		(at 0.59897 0)
 		(size 0.635 0.508)
 		(layers "F.Cu" "F.Mask" "F.Paste")
-		(uuid "a7a64d32-48d1-4380-b1c0-c7a00114fece")
+		(uuid "629b0135-f9b8-466a-a43e-5a0ece82ecad")
 	)
 	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_0402_1005Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

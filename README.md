@@ -21,7 +21,8 @@ ngspice simulation suite. The firmware lives in its own repository and is the so
 
 - **STM32WB55RGV6** with BLE 5. The whole RF corner is a copy of ST's NUCLEO-WB55 (MB1355 rev D-01, D-037): internal
   SMPS, 32 MHz HSE without external caps, `MLPF-WB55-01E3` → 3.6 nH / 1.2 pF match → printed meander antenna on
-  ST's ground-free tab at the top-left corner, and a not-fitted SMA branch.
+  ST's ground-free tab at the top-left corner (PCB antenna only, D-038). The MCU decoupling sits on top at the
+  Nucleo's spots, or the nearest free spot to each pin (DS11929 Fig. 16 values, D-038).
 - **DRV8711 gate driver with four external half-bridges** (`CSD88537ND`) for two MG310 gear motors: indexer bypassed
   (PWMMODE 1), 50 mΩ low-side shunts with Kelvin taps, 2.0 A trip, SS34 clamps on every phase node.
 - **Battery path:** XT30, 4 A fuse, back-to-back `AO4805` P-FETs for reverse polarity and switching, with a simulated
@@ -190,7 +191,7 @@ kept out of the repository in `reference/mb1355/` (ST's Open Platform License).
 3. JLCPCB options (PCB + assembly, D-036): 4 layers, JLC04161H-7628, 1.6 mm, 1 oz outer / 0.5 oz inner; impedance
    control only if JLCPCB holds MB1355's RF line as drawn (0.6 / 0.2 mm on L1 over L3, `docs/rf.md`). Check every CPL rotation in the preview
    (the WS2812B-2020 footprint is the datasheet pattern turned 180°).
-4. Leave the DNP parts off: antenna-match C401, SMA branch R402 / C403 / C404 / J401, shield clips SC401–SC404, NFC trim C804, sense filters C501/C504, motor
+4. Leave the DNP parts off: antenna-match C401, shield clips SC401–SC404, NFC trim C804, sense filters C501/C504, motor
    snubbers C603/C607, encoder pull-ups, R602.
 
 ---

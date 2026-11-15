@@ -46,7 +46,7 @@ Status legend: ✅ done · ⚠️ open (reason given) · ➖ not applicable.
 | Module vs chip-down decided | ✅ | Chip-down with MLPF-WB55-01E3 IPD (D-007) |
 | Match/filter per vendor; direction | ✅ | DS12804 Table 6: IN (A3) to RF1, OUT (A1) to the antenna; footprint from Fig. 13 |
 | DNP tuning network at the antenna | ✅ | Pi: 2 × DNP shunt, 0 Ω series |
-| Conducted test port | ✅ | U.FL (DNP) through a DNP 0 Ω |
+| Conducted test port | ✅ | None since D-038 (PCB antenna only): a pigtail on R401's RF_50 pad (`docs/rf.md`) |
 | SMPS parts and decoupling per vendor | ✅ | See above |
 | Crystal ppm budget | ⚠️ | ±10 ppm initial, then trimmed by HSETUNE (AN5042). Temperature and ageing figures for CS06654 are not in the catalog page. Trim plan is in bring-up. |
 | Clock harmonics vs used channels | ⚠️ | 32 MHz HSE lands at 2432/2464 MHz (inherent to STM32WB); buck 1.2 MHz FCCM; SMPS 4 MHz. Pre-compliance scan is out of scope (no certification, D-007). |

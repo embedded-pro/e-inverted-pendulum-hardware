@@ -600,14 +600,6 @@
         "pattern": "*/RF_ANT"
       },
       {
-        "netclass": "RF",
-        "pattern": "*/RF_SMA_A"
-      },
-      {
-        "netclass": "RF",
-        "pattern": "*/RF_SMA"
-      },
-      {
         "netclass": "NFC",
         "pattern": "*/NFC_AC0"
       },

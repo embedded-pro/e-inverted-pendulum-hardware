@@ -14,7 +14,11 @@ One shot, on the owner's request: `python3 scripts/pcb/rf_block.py --apply`. It 
     removing three of ST's GND vias, C307 100 nF at the nearest free spot (DEVIATIONS below; routed by the owner);
   - nudges the few ST vias whose hole is closer than JLCPCB's 0.20 mm to other-net copper, by the least amount;
   - groups and locks it all as "MB1355 RF corner": move or rotate the group as one unit.
-Re-running is a no-op once the group exists. Run board.py first so the parts and nets exist.
+  - places the rest of the MCU decoupling (DS11929 Rev 11 Fig. 16 values) on top: at the Nucleo's spot where the Nucleo
+    has that cap on top (C303 / C304 / C305 / C306 at C18 / C28 / C31 / C17), else at the nearest free spot to its pin
+    (the Nucleo has those on the bottom; owner decision: top-side assembly, D-038).
+Re-running is a no-op once the group exists; --replace removes the group's copper and re-pastes it (the group is
+generated, not hand-edited). Run board.py first so the parts and nets exist.
 """
 
 import argparse
@@ -38,6 +42,11 @@ DEVIATIONS = {
     "removed_vias": [(135.7659, 86.8935), (135.8881, 88.0177), (135.9229, 88.6405)],
     "top_decoupling": [("C308", (135.5451, 89.0864)), ("C307", (135.5451, 89.0864))],
 }
+DECOUPLING = [
+    ("C301", None, "30"), ("C302", None, "45"), ("C303", "C18", "68"), ("C304", "C28", "1"), ("C305", "C31", "55"),
+    ("C312", None, "13"), ("C310", None, "14"), ("C313", None, "13"), ("C311", None, "14"), ("FB301", None, "14"),
+    ("C317", None, "NRST"), ("C306", "C17", "68"),
+]
 HOLE_TO_COPPER = 0.20
 PART_CLEARANCE = 0.15
 BOARD_ONLY = {"SC401", "SC402", "SC403", "SC404"}
@@ -115,12 +124,20 @@ def add_zone(board, layer, polygons, net=None, rule=None, priority=0, settings=N
     return zone
 
 
-def reset_geometry(board):
-    """Old outline, drawings and retired rule areas out. Removing items leaves pcbnew's SWIG wrappers unusable for the
-    rest of the process, so this runs in its own child process and apply() in the next one."""
+def reset_geometry(board, replace=False):
+    """Old outline, drawings and retired rule areas out; with `replace`, the pasted group's copper, zones, rule areas
+    and board-only clips too (its schematic footprints stay). Removing items leaves pcbnew's SWIG lists unusable for
+    the rest of the process, so everything is gathered first, and apply() runs in the next child process."""
     drawings = [item for item in board.GetDrawings() if item.GetLayer() in (pcbnew.Edge_Cuts, pcbnew.Dwgs_User)]
     retired = [zone for zone in board.Zones() if zone.GetIsRuleArea() and zone.GetZoneName() in RETIRED_RULE_AREAS]
-    for item in drawings + retired:
+    groups = [g for g in board.Groups() if g.GetName() == GROUP] if replace else []
+    members = [list(g.GetItems()) for g in groups]
+    doomed = [i for items in members for i in items if i.GetClass() != "FOOTPRINT" or i.GetReference() in BOARD_ONLY]
+    for group, items in zip(groups, members):
+        for item in items:
+            item.SetLocked(False)
+            group.RemoveItem(item)
+    for item in drawings + retired + doomed + groups:
         board.Remove(item)
 
 
@@ -198,10 +215,15 @@ def nudge_vias(board, vias):
     return moved, worst
 
 
-def place_near(board, fp, pin):
-    """First spot, nearest to `pin` first, where every pad clears other-net copper by PART_CLEARANCE and the
-    courtyard clears every other footprint's."""
+def place_near(board, fp, pin, first=None):
+    """`first` (position, rotation) if it is free, else the first spot nearest to `pin` where every pad clears
+    other-net copper by PART_CLEARANCE and the courtyard clears every other footprint's."""
     others = [f for f in board.GetFootprints() if f.GetReference() != fp.GetReference()]
+    if first is not None:
+        fp.SetOrientationDegrees(first[1])
+        fp.SetPosition(first[0])
+        if spot_ok(board, fp, others):
+            return "Nucleo spot"
     for ring in range(1, 160):
         r = mm(0.05) * ring
         steps = max(8, int(2 * math.pi * ring / 2))
@@ -211,8 +233,8 @@ def place_near(board, fp, pin):
                 fp.SetOrientationDegrees(rot)
                 fp.SetPosition(pin + pcbnew.VECTOR2I(int(r * math.cos(angle)), int(r * math.sin(angle))))
                 if spot_ok(board, fp, others):
-                    return
-    sys.exit(f"no free spot for {fp.GetReference()} near VDDRF")
+                    return f"{pcbnew.ToMM(r):.2f} mm from the target"
+    sys.exit(f"no free spot for {fp.GetReference()}")
 
 
 def spot_ok(board, fp, others):
@@ -306,9 +328,21 @@ def apply(board):
 
     group_vias = [item for item in group.GetItems() if item.GetClass() == "PCB_VIA"]
     nudged = nudge_vias(board, group_vias)
+    report = []
     for ref, pin in DEVIATIONS["top_decoupling"]:
         fp = footprints[ref]
-        place_near(board, fp, to_ours(*pin))
+        report.append((ref, place_near(board, fp, to_ours(*pin))))
+        group.AddItem(fp)
+        placed.append(fp)
+    mcu_pads = {p.GetNumber(): p for p in mcu.Pads()}
+    for ref, st_ref, pin in DECOUPLING:
+        fp = footprints[ref]
+        pad = (next(p for p in mcu.Pads() if p.GetNetname().endswith("/" + pin) or p.GetNetname() == pin)
+               if not pin.isdigit() else mcu_pads[pin])
+        first = None
+        if st_ref and DATA["decoupling"][st_ref]["st_side"] == "F":
+            first = (to_ours(*DATA["decoupling"][st_ref]["at"]), DATA["decoupling"][st_ref]["rot"])
+        report.append((ref, place_near(board, fp, first[0] if first else pad.GetPosition(), first)))
         group.AddItem(fp)
         placed.append(fp)
 
@@ -331,37 +365,43 @@ def apply(board):
     print(f"pasted '{GROUP}': {len(placed) + 1} footprints (U301 pad fit {worst:.4f} mm), {len(DATA['tracks'])} tracks, "
           f"{vias} vias ({len(removed)} of ST's removed for C308, {nudged[0]} nudged by <= {nudged[1]:.3f} mm), "
           f"{len(DATA['zones'])} zones, {len(DATA['rule_areas'])} rule areas")
-    for ref, _ in DEVIATIONS["top_decoupling"]:
+    for ref, how in report:
         fp = footprints[ref]
-        print(f"{ref} on top at mechanical {board_to_mech(fp.GetPosition())}, rotation {fp.GetOrientationDegrees():.0f}")
+        print(f"{ref} on top at mechanical {board_to_mech(fp.GetPosition())}, rotation {fp.GetOrientationDegrees():.0f} "
+              f"({how})")
     print(f"antenna feed at mechanical {placement.from_mb1355(*[p for p in DATA['parts'] if p['ours'] == 'AE401'][0]['at'])}"
           f" (board {pcbnew.ToMM(antenna.x):.3f}, {pcbnew.ToMM(antenna.y):.3f} mm); top-right edge and ground at "
           f"z {placement.TOP_RIGHT_Z}")
     return True
 
 
-def stage(step):
+def stage(step, replace):
     board = pcbnew.LoadBoard(str(B.BOARD))
-    if has_group(board):
+    if has_group(board) and not (replace and step == "reset"):
         print(f"'{GROUP}' is already on the board: nothing to do")
         sys.exit(3)
-    reset_geometry(board) if step == "reset" else apply(board)
+    if step == "reset":
+        reset_geometry(board, replace)
+    else:
+        apply(board)
     pcbnew.SaveBoard(str(B.BOARD), board)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--apply", action="store_true", help="paste the MB1355 RF corner (one shot)")
+    parser.add_argument("--replace", action="store_true",
+                        help="remove the pasted group's copper and paste it again (after a change to the copy)")
     parser.add_argument("--pcbnew-stage", choices=["reset", "apply"], help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.pcbnew_stage:
-        stage(args.pcbnew_stage)
+        stage(args.pcbnew_stage, args.replace)
         return
     if not args.apply:
         parser.error("nothing to do without --apply")
     project = B.PROJECT.read_bytes()
     for step in ("reset", "apply"):
-        result = subprocess.run([sys.executable, __file__, "--pcbnew-stage", step])
+        result = subprocess.run([sys.executable, __file__, "--pcbnew-stage", step] + (["--replace"] if args.replace else []))
         B.PROJECT.write_bytes(project)
         if result.returncode == 3:
             return

@@ -6,7 +6,8 @@ board geometry. This script never moves or reshapes anything that already exists
   - creates what is missing: the outline (85 mm wide, MB1355's antenna tab at the top-left corner, D-037), the rule
     areas and reference drawings from placement.py, and the bracket holes (placement.MECHANICAL), each only if absent;
   - syncs the schematic: one footprint per symbol with its fields, sheet path, DNP/BOM flags and pad nets; a footprint
-    whose library entry changed is swapped in place (position, rotation and lock kept); new parts go to the first
+    whose library entry changed is swapped in place (position, rotation and lock kept), and one whose library 3D
+    bodies changed gets the new bodies in place (nothing moves or leaves its group); new parts go to the first
     free spot in the staging area right of the board; parts removed from the schematic are deleted (board-only
     footprints are never deleted);
   - shows only the reference on the silkscreen, at the fab's minimum text size; test pads show their net name instead
@@ -82,7 +83,7 @@ NET_CLASSES = {
     "SUPPLY": {"track_width": 0.5, "clearance": 0.15,
                "patterns": ["+5V", "+3V3", "VDDA", "*/ENC_VCC", "*/DRV_V5", "*/DRV_VINT", "*/DRV_VCP"]},
     "RF": {"track_width": 0.6, "clearance": 0.2,
-           "patterns": ["RF1", "*/RF_50", "*/RF_MATCH", "*/RF_ANT", "*/RF_SMA_A", "*/RF_SMA"]},
+           "patterns": ["RF1", "*/RF_50", "*/RF_MATCH", "*/RF_ANT"]},
     "NFC": {"track_width": 0.25, "clearance": 0.15,
             "patterns": ["*/NFC_AC0", "*/NFC_AC1"]},
     "CRYSTAL": {"track_width": 0.2, "clearance": 0.15,
@@ -322,6 +323,26 @@ def library_fingerprint(board, lib_id):
     return _LIBRARY_CACHE[lib_id]
 
 
+def model_key(models):
+    return tuple((m.m_Filename, m.m_Scale.x, m.m_Scale.y, m.m_Scale.z, m.m_Rotation.x, m.m_Rotation.y, m.m_Rotation.z,
+                  m.m_Offset.x, m.m_Offset.y, m.m_Offset.z) for m in models)
+
+
+_MODEL_CACHE = {}
+
+
+def sync_models(board, fp, lib_id):
+    """Give a placed footprint its library 3D bodies, in place: renders only, nothing moves or leaves its group."""
+    if lib_id not in _MODEL_CACHE:
+        _MODEL_CACHE[lib_id] = load_footprint(board, lib_id)
+    library = _MODEL_CACHE[lib_id].Models()
+    if model_key(fp.Models()) != model_key(library):
+        models = fp.Models()
+        models.clear()
+        for model in library:
+            models.push_back(model)
+
+
 def replace_footprint(board, fp, lib_id):
     position, orientation, locked = fp.GetPosition(), fp.GetOrientationDegrees(), fp.IsLocked()
     board.Delete(fp)
@@ -414,7 +435,9 @@ def sync_footprints(board, components, nets, pins):
         if fp is not None and (fp.GetFPIDAsString() != comp["footprint"]
                                or fingerprint(fp) != library_fingerprint(board, comp["footprint"])):
             fp = replace_footprint(board, fp, comp["footprint"])
-        elif fp is None:
+        elif fp is not None:
+            sync_models(board, fp, comp["footprint"])
+        else:
             fp = load_footprint(board, comp["footprint"])
             place_in_free_spot(board, fp)
             board.Add(fp)

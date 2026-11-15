@@ -37,15 +37,11 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
 | Ours | MB1355 | Part | Role |
 |---|---|---|---|
 | FL401 | U12 | MLPF-WB55-01E3 (C2651048) | IPD: match + low-pass filter (DS12804) |
-| R401 | R5 | 0R 0402, fitted | "RF switch": RF_50 → PCB antenna |
+| R401 | R5 | 0R 0402, fitted | In the antenna path, as ST laid it out (ST's switch to the SMA; D-038) |
 | C401 | C36 | not fitted | antenna-match shunt |
 | L401 | L3 | 3.6 nH LQG15HS3N6S02D (C19216) | antenna-match series |
 | C402 | C37 | 1.2 pF GJM1555C1H1R2WB01D (C76899) | antenna-match shunt |
 | AE401 | (copper) | printed meander antenna, ST AN3359 type | `MB1355_Meander_Antenna` |
-| R402 | R13 | 0R, not fitted | "RF switch": RF_50 → SMA |
-| C403, C404 | C39, C40 | not fitted | SMA filter / match shunts |
-| R403 | L4 | 0R 0402, fitted | SMA branch series element |
-| J401 | J2 | edge SMA, not fitted | ST's `SMA_T_9.52_NF` land |
 | L302 → L301 | L5 → L1 | 10 nH → 10 µH | SMPS: VLXSMPS → 10 nH → 10 µH → VFBSMPS (ST's order) |
 | C314, C309, C318 | C29, C23, C24 | 4.7 µF, 4.7 µF + 100 nF | VFBSMPS; VDDSMPS |
 | C307, C308 | C33, C34 | 100 nF, 100 pF | VDDRF (pin 33) |
@@ -53,9 +49,8 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
 | Y302, C315, C316 | X2, C6, C7 | NX2012SA 32.768 kHz + 2 × 6.8 pF | LSE |
 | SC401–SC404 | SC1–SC4 | Harwin S0951-46R clips, not fitted | 17.2 × 17.2 mm shield (custom part) |
 
-**Connector options:**
-- Default: R401 fitted, so RF_50 drives the PCB antenna.
-- To use J401 instead (external 50 Ω antenna or instrument): fit R402 0R, remove R401, fit J401.
+**PCB antenna only (D-038):** MB1355's SMA branch (R13, C39, L4, C40, J2) and its copper are left out. R401 stays as
+ST laid it out; its RF_50 pad is where a conducted test attaches (see Tuning and test).
 
 **Deliberate differences from MB1355**, each owner-approved and recorded in D-037:
 - **VDDRF caps on top.**
@@ -71,8 +66,39 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
   - With 10 pF, either stocked variant would pull 30–40 ppm.
 - **Shield:** ST's 17.2 mm brass shield is a custom part. The clip pads are copied; the clips and the shield are not
   fitted.
-- **Vias:** 104 of ST's vias are moved ≤ 0.05 mm, so that every hole is ≥ 0.20 mm from other-net copper (JLCPCB's
+- **Vias:** 60 of ST's vias are moved ≤ 0.045 mm, so that every hole is ≥ 0.20 mm from other-net copper (JLCPCB's
   published floor; ST used down to 0.16 mm).
+- **No SMA branch** (D-038): R13 / C39 / L4 / C40 / J2 and their copper are not copied.
+- **MCU decoupling on top** (D-038): see below.
+
+## MCU decoupling (D-038)
+
+Values are DS11929 Rev 11 §6.1.6 Fig. 16 (VDD n × 100 nF + 4.7 µF; VDDA 10 nF + 1 µF; VREF+ 100 nF + 1 µF) plus the
+Nucleo's VBAT and VDDUSB caps. DS11929 asks for them "as close as possible to (or below) the appropriate pins on the
+underside". This board is assembled on top only, so `scripts/pcb/rf_block.py` puts them on top:
+- where the Nucleo has the cap on top, at the Nucleo's spot;
+- where the Nucleo has it on the bottom, at the nearest top-side spot that clears ST's copper (courtyard and 0.15 mm
+  pad clearance), measured centre to pin.
+
+| Ours | Value | Pin | Nucleo (D-01) | Spot on our board |
+|---|---|---|---|---|
+| C308 | 100 pF | VDDRF 33 | C34, bottom | top, 1.75 mm (three ST GND vias removed, D-037) |
+| C307 | 100 nF | VDDRF 33 | C33, bottom | top, 2.80 mm |
+| C303 | 100 nF | VDD 68 | C18, top | Nucleo spot |
+| C304 | 100 nF | VBAT 1 | C28, top | Nucleo spot |
+| C305 | 100 nF | VDDUSB 55 | C31, top | Nucleo spot |
+| C306 | 4.7 µF | VDD | C17 (100 nF), top | Nucleo spot, about 14.5 mm below the MCU, as ST's |
+| C301 | 100 nF | VDD 30 | C19 / C20, bottom | top, 2.75 mm |
+| C302 | 100 nF | VDD 45 | C19 / C20, bottom | top, 1.75 mm |
+| C312 | 100 nF | VREF+ 13 | C32, bottom | top, 1.35 mm |
+| C313 | 1 µF | VREF+ 13 | — | top, 4.35 mm |
+| C310 | 10 nF | VDDA 14 | — | top, 2.90 mm |
+| C311 | 1 µF | VDDA 14 | — | top, 4.75 mm |
+| FB301 | BLM18PG221SN1D | VDDA 14 | L2 ferrite, bottom | top, 6.00 mm |
+| C317 | 100 nF | NRST 8 | C3, bottom | top, 4.05 mm |
+
+The crystals need nothing added: Y301 (HSE) has no external caps (HSETUNE), and Y302 with C315 / C316 sits on ST's lands
+as copied (D-037). The decoupling is inside the locked group; its routing is the owner's.
 
 ## Stack-up and the RF line
 
@@ -103,7 +129,8 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
   - 28.5 mm wide, from the left edge to x −14.0, with ST's 45° chamfers;
   - the board edge is 1.1 mm above the antenna;
   - ground starts 7.5 mm down, at z 109.98;
-  - right of the tab, the whole top edge steps down to z 110.02, the ground line, where J401's edge SMA lands (as on ST).
+  - right of the tab, the whole top edge steps down to z 110.02, the ground line, as on ST (where ST's edge SMA sits;
+    not fitted here, D-038).
 - **Keep-out:** rule area `ANTENNA_TAB` on all four layers: no pour and no vias.
   - A project DRC rule allows only the antenna feed (RF_ANT) to cross it.
   - It replaces the full-width `ANTENNA_KEEPOUT` / `ANTENNA_BASE` band of D-029.
@@ -117,8 +144,8 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
 ## Layout rules that come with the copy
 
 - **The group:** "MB1355 RF corner" holds:
-  - the 27 copied footprints, including U301;
-  - 69 tracks and arcs and 317 vias;
+  - 34 footprints: U301, the RF-corner parts and the MCU decoupling (D-038);
+  - 61 tracks and arcs and 317 vias;
   - the L1 / L2 / L3 / L4 ground of the RF strip;
   - the L2 cut-out and ST's four pad keep-outs.
 
@@ -143,7 +170,8 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
   2400–2483.5 MHz.
   - Tune with C401 (not fitted) and C402 (1.2 pF): the robot's ground plane, battery and motors differ from MB1355's.
   - The match is ST's starting point, not a guarantee for this chassis.
-- **Conducted test:** fit R402 and J401, remove R401.
+- **Conducted test:** remove R401 and solder a 50 Ω pigtail to its FL401-side pad (RF_50), shield to the L1 ground
+  beside it. There is no connector since D-038.
 
 ## Open items
 
@@ -151,4 +179,7 @@ what the copy doesn't decide; its sections are cited as rf-layout §n.
 2. Ask JLCPCB whether they hold a non-standard GCPW (0.6 / 0.2 mm referenced to L3) under impedance control; if not,
    order without it.
 3. Check AN5165 (RF hardware for STM32WB) and AN2867 against the copy once st.com can be read.
-4. Owner: route C307 / C308 to pin 33 and +3V3, pour the board-wide ground, and keep the bumper screws clear of the tab.
+4. Owner: route the decoupling (C301–C313, C317, FB301) to its pins and +3V3, pour the board-wide ground, and keep the
+   bumper screws clear of the tab.
+5. Check the VDDA / VREF+ caps (4.35–6.0 mm from pins 13 / 14). They are the farthest; unlock the group to bring
+   them closer if routing frees a spot.

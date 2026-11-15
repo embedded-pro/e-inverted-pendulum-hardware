@@ -49,12 +49,13 @@ These are on the board as rule areas (they can be moved or edited in KiCad) and 
 ## Placement guidance (from the design docs)
 
 - **RF (`docs/rf.md`):** done by the copy. The group "MB1355 RF corner" holds:
-  - U301, FL401, the match, AE401 and the SMA branch;
+  - U301, FL401, the match and AE401 (no SMA branch, D-038);
   - L301 / L302, Y301 / Y302 and their caps, the shield-clip pads;
+  - the MCU decoupling on top, at the Nucleo's spots or the nearest free spot to each pin (D-038, `docs/rf.md`);
   - ST's copper, vias and ground.
 
   Move it only as a group; its position on the outline (the tab) is part of the copy. Still yours:
-  - route C307 / C308 (VDDRF, on top) to pin 33 and +3V3;
+  - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
   - route the MCU's other pins out of the corner;
   - pour the board-wide ground.
 - **IMU (U701):** next to the MCU's SPI2 pins (PB12–PB15, PC6). If it sits far from the axle, report its position for the
