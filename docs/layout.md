@@ -230,6 +230,9 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
     order; the phase test pads sit on their tracks.
   - Unrouted 57 → 48: the 9 phase and clamp connections, with D504's old GND stub and C502's old stubs taken up.
   - Still open in the drive: SENSE_A / SENSE_B to TP501 / TP502, and the DRV8711 logic lines listed above.
+- **Ground fills (D-061, `scripts/pcb/gnd_fills.py`): done.** L1 and L4 carry GND fills over the board, outside the
+  vendor copies' areas and the keep-outs. They are stitched to L2 by 95 vias on a 5 mm lattice; none goes in the RF
+  strip, the NFC area or L3's VBAT corridor. Unrouted 48 → 46. Refill in KiCad (`B`) after any change.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).

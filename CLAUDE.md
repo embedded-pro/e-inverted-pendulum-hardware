@@ -112,6 +112,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/route_phases.py --apply`: the four motor phases from TI's strips to J601 / J602 (D-060): each
   motor's pair on F.Cu across the top of the bracket strip, 0.8 mm; the SS34 clamps on their own strips with a GND via
   under the body; C502 beside C507; C603 turned; the phase test pads on their tracks. Checked exactly; one shot.
+- `python3 scripts/pcb/gnd_fills.py --apply`: L1_GND / L4_GND fills over the board, outside the vendor copies' areas and
+  the keep-outs, lowest priority; 0.3 / 0.6 mm stitching vias on a 5 mm lattice (not in the RF strip, the NFC area or L3's
+  VBAT corridor), plus one GND via per cut-off piece of TI's GND fills (D-061). One shot.
 - `python3 scripts/pcb/ripup.py --apply`: take up the routing of passes 1, 3 and 4 (the tracks and vias they added, known
   from the history: 86255bf vs 90d12ca, 6926847 vs ae59e46); the copies, pass 2, the power bus, the fan-out, the GND
   lattice and the pours stay (D-059). No-op once gone. Re-route with `route_simple` then `route_maze` (pass 3, pass 4).
