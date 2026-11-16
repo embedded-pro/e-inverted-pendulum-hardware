@@ -82,13 +82,15 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
   (D-049). The drive stage sits 8 mm further right, and the RGB LEDs are two square rings in the centre (D-050). The
   rest is placed for short tracks (D-051): SW101 and the Qwiic port at the left edge, the support parts at their pins,
   the test pads in rows per block. Only the cradle and bumper holes (MC1–MC4, MH1 / MH2) are still off the board, for
-  the owner. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
+  the owner. Routing pass 1 is done (D-054, `scripts/pcb/route_simple.py`): 90 short single-layer links, 3 GND ties, 1
+  gap and 83 GND vias; 204 connections are left for pass 2 and the owner (long buses, blocked hops, the power bus for
+  its pours, the vendor copies' own gaps). `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.
 
 ## Still to check or do
 
-- Placement (owner), then routing, DRC with schematic parity, and the `power-pcb-layout` §7 / `rf-layout` §12
+- Routing pass 2 (long buses, blocked hops, vendor gaps from the references) and the power-bus pours, then DRC with schematic parity, and the `power-pcb-layout` §7 / `rf-layout` §12
   checklists (Phase 3 gate).
 - Mechanical ASSUMPTIONS in `docs/mechanical.md`: MG310 mass and stall current (the listing says "≤ 2 mA"), battery
   and component masses, the bracket's 18 mm reference face.

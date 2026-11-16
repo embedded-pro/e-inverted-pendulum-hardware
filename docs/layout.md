@@ -176,6 +176,20 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
     ENC_R_B_RAW branches start on their pads, ST's NFC ground tee is a 0.45 / 0.20 mm via, and the GND via beside RF_50
     moved 0.11 mm to JLCPCB's 0.20 mm hole-to-copper. No DRC exclusions are left.
   - DRC: no errors; 51 warnings, every one a signal fan-out via that connects when you route its net.
+- **Routing pass 1 (D-054, `scripts/pcb/route_simple.py`): done.** The simple connections, closest first, each on one
+  layer with no via:
+  - 90 pad-to-pad links up to 8 mm (median 2 mm), straight or with one 45° bend, centre to centre, at the class width
+    (narrowed only to a narrower pad, never below 0.15 mm): decoupling to its pins, the regulators' local nets, the LED
+    chain's data and +5V hops, pull-ups, the encoder chains, the motor connectors' caps;
+  - 3 GND ties between one part's side-by-side ground pins, and NRST from C317 to its fan-out via;
+  - 83 GND vias, one per ground island off the plane, just outside its pad (0.3 / 0.6 mm; 3 at 0.2 / 0.45 mm).
+  - Left for pass 2 and for you (204 unrouted): 89 connections longer than 8 mm (the buses: SPI1 / SPI2, I2C3, SWD / VCP,
+    the DRV8711 control lines, the encoders to the MCU, +3V3 / +5V distribution), 69 short ones blocked by other pads
+    (they need a bend around a part or a via), PWR_BUS for the pours (D-053's TI pours plus L1 / L3 copper, power map),
+    the vendor copies' own gaps (HSE, SMPS_LX, ST's NFC VCC / RF_DIS, +3V3 at U301) from ST's and TI's references, and 5
+    ground pads with no via spot (C317, D810, D811, U701 pins 11 / 20) plus the copies' ground pads.
+  - Run `python3 scripts/pcb/route_simple.py --apply` again after you move parts: it routes what has become simple and
+    does nothing otherwise.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).

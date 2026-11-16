@@ -89,6 +89,11 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   ST's NFC B.Cu ground, TI's 12 drive pours, and the board's rule areas; fills the zones (D-053). One shot.
 - `python3 scripts/pcb/tidy_copper.py --apply`: exact 45° bends (copied diagonals 1–500 nm off), branches started on
   pads, a ground tee turned into a via, vias moved to JLCPCB's 0.20 mm hole-to-copper (D-053). No-op when tidy.
+- `python3 scripts/pcb/route_simple.py --apply`: routing pass 1 (D-054). Each net's islands joined closest-first: pad-to-pad
+  links up to 8 mm on one layer (straight or one 45° bend, class width narrowed only to a narrower pad, ≥ 0.15 mm), GND
+  ties between a part's adjacent pins, short gaps to free track ends / vias, and one GND via per island off the L2 plane.
+  Skips PWR_BUS (pours), the vendor copies' own connections and a crystal unless both nets route. No-op when nothing
+  simple is left.
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
