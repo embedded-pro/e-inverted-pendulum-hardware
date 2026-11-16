@@ -55,7 +55,9 @@ Front view (component side):
 Left edge, top to bottom: J301 (STDC14, left of the MCU, D-047), SW101 (power switch, above the battery, D-051), J801
 (Qwiic, D-051), J101 (XT30 battery input, D-047), J601 (left motor, D-042).
 
-- **Front:** every SMD part (JLC single-side PCBA), with no parts in the bottom 25 mm strip.
+- **Front:** every SMD part (JLC single-side PCBA), with no parts in the bottom 25 mm strip. Since D-060 the four motor
+  phases run on the strip's front copper, between the bracket holes' keep-outs (z 9.9–13.5, x −15 to +29); nothing on
+  the back (the bracket base).
 - **Back:** the bracket in the strip, the motors behind it, and the battery above them. No parts.
 - **Plate:** 85 mm wide × 1.6 mm; 130 mm tall at the top-left antenna tab (x −42.5 to −14.0) and right of x +6.1, where
   the MB1163 NFC corner sits (D-039); 122.5 mm between them, where the top edge steps down to z 110.02 (MB1355's

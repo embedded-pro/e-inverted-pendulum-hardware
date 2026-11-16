@@ -109,6 +109,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   TI's bridges and ST's B.Cu strip below z 103 give way (D-058). No-op when nothing routable is left.
 - `scripts/pcb/maze.py`: the grid router (0.05 mm, F.Cu / B.Cu, 45° turns only, layer-direction costs, ≤ 2 vias, every
   segment and via checked exactly) that `vendor_gaps.py` and `route_maze.py` use.
+- `python3 scripts/pcb/route_phases.py --apply`: the four motor phases from TI's strips to J601 / J602 (D-060): each
+  motor's pair on F.Cu across the top of the bracket strip, 0.8 mm; the SS34 clamps on their own strips with a GND via
+  under the body; C502 beside C507; C603 turned; the phase test pads on their tracks. Checked exactly; one shot.
 - `python3 scripts/pcb/ripup.py --apply`: take up the routing of passes 1, 3 and 4 (the tracks and vias they added, known
   from the history: 86255bf vs 90d12ca, 6926847 vs ae59e46); the copies, pass 2, the power bus, the fan-out, the GND
   lattice and the pours stay (D-059). No-op once gone. Re-route with `route_simple` then `route_maze` (pass 3, pass 4).

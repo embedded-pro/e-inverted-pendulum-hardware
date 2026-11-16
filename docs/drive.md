@@ -99,8 +99,21 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
   - One of the jogs is TI's: 0.19 mm on A2HS.
   - The other four jogs and the T-junction are ST's copies.
   - Shorts, clearance and the fab floor are not relaxed.
-- **Phase outputs:** the phase copper (TI's pours until D-046) is the owner's, from the FETs to J601 / J602 (PH 6-pin at
-  the side edges, D-044).
+- **Phase outputs (D-060, `scripts/pcb/route_phases.py`):** as on TI's board, each phase pour leaves its FETs straight
+  towards the terminal side, which on ours (turned 180°) is the bracket strip. Each motor's pair then runs on F.Cu, 0.8 mm
+  at 1.6 mm pitch (1.2 mm under D501), across the top of the strip clear of the M3 / M2 keep-outs.
+  - Left motor: up into the free area left of the bridges, left above MB1, up the left edge to C603 and J601.
+  - Right motor: up beside C507 through the right margin of TI's F.Cu GND (outside the C507 → FETs → shunts loop), then
+    to C607 and J602.
+  - MOT_L_N (to J601 pin 1) and MOT_R_P (to J602 pin 6) cross their pin column on B.Cu through two 0.3 / 0.6 mm vias.
+  - Lengths 51–70 mm. About 0.04 Ω per phase (1 oz, 0.8 mm, ρ_Cu 1.72e-8 Ω·m): 0.17 W at the 2 A trip, 11 mW at
+    0.5 A.
+- **Clamps (D-060):** since D-042's bridge swap, D502 and D503 sat in the other phase's copper and D501 / D502 / C502
+  blocked MOT_R_N's exit.
+  - Each SS34 now stands upright on the outer side of its own strip. Pad 1 (the phase) points up, 4.5–5.1 mm from its
+    FET's phase pads. Pad 2 has a 0.3 / 0.6 mm GND via under the body to L2, as S2 models the clamp straight across the
+    phase node.
+  - C502 (bridge A's 10 µF) moves beside C507, its VBAT pad at the edge of TI's VBAT pour below TI's via array.
 - **Net ties on the bottom:** copper only, nothing to assemble, no label.
 - **Silkscreen (D-041, D-052):** references on F.Fab only. The extras are placed so that no two outlines overlap.
 - **Assembly spacing (D-052):** JLCPCB's 0.5 mm between parts: TI's C510 (0.15 mm), C511 (0.15) and C514 (0.05) are
@@ -109,10 +122,10 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
 
 ## Open items
 
-1. Owner: route the four phase outputs to J601 / J602, the logic pins (SPI, AIN / BIN, nFAULT, nSTALL, nSLEEP, RESET)
-   to the MCU, and the board-wide ground.
-2. The SS34 clamps sit 5.4–7.0 mm from the phase pads (the nearest free spots around TI's dense FET row). Check the
-   phase-node swing on the bench with the clamps fitted and not fitted.
+1. Owner: route the logic pins still open (SPI, AIN / BIN, nFAULT, nSLEEP, RESET) to the MCU, and the sense test pads
+   TP501 / TP502. The phases are routed (D-060).
+2. The SS34 clamps sit 4.5–5.1 mm from the phase pads (D-060). Check the phase-node swing on the bench with the clamps
+   fitted and not fitted.
 3. Shunt temperature at the 2.0 A trip (0.2 W in a 3 W 2512, TI's part).
 4. Confirm TI's design-file licence for publishing the derived footprints and geometry.
 

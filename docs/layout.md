@@ -158,8 +158,9 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
     - Qwiic: a column at x −24, z 72.6 → 67.2 (SDA, GND, SCL);
     - drive logic: a row at z 53.5, x 9.0 → 28.2 (nFAULT, MISO, SCS, MOSI, SCK, AIN2, AIN1, BIN1, BIN2), above the
       DRV8711's logic vias, in their order;
-    - drive power: one row per bridge, below each motor's phase route: z 29.0, x −17.0 → −9.5 (MOT_L_P, MOT_L_N,
-      SENSE_B, GND) and z 28.0, x 27.0 → 34.5 (GND, SENSE_A, MOT_R_N, MOT_R_P);
+    - drive power: SENSE_B / GND at z 29.0, x −12.2 / −9.5, and GND / SENSE_A at z 28.0, x 27.0 / 29.7. The phases'
+      pads sit on their own tracks (D-060): TP503 / TP504 on the left pair at (−33.97, 20.8) / (−32.42, 23.0), TP505 /
+      TP506 on the right pair at (32.42, 30.0) / (33.97, 27.8);
     - MCU: a row above J301 at z 104.0, x −37.5 → −32.7 (NRST, VFBSMPS, BOOT0); TP303 (VDDA) beside the VDDA caps at
       (−6.0, 98.5), 2.1 mm from C311's pad (D-052);
     - IMU and flash: a row left of the IMU at z 80.9, x −16.9 → −4.9 (FLASH_NCS, IMU_NCS, SCK, MOSI, MISO, INT);
@@ -222,6 +223,13 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
   After any change, `route_maze.py --apply` routes what has become routable and does nothing otherwise. After moving
   parts, `ripup.py --apply` takes up passes 1, 3 and 4 so `route_simple.py` and `route_maze.py` (`--max-length 8`, then
   without) re-route around the new spots.
+- **Motor phases (D-060, `scripts/pcb/route_phases.py`): done.**
+  - The four phases run from TI's strips to J601 / J602, each motor's pair on F.Cu across the top of the bracket strip,
+    as described in `docs/drive.md`.
+  - The SS34 clamps and C502 are re-placed beside their own copper; C603 is turned 180° so the left pair meets it in
+    order; the phase test pads sit on their tracks.
+  - Unrouted 57 → 48: the 9 phase and clamp connections, with D504's old GND stub and C502's old stubs taken up.
+  - Still open in the drive: SENSE_A / SENSE_B to TP501 / TP502, and the DRV8711 logic lines listed above.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).
