@@ -9,7 +9,8 @@ Each net's islands are joined closest-first (route_simple.Islands, so no loop is
 on F.Cu and B.Cu: 45-degree geometry, horizontal-preferred F.Cu and vertical-preferred B.Cu, at most two vias (0.3 / 0.6
 mm, or 0.2 / 0.45 mm where that does not fit), every segment and via checked exactly before it is added.
   - Widths: the class width (docs/power-map.md), narrowed only to a narrower pad, never below 0.15 mm (route_simple.
-    link_width); a supply that finds no path at 0.5 mm tries 0.3 mm (still above IPC-2221's 0.12 mm for 0.5 A).
+    link_width); a supply that finds no path at 0.5 mm tries 0.3 mm (still above IPC-2221's 0.12 mm for 0.5 A), a
+    signal that finds none at 0.2 mm tries 0.15 mm (the board's design minimum).
   - No jogs: a route with a segment under 0.25 mm between parallel runs is refused (pcb-design-rules gate).
   - Left alone: PWR_BUS (its pours, power_pours.py, D-056), the crystal nets (at the pins, no vias: the power map), and
     GND, except a ground pad still off the plane, which is joined to the nearest grounded copper. The vendor copies'
@@ -39,8 +40,9 @@ import route_simple as RS  # noqa: E402
 SKIP_CLASSES = {"PWR_BUS", "CRYSTAL"}
 # Supplies that find no path at the class width (0.5 mm) try this: they carry at most 0.6 A (+5V), and IPC-2221 asks
 # 0.12 mm for 0.5 A on 1 oz outer copper (docs/power-map.md).
-NARROW = {"SUPPLY"}
-NARROW_WIDTH = 0.3
+# Default-class signals that find no path at 0.2 mm try the board's design minimum, 0.15 mm (JLCPCB's 4-layer floor is
+# 0.09 mm): between the MCU's 0.15 / 0.25 mm fan-out vias (D-048) only 0.15 mm fits.
+NARROW = {"SUPPLY": 0.3, "Default": 0.15}
 FINE_PAD = 0.35
 GND = "GND"
 GND_REACH = 8.0
@@ -113,8 +115,9 @@ def stage(max_length, limit):
         width = RS.link_width(a.item.GetNetClassName(), a, b)
         started = time.time()
         result, why = router.route(a, b, width, allow_vias=True, via_cost=via_cost)
-        if result is None and a.item.GetNetClassName() in NARROW and width > M.mm(NARROW_WIDTH):
-            width = M.mm(NARROW_WIDTH)
+        narrow = NARROW.get(a.item.GetNetClassName() or "Default")
+        if result is None and narrow and width > M.mm(narrow):
+            width = M.mm(narrow)
             result, why = router.route(a, b, width, allow_vias=True, via_cost=via_cost)
         spent = time.time() - started
         if result is None:

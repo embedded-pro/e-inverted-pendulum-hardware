@@ -104,6 +104,20 @@ def bridges():
     return poly
 
 
+# ST's RF strip (mechanical z): its B.Cu ground below RF_BAND_Z, along the MCU's top pins, gives way to the fan-out's
+# tracks (D-048 put those vias at z 101.9-102.3, inside the strip). The RF line references L3 (ST's In2 ground, which
+# signals never touch) and its coplanar F.Cu ground stays solid everywhere.
+RF_BAND_Z = 103.0
+
+
+def rf_band():
+    poly = pcbnew.SHAPE_POLY_SET()
+    poly.NewOutline()
+    for x, z in ((-50.0, RF_BAND_Z), (50.0, RF_BAND_Z), (50.0, 130.0), (-50.0, 130.0)):
+        poly.Append(RS.B.to_board(x, z))
+    return poly
+
+
 def soft_fill(zone):
     """A GND fill a track or via may cut into (it is refilled around them), outside BRIDGES: TI's drive GND and ST's
     NFC ground, which tie ground pads to the L2 plane. ST's RF-strip ground (the RF line's coplanar ground) and every
@@ -224,6 +238,8 @@ class Router:
                     fill = pcbnew.SHAPE_POLY_SET(zone.GetFilledPolysList(layer))
                     if fill.OutlineCount() and soft_fill(zone):
                         fill.BooleanIntersection(bridges())
+                    elif fill.OutlineCount() and zone.GetZoneName() == "MB1355 B.Cu GND" and layer == pcbnew.B_Cu:
+                        fill.BooleanIntersection(rf_band())
                     if fill.OutlineCount():
                         self.fills[layer].append((zone.GetNetCode(), RS.short(zone.GetNetname()), outlines(fill)))
                         self.hard[layer].append((zone.GetNetCode(), fill, gap))
