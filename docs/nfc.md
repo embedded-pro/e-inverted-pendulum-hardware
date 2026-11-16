@@ -148,8 +148,8 @@ External Qwiic devices must avoid 0x50 and 0x56.
 5. **ASSUMPTION:** the coil's 2 mm from the board edge. Check the phone read range with the bumper fitted.
 6. The coil is 1.5 mm above the battery (owner, 2026-11-15). Measure f0 with the battery fitted, not on a bare board.
 7. **`NFC_COIL` and `NFC_POUR_GAP` are off the board until the pours (owner, D-047).** The next `board.py` run re-adds
-   them; until then nothing stops copper under or near the coil, which would detune it (D-039). C803 is parked off the
-   board: place it back in ST's cluster.
+   them; until then nothing stops copper under or near the coil, which would detune it (D-039). C803 is back on ST's
+   land in the cluster (D-051).
 8. **The right LED ring's top row (D809–D811, D-050) sits in the 4.4 mm pour gap,** its pads about 1.6 mm below the coil.
    D-039's rule forbids vias and pour there, not pads, and ST's own cluster copper sits in the gap too. Keep the LED
    routing's vias out of it, and measure f0 with the LEDs fitted.

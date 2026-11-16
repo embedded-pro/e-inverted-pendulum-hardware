@@ -185,8 +185,6 @@ MOTOR_IO_SUPPLY = [
     ("C601", -28.25, 30.0, 180.0),
     ("C602", -28.25, 28.25, 180.0),
 ]
-# Parked off the board by the owner, to be placed by the owner (D-047): not in the tables, place_block leaves them.
-MOTOR_IO_PARKED = ("TP603", "TP604", "TP605", "TP606")
 # Through-hole parts whose pins may sit over the battery: the cradle has a relief for them (owner, D-044, D-047).
 BATTERY_RELIEF = {"J601", "J602", "J101"}
 
@@ -211,12 +209,6 @@ IMU_MEMORY = [
     ("U702", -26.2, 82.895, 180.0),
     ("U802", -26.275, 88.9949999, 0.0),
 ]
-# Parked off the board by the owner, to be placed by the owner (D-047): the SPI2 / INT and FLASH_NCS test pads, the
-# flash's bypass and pull-ups, R301 (SPI1 SCK source termination), the EEPROM's bypass and the I2C3 pull-ups.
-IMU_MEMORY_PARKED = ("TP701", "TP702", "TP703", "TP704", "TP705", "TP706", "C704", "R702", "R703", "R704", "R301",
-                     "C802", "R808", "R809")
-
-
 def imu_memory():
     """The placed IMU, flash and EEPROM parts, as (ref, x, z, rotation)."""
     return list(IMU_MEMORY)
@@ -306,3 +298,68 @@ LEDS = [
 def leds():
     """The RGB LED rings, their caps, the chain's driver and the status LED, as (ref, x, z, rotation)."""
     return list(LEDS)
+
+# The remaining parts (owner, D-051), placed by scripts/pcb/place_block.py rest: the edge parts first, then the support
+# parts at their pins, then the test pads in rows per block in the room left. (ref, x, z, rotation): mechanical, at the
+# centre of the footprint's pads. Each spot clears every courtyard, other-net copper and silk outline (place_block), keeps
+# the existing silkscreen labels where they are, and leaves its own label a clean spot (silk.py, D-041), except R302 and
+# TP704 (F.Fab). Parked for the owner: MC1-MC4 and MH1 / MH2 (the cradle and the bumpers aren't designed yet).
+REST_EDGE = [
+    ("SW101", -38.75, 83.7, 90.0),
+    ("J801", -39.15, 70.0, 270.0),
+    ("U801", -34.6, 68.5, 0.0),
+]
+# Support parts at the nearest spot to the pin they serve that keeps every label; C803 on ST's MB1163 land (D-039).
+# R808 / R809 (I2C3 pull-ups) by the Qwiic port's ESD, where the bus enters; R301 (SPI1 SCK 33 Ohm) 6 mm down the SCK
+# route from its fan-out via; R302 (BOOT0 pull-down) 3.8 mm from its via; R702 clear of U702's pin-1 mark.
+REST_SUPPORT = [
+    ("C803", -9.85, 90.45, 90.0),
+    ("C704", -30.06, 79.924, 0.0),
+    ("R702", -21.0, 79.45, 0.0),
+    ("R703", -20.812, 83.53, 90.0),
+    ("R704", -31.62, 82.011, 90.0),
+    ("C802", -22.0, 91.0, 90.0),
+    ("R808", -32.6, 74.5, 90.0),
+    ("R809", -32.6, 71.4, 90.0),
+    ("R301", -19.3, 87.5, 90.0),
+    ("R302", -9.6, 97.5, 0.0),
+]
+TP_PITCH = 2.4
+TP_PITCH_LARGE = 2.7
+_LARGE_TPS = {"TP101", "TP105", "TP303", "TP516", "TP517", "TP605", "TP606", "TP804"}
+
+
+def tp_row(refs, x, z, along="x"):
+    """Test pads in a straight row (along x, left to right) or column (along z, top down): TP_PITCH centre to centre,
+    TP_PITCH_LARGE next to a 1.5 mm pad."""
+    out = []
+    for i, ref in enumerate(refs):
+        out.append((ref, round(x, 4), round(z, 4), 0.0))
+        if i + 1 < len(refs):
+            step = TP_PITCH_LARGE if {ref, refs[i + 1]} & _LARGE_TPS else TP_PITCH
+            x, z = (x + step, z) if along == "x" else (x, z - step)
+    return out
+
+
+# Test pads in rows per block (owner), each beside the copper it probes: the power entry in a column right of the
+# Qwiic port's pull-ups, BAT_F / PP_G nearest Q101; the Qwiic port's beside it; the drive's logic in a row right of the
+# power block, above the DRV8711's logic vias; its power test pads in one row per bridge, below each motor's phase route
+# (left: MOT_L, SENSE_B; right: MOT_R, SENSE_A); the MCU's above J301 (NRST, VFBSMPS nearest their pins); the IMU's
+# SPI2 / INT with FLASH_NCS in one row left of the IMU; the right encoder's beside U604, as the left's; ENC_VCC with a
+# GND below the encoder supply.
+REST_TEST_PADS = (
+    tp_row(("TP102", "TP103", "TP101", "TP105", "TP104"), -30.0, 73.5, "z")
+    + tp_row(("TP802", "TP803", "TP804"), -26.0, 73.0, "z")
+    + tp_row(("TP511", "TP515", "TP512", "TP514", "TP513", "TP508", "TP507", "TP509", "TP510"), 9.0, 53.5)
+    + tp_row(("TP503", "TP504", "TP502", "TP516"), -17.0, 29.0)
+    + tp_row(("TP517", "TP501", "TP506", "TP505"), 27.0, 28.0)
+    + tp_row(("TP301", "TP304", "TP303", "TP302"), -37.5, 104.0)
+    + tp_row(("TP706", "TP704", "TP701", "TP702", "TP703", "TP705"), -16.9, 80.9)
+    + [("TP603", 25.5, 44.5, 0.0), ("TP604", 25.5, 36.0, 0.0)]
+    + tp_row(("TP605", "TP606"), -28.0, 26.0)
+)
+
+
+def rest():
+    """The edge parts, the support parts and the test pads, as (ref, x, z, rotation)."""
+    return REST_EDGE + REST_SUPPORT + REST_TEST_PADS

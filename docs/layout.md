@@ -62,8 +62,8 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   - ST's copper, vias and ground (the owner removed the ground field's 236 vias, D-047; the 54 beside the RF line stay).
 
   The MCU decoupling the owner parked (D-047) is back on top after the fan-out (D-048, `scripts/pcb/mcu_escape.py
-  --decoupling`, `docs/rf.md`). Still parked: R301 (SPI1 SCK termination, goes at the SPI1_SCK via) and C803 of the NFC
-  cluster.
+  --decoupling`, `docs/rf.md`). R301 (SPI1 SCK termination) and C803 of the NFC cluster are placed with the rest
+  (D-051, below).
 
   Its position on the outline (the tab) is part of the copy. Still yours:
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
@@ -80,8 +80,9 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
     (`docs/firmware-interface.md`). C701 / C702 / C703 at VDD / VDDIO / REGOUT, R701 (nCS pull-up) above it.
   - U702 (W25Q16JV) left of the MCU at (−26.2, 82.9), turned 180°; U802 (M24C64) above it in the same column at
     (−26.3, 89.0) (D-047).
-  - Parked off the board, still yours to place: the SPI2 / INT test pads TP701–TP705, TP706 (FLASH_NCS), C704 and
-    R702–R704 (the flash's bypass and pull-ups), R301 (SPI1 SCK 33 Ω), C802 and the I2C3 pull-ups R808 / R809.
+  - Their support parts and test pads are placed with the rest (D-051, below): C704 and R702–R704 at U702's pins, R301
+    (SPI1 SCK 33 Ω) on the SCK route, C802 at U802, the I2C3 pull-ups R808 / R809 at the Qwiic port, TP701–TP706 in one
+    row left of the IMU.
   - Still yours, routing: SPI2 from the MCU's left pins (46–50) to the IMU, about 30 mm, under the NFC cluster; I2C3 from
     the MCU's top pins (28 / 29) around its left side and down to the EEPROM, about 50 mm (inside the bus
     budget's 15 cm, `docs/nfc.md`); SPI1 and FLASH_NCS from the bottom pins. Keep them off the RF
@@ -117,7 +118,8 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
     pull-up DNP) in a column at x ±31.5…32, the 1 nF caps at x ±28.2…28.75, then the SN74LVC3G17 (U602 / U604) at
     x −27.5 / +27.75 with its bypass; TP601 / TP602 beside U602. C603 / C607 (snubbers, DNP) below the connectors.
   - The encoder supply (R601 / R602, F601, C601 / C602) sits below the left chain, z 28–32.
-  - Parked off the board, still yours to place: TP603 / TP604 (right encoder outputs), TP605 / TP606 (ENC_VCC, GND).
+  - TP603 / TP604 (right encoder outputs) beside U604 and TP605 / TP606 (ENC_VCC, GND) below the encoder supply are
+    placed with the rest (D-051).
   - Still yours, routing:
     - Both motor pins leave at the bottom of the connector and run about 22 mm down the side to the phase pours that end
       at z 13.5 on the same side.
@@ -140,9 +142,34 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   - Still yours, routing: the data chain in order (U804 → R802 → D802 DIN … D813), +5V and GND to every LED through
     its cap, LED_DATA from PA7's fan-out via. Keep vias out of the NFC pour gap (x ≥ 6.1, z ≥ 72.1): the right ring's
     top row sits in it, 1.6 mm below the coil (`docs/nfc.md`).
+- **The rest (D-051, `scripts/pcb/place_block.py rest`): placed.** Edge parts first, then the support parts at their
+  pins, then the test pads in rows per block in the room left. Every spot keeps the existing silkscreen labels where
+  they are and leaves its own label a clean spot, except R302 and TP704 (F.Fab, D-041).
+  - SW101 (power switch) at the left edge above the battery, turned 90°: pins at x −38.75, z 79.0 / 83.7 / 88.4, between
+    J801 and J301, lever on top (`docs/mechanical.md`). SW_ON runs about 30 mm down to R102.
+  - J801 (Qwiic) at the left edge between J101 and SW101, the cable entering from the edge, pads at x −37.15, z 68.5–71.5;
+    U801 (its ESD) beside the pads for pass-through routing (interface-layout §2); R808 / R809 (I2C3 pull-ups) right of
+    U801, where the bus enters.
+  - C704 / R702–R704 at U702's VCC, /CS, /WP, /HOLD; C802 at U802's VCC; R301 6 mm down the SCK route from its fan-out
+    via; R302 3.8 mm from the BOOT0 via; C803 on ST's MB1163 land (D-039).
+  - Test pads, 2.4 mm pitch (2.7 mm next to a 1.5 mm pad):
+    - power entry: a column at x −30, z 73.5 → 63.0 (BAT_F, PP_G, VBAT, GND, VBAT_SENSE), BAT_F / PP_G nearest Q101;
+    - Qwiic: a column at x −26, z 73.0 → 67.9 (SDA, SCL, GND);
+    - drive logic: a row at z 53.5, x 9.0 → 28.2 (nFAULT, MISO, SCS, MOSI, SCK, AIN2, AIN1, BIN1, BIN2), above the
+      DRV8711's logic vias, in their order;
+    - drive power: one row per bridge, below each motor's phase route: z 29.0, x −17.0 → −9.5 (MOT_L_P, MOT_L_N,
+      SENSE_B, GND) and z 28.0, x 27.0 → 34.5 (GND, SENSE_A, MOT_R_N, MOT_R_P);
+    - MCU: a row above J301 at z 104.0, x −37.5 → −29.7 (NRST, VFBSMPS, VDDA, BOOT0);
+    - IMU and flash: a row left of the IMU at z 80.9, x −16.9 → −4.9 (FLASH_NCS, IMU_NCS, SCK, MOSI, MISO, INT);
+    - encoders: TP603 / TP604 beside U604 at (25.5, 44.5) / (25.5, 36.0); ENC_VCC / GND at z 26.0 below F601.
+  - Still yours, routing: SW_ON to R102; I2C3 J801 → U801 → R808 / R809 → U802 → MCU and on to U803; each test pad's
+    stub to the copper it probes, short and on top; VDDA's pad (TP303) is about 20 mm from its nearest cap (C312): keep
+    that stub thin and away from switching copper, or move the pad.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
-  J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule).
-- **Holes for you to place (staged under "Mechanical"):** battery cradle MC1–MC4 and bumpers MH1/MH2. Footprints
+  J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
+  battery (z ≥ 79).
+- **Holes for you to place (staged under "Mechanical", the only parts still off the board, D-051):** battery cradle
+  MC1–MC4 and bumpers MH1/MH2. Footprints
   `MountingHole_M3_NPTH_KeepOut7mm` and `..._M2_..._KeepOut5.5mm` are in the project library for more.
 
 ## After placing

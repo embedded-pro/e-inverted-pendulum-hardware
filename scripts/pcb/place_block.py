@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Place a block of parts at the owner's chosen spots, once (D-042, D-043, D-047, D-049, D-050).
+"""Place a block of parts at the owner's chosen spots, once (D-042, D-043, D-047, D-049, D-050, D-051).
 
     python3 scripts/pcb/place_block.py --apply motor_io      J601 / J602 at the side edges, their encoder chains and the
                                                             encoder supply (D-042, D-044)
@@ -9,16 +9,21 @@
                                                             entry, to TI's layout guidance (D-049)
     python3 scripts/pcb/place_block.py --apply leds          the 12 RGB LEDs as two square rings in the centre, their
                                                             caps, the chain's driver and the status LED (D-050)
+    python3 scripts/pcb/place_block.py --apply rest          the rest: the power switch and the Qwiic port at the left
+                                                            edge, the support parts at their pins and the test pads in
+                                                            rows per block (D-051)
 
 Each block is a list from placement.py of (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. The
-tables hold the owner's positions from KiCad (D-047), so --replace on the owner's board changes nothing; the parts the
-owner parked off the board (placement.*_PARKED) are not in them and stay where they are. The parts move to their spots,
+tables hold the owner's positions from KiCad (D-047), so --replace on the owner's board changes nothing; parts not in a
+table (the mechanical holes MC1-MC4 and MH1 / MH2) stay where they are. The parts move to their spots,
 and the script refuses if any part:
   - leaves the board, or its courtyard reaches into the bracket strip (no parts there, D-026);
   - puts a through-hole pin over the battery (BATTERY_BACK, D-025), except the parts the cradle has a relief for
     (placement.BATTERY_RELIEF, D-044, D-047);
   - touches another part's courtyard, comes closer than rf_block.PART_CLEARANCE to another net's copper, or overlaps
-    another silk outline (rf_block.spot_ok).
+    another silk outline (rf_block.spot_ok);
+  - opens solder mask under another part's silkscreen outline, or lays its outline over another part's pad (DRC
+    silk_over_copper: the fab would clip the silk).
 It lays the silkscreen labels out (silk.py, D-041) and locks nothing: locking is the owner's (D-045). Re-running is a
 no-op once the block's anchors are on the board; --replace moves an already placed block to its table again (after the owner changes it).
 Run board.py first so the parts exist.
@@ -37,11 +42,13 @@ import placement  # noqa: E402
 import rf_block as RF  # noqa: E402
 import silk  # noqa: E402
 
+SILK_TO_MASK = 0.0
 BLOCKS = {
     "motor_io": (placement.motor_io, ("J601", "J602")),
     "imu_memory": (placement.imu_memory, ("U701",)),
     "power": (placement.power, ("U201",)),
     "leds": (placement.leds, ("D802",)),
+    "rest": (placement.rest, ("SW101",)),
 }
 
 
@@ -70,6 +77,34 @@ def problems(board, fp, outline, others):
             found.append(f"through-hole pin {pad.GetNumber()} over the battery")
     if not RF.spot_ok(board, fp, others):
         found.append("touches a courtyard, another net's copper or a silk outline")
+    found += mask_under_silk(fp, others)
+    return found
+
+
+def mask_opening(pad):
+    opening = pcbnew.SHAPE_POLY_SET()
+    pad.TransformShapeToPolygon(opening, pcbnew.F_Mask, 0, pcbnew.FromMM(0.005), pcbnew.ERROR_OUTSIDE)
+    return opening
+
+
+def mask_under_silk(fp, others):
+    """A pad's mask opening within SILK_TO_MASK of another part's silkscreen outline, or this part's outline over another
+    part's pad (DRC silk_over_copper: the fab clips the silk)."""
+    reach = fp.GetBoundingBox()
+    reach.Inflate(pcbnew.FromMM(1.0))
+    near = [o for o in others if not o.IsFlipped() and reach.Intersects(o.GetBoundingBox())]
+    found = []
+    own = RF.silk_outline(fp)
+    for other in near:
+        silk = RF.silk_outline(other)
+        for pad in fp.Pads():
+            if pad.IsOnLayer(pcbnew.F_Mask) and silk.OutlineCount() and \
+                    silk.Collide(mask_opening(pad), pcbnew.FromMM(SILK_TO_MASK)):
+                found.append(f"pad {pad.GetNumber()} under {other.GetReference()}'s silkscreen")
+        for pad in other.Pads():
+            if pad.IsOnLayer(pcbnew.F_Mask) and own.OutlineCount() and \
+                    own.Collide(mask_opening(pad), pcbnew.FromMM(SILK_TO_MASK)):
+                found.append(f"silkscreen over {other.GetReference()} pad {pad.GetNumber()}")
     return found
 
 

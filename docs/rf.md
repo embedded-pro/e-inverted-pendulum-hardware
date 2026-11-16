@@ -206,7 +206,7 @@ MCU fan-out:
    A regular 1.2 mm stitching grid replaces the field (128 vias, D-049). Re-create the strip's L1 / L3 / L4 ground pours
    over it when the pours are made, and the `ANTENNA_TAB` rule area (the next `board.py` run adds it).
 8. **Owner's GND via at (−19.3, 105.2)** is 0.18 mm hole-to-copper from RF_50; JLCPCB's floor is 0.20 mm (DRC error).
-9. The MCU decoupling is back on the board (D-048). R301 (SPI1 SCK 33 Ω source termination) is still parked: place it
-   at the SPI1_SCK fan-out via, a few mm from pin 63.
+9. The MCU decoupling is back on the board (D-048). R301 (SPI1 SCK 33 Ω source termination) is placed 6 mm down the
+   SCK route from its fan-out via (D-051): route pin 63's via to it first, then on to U702 and U501.
 10. U301's exposed pad has its ground vias back: 33 on a 0.8 mm lattice in the paste gaps (D-049), where ST had 50
     irregular ones before the owner removed the field (D-047).

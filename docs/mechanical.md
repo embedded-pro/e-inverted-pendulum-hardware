@@ -43,7 +43,7 @@ Front view (component side):
    │  MCU + RF corner   M24SR64-Y tag ◄──── │ (MB1163 copy)    │
    │  (MB1355 copy)     (left of the coil)  └──────────────────│ z 76.5 (coil bottom)
    │                                                    │ z ~76
-   │       (battery behind this band: SMD parts only)   │ ◄ STDC14 at the middle of the right edge
+   │       (battery behind this band: SMD parts only)   │
    │                                                    │ z ~40
    │◄J601 (L)   bridge B   DRV8711   bridge A   J602 (R)►│ PH6 plugs enter from the side edges (D-042)
    ├──────────────────────────────────────────────────┤ z 12.5
@@ -51,6 +51,9 @@ Front view (component side):
    └──────────────────────────────────────────────────┘ z −12.5
       bracket legs 8.5 mm outside each side edge (x ±51)
 ```
+
+Left edge, top to bottom: J301 (STDC14, left of the MCU, D-047), SW101 (power switch, above the battery, D-051), J801
+(Qwiic, D-051), J101 (XT30 battery input, D-047), J601 (left motor, D-042).
 
 - **Front:** every SMD part (JLC single-side PCBA), with no parts in the bottom 25 mm strip.
 - **Back:** the bracket in the strip, the motors behind it, and the battery above them. No parts.
@@ -139,3 +142,8 @@ Result (S0, `simulation/results/sizing_summary.json`):
    **J101 (D-047):** the owner placed the XT30 at the left edge with both pins (1.9 mm holes, 3.2 mm pads) at x −38,
    z 56.4 / 61.4, over the battery's left edge (x −38.5). Its tails stick out on the back (**ASSUMPTION**: about 1.5 mm;
    measure the XT30UPB-F), so the cradle needs a second relief at x −40.1…−35.9, z 54.3–63.5 (pads plus 0.5 mm).
+7. **Power switch (D-051):** SW101 (SS-12D10L5) at the left edge, turned 90° so it slides along z, pins at x −38.75,
+   z 79.0 / 83.7 / 88.4, 3.75 mm from the edge to the pin row. Its lever stands out of the front (component side) and is
+   worked from the front; its through-hole tails are above the battery (z ≥ 79 > 75), so the cradle needs no relief.
+   **ASSUMPTION**: lever and body heights from the part family, not measured; check that the lever clears a front cover
+   or bumper, and that a fall on the left side doesn't hit it (HW-MEC-004 bumpers).
