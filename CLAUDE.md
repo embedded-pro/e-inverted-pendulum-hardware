@@ -94,6 +94,12 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   ties between a part's adjacent pins, short gaps to free track ends / vias, and one GND via per island off the L2 plane.
   Skips PWR_BUS (pours), the vendor copies' own connections and a crystal unless both nets route. No-op when nothing
   simple is left.
+- `python3 scripts/pcb/vendor_gaps.py --apply`: routing pass 2 (D-055). The vendor copies' missing tracks restored from the
+  references where their ends land (or up to a hop onto a part that moved), the rest of a copy's own open connections
+  re-joined by `maze.py` at the vendor's width (crystals, switch nodes, RF: F.Cu, no via; crystals as a pair), TI's missing
+  vias where they fit, one GND via per open vendor ground pad. No-op when nothing is left.
+- `scripts/pcb/maze.py`: the grid router (0.05 mm, F.Cu / B.Cu, 45° turns only, layer-direction costs, ≤ 2 vias, every
+  segment and via checked exactly) that `vendor_gaps.py` and `route_maze.py` use.
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->

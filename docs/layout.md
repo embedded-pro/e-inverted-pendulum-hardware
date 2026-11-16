@@ -190,6 +190,10 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
     ground pads with no via spot (C317, D810, D811, U701 pins 11 / 20) plus the copies' ground pads.
   - Run `python3 scripts/pcb/route_simple.py --apply` again after you move parts: it routes what has become simple and
     does nothing otherwise.
+- **Routing pass 2 (D-055, `scripts/pcb/vendor_gaps.py`): done.** The vendor copies' open ends, closed from ST's and TI's
+  references: ST's HSE_OUT and SMPS_LX as drawn; HSE_IN, the OSC32 load caps, the SMPS loop, +3V3 on U301 pins 44–45 /
+  1–68, NFC_VCC and NFC_RF_DIS re-joined by the grid router (`scripts/pcb/maze.py`) at the vendor's width; TI's 2 vias
+  that fit; one GND via at each of the copies' open ground pads. Unrouted 204 → 185.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).

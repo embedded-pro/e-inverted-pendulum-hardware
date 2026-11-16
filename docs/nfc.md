@@ -130,6 +130,9 @@ External Qwiic devices must avoid 0x50 and 0x56.
     floor are not relaxed.
 - **Deviation:** ST's drill file lists ANT14's two layer changes as **non-plated** 0.5 mm holes. A non-plated hole
   would leave the coil open between F.Cu and B.Cu, so ours are plated (0.5 mm drill, 1.27 mm pads, as ST's lands).
+- **Open ends closed from ST's reference (D-055, `scripts/pcb/vendor_gaps.py`):** NFC_VCC (C804 → C803 and U803 → FB801,
+  which moved 8 mm) and NFC_RF_DIS (U803 → R804, moved 2.2 mm) re-joined at 0.2 mm on F.Cu; one GND via at C803 and
+  R804. ST's 4 missing vias are not restored: they led to the Arduino header, which this board does not have.
 
 ## Firmware notes (`docs/firmware-interface.md`)
 

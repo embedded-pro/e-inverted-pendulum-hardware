@@ -102,6 +102,25 @@ def copy_of(item):
     return next((name for name, refs in COPIES.items() if ref in refs), None)
 
 
+COPY_NETS = {
+    "MB1355": {short(str(n)) for n in RF.DATA["net_map"].values()},
+    "MB1163": {short(str(n)) for n in N.DATA["net_map"].values()},
+    "BOOST-DRV8711": {short(str(n)) for n in D.DATA["net_map"].values()},
+}
+
+
+def vendor_internal(a, b):
+    """A connection that is the vendor's own routing: a net of that copy between its own parts, or from one of its pads
+    to loose copper of the net (D-055: vendor_gaps.py closes these from the reference)."""
+    ca, cb = copy_of(a.item), copy_of(b.item)
+    copy = ca or cb
+    if copy is None or short(a.item.GetNetname()) not in COPY_NETS[copy]:
+        return False
+    if a.kind == "pad" and b.kind == "pad":
+        return ca == cb
+    return True
+
+
 def uid(item):
     return item.m_Uuid.AsString()
 
@@ -274,8 +293,9 @@ class World:
 
     # Tracks.
 
-    def track_problem(self, a, b, layer, width, probe, own):
-        """Why a track from a to b on this layer would break a rule, or None. own: the terminals it joins."""
+    def track_problem(self, a, b, layer, width, probe, own, pours=True):
+        """Why a track from a to b on this layer would break a rule, or None. own: the terminals it joins. pours=False
+        leaves other nets' pours out (a vendor's own track, which its pour flows around when refilled)."""
         shape = pcbnew.SHAPE_SEGMENT(a, b, width)
         half = width // 2
         if self.outside.Collide(shape, mm(EDGE)):
@@ -318,7 +338,7 @@ class World:
                 continue
             if theirs.Collide(shape, mm(R.rule_clearance(item, probe))):
                 return "via" if via else "track"
-        for net, poly, gap in self.fills[layer]:
+        for net, poly, gap in (self.fills[layer] if pours else ()):
             if net != probe.GetNetCode() and poly.Collide(shape, gap):
                 return "pour"
         return None
@@ -482,8 +502,7 @@ def candidates(board, islands, found):
                     continue
                 if a.kind == "end" and b.kind == "end" and uid(a.track) == uid(b.track):
                     continue
-                copies = {copy_of(t.item) for t in (a, b)} - {None}
-                if copies and (a.kind != "pad" or b.kind != "pad" or copy_of(a.item) == copy_of(b.item)):
+                if vendor_internal(a, b):
                     continue
                 length = (b.at - a.at).EuclideanNorm() / 1e6
                 both_pads = a.kind == "pad" and b.kind == "pad"
@@ -634,14 +653,15 @@ def via_spot(world, pad, probe):
     return None
 
 
-def ground_islands(board, world, islands):
-    """One via per GND island that is off the plane."""
+def ground_islands(board, world, islands, copies=False):
+    """One via per GND island that is off the plane (on the vendor copies' pads too when copies is set)."""
     gnd = board.FindNet(GND).GetNetCode()
     plane = islands.find(uid(world.plane))
     groups = defaultdict(list)
     for fp in board.GetFootprints():
         for pad in fp.Pads():
-            if pad.GetNetCode() == gnd and not pad.HasHole() and islands.find(uid(pad)) != plane and copy_of(pad) is None:
+            if pad.GetNetCode() == gnd and not pad.HasHole() and islands.find(uid(pad)) != plane and \
+                    (copies or copy_of(pad) is None):
                 groups[islands.find(uid(pad))].append(pad)
     added, failed = [], []
     probe = probe_for(board, board.FindNet(GND))

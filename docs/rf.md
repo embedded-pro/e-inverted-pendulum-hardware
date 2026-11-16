@@ -215,3 +215,9 @@ MCU fan-out:
    SCK route from its fan-out via (D-051): route pin 63's via to it first, then on to U702 and U501.
 10. U301's exposed pad has its ground vias back: 33 on a 0.8 mm lattice in the paste gaps (D-049), where ST had 50
     irregular ones before the owner removed the field (D-047).
+9. **ST's missing routing is back from the reference (D-055, `scripts/pcb/vendor_gaps.py`):** HSE_OUT as drawn; SMPS_LX
+   as drawn to a hop onto L302 (moved 0.88 mm); HSE_IN, the OSC32 load caps C315 / C316, SMPS_MID, VFBSMPS and +3V3 on
+   U301 pins 44–45 / 1–68 re-joined at ST's widths and 0.1 mm rule, on F.Cu with no via for the crystals and the SMPS
+   loop; one GND via at C309, C314, C315, C316 and C318. ST's +3V3 chain from pin 44 to C318 and its VFBSMPS chain now
+   cross our MCU fan-out and C302 (D-048) and are not restored; U301's other VDD pins, which ST joins through its own
+   planes, are routed in the later passes.

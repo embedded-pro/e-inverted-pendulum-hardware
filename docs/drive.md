@@ -115,3 +115,9 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
    phase-node swing on the bench with the clamps fitted and not fitted.
 3. Shunt temperature at the 2.0 A trip (0.2 W in a 3 W 2512, TI's part).
 4. Confirm TI's design-file licence for publishing the derived footprints and geometry.
+
+## Routing pass 2 (D-055)
+
+All 173 of TI's tracks are on the board. Of TI's 144 vias, 4 were missing; `scripts/pcb/vendor_gaps.py` put back the 2
+that fit (VBAT at Q501, at x 16.92, z 20.06; GND at x 24.68, z 34.41). The other 2 (GND at x 24.68, z 38.22 and 42.03)
+would sit under the right encoder chain's parts (U604 / C610, D-042) and stay out; TI's GND pours tie that area.
