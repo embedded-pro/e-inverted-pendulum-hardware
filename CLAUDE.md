@@ -92,7 +92,8 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   (`--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
   with their encoder chains and supply (D-042, D-044); `imu_memory` = the IMU on the centre line, the flash and the
   EEPROM left of the MCU (D-043); `power` = the TPS62933F buck and the TLV75533P LDO right of the power entry, to TI's
-  layout guidance (D-049). The tables hold the owner's positions from KiCad (D-047): after moving parts, update
+  layout guidance (D-049); `leds` = the 12 RGB LEDs as two square rings in the centre, their caps, the chain's driver and
+  the status LED (D-050). The tables hold the owner's positions from KiCad (D-047): after moving parts, update
   them so `--replace` changes nothing; parts parked off the board are not in them.
 - `python3 scripts/pcb/shift_block.py --apply drive`: move a placed block with its copper (tracks and vias inside its
   courtyards' box, on its nets) to the target of its anchor in `placement.py`; refuses on any clash; no-op once there

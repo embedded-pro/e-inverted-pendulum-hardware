@@ -227,7 +227,8 @@ def imu_memory():
 # to VIN / GND (pins 3 / 4), the 10 uF input caps beside it toward the power entry, so the input loop is the smallest;
 # C204 (BST) between BST and SW (pins 6 / 5), L201's SW pad facing pin 5; the output caps under L201, +5V pads up toward
 # its +5V pad; the EN divider, the SS cap and the FB divider in a row above the IC, the FB pair over FB (pin 8), away from
-# SW and L201. The LDO sits beside the output caps, rotated so IN / EN face C209 and OUT faces C210. Test pads above.
+# SW and L201. The LDO sits beside the output caps, rotated so IN / EN face C209 and OUT faces C210. Test pads right
+# of L201 (moved there by D-050 to leave the LED rings room for labels).
 POWER = [
     ("U201", -7.71, 58.0, 0.0),
     ("C203", -10.1, 57.5, 270.0),
@@ -246,12 +247,62 @@ POWER = [
     ("C205", -9.6, 62.8, 90.0),
     ("R204", -7.8, 62.8, 90.0),
     ("R203", -6.0, 62.8, 270.0),
-    ("TP201", -3.4, 62.8, 0.0),
-    ("TP203", -0.6, 62.8, 0.0),
-    ("TP202", 2.2, 62.8, 0.0),
+    ("TP201", 1.4, 59.6, 0.0),
+    ("TP203", 1.4, 56.85, 0.0),
+    ("TP202", 1.4, 54.1, 0.0),
 ]
 
 
 def power():
     """The buck and the LDO with their support parts and test pads, as (ref, x, z, rotation)."""
     return list(POWER)
+
+
+# The 12 RGB LEDs in the centre as two square rings (owner, D-050), placed by scripts/pcb/place_block.py leds.
+# (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. Each ring has 6 WS2812B-2020 on a 7.0 mm square:
+# the four corners and the middle of the top and bottom sides, 3.5 mm pitch; the rings are centred at (-9, 70.5) and
+# (+9, 70.5), mirrored about the centre line, between the power block and the IMU. The chain runs D802 (bottom middle of the
+# left ring) round the left ring to D807 (bottom right), across the centre to D808 (bottom left of the right ring) and
+# round it to D813, so every DOUT -> DIN link is short. Bottom-row LEDs at 0 degrees and top-row LEDs at 180 so every VDD
+# pad faces the inside of its ring, where its 100 nF cap (C806-C817 in chain order) sits with its +5V pad toward it. The
+# chain's driver (U804 with C801, R803, R802 at its output, C805 bulk, TP801) is left of the left ring; the green status
+# LED D801 with R801 sits on the centre line between the rings.
+LEDS = [
+    ("D802", -9.0, 67.0, 0.0),
+    ("C806", -8.565, 69.05, 180.0),
+    ("D803", -12.5, 67.0, 0.0),
+    ("C807", -12.065, 69.05, 180.0),
+    ("D804", -12.5, 74.0, 180.0),
+    ("C808", -12.935, 71.95, 0.0),
+    ("D805", -9.0, 74.0, 180.0),
+    ("C809", -9.435, 71.95, 0.0),
+    ("D806", -5.5, 74.0, 180.0),
+    ("C810", -5.935, 71.95, 0.0),
+    ("D807", -5.5, 67.0, 0.0),
+    ("C811", -5.065, 69.05, 180.0),
+    ("D808", 5.5, 67.0, 0.0),
+    ("C812", 5.935, 69.05, 180.0),
+    ("D809", 5.5, 74.0, 180.0),
+    ("C813", 5.065, 71.95, 0.0),
+    ("D810", 9.0, 74.0, 180.0),
+    ("C814", 8.565, 71.95, 0.0),
+    ("D811", 12.5, 74.0, 180.0),
+    ("C815", 12.065, 71.95, 0.0),
+    ("D812", 12.5, 67.0, 0.0),
+    ("C816", 12.935, 69.05, 180.0),
+    ("D813", 9.0, 67.0, 0.0),
+    ("C817", 9.435, 69.05, 180.0),
+    ("D801", 0.0, 71.0, 270.0),
+    ("R801", 0.0, 67.6, 90.0),
+    ("U804", -17.6, 69.5, 0.0),
+    ("R802", -16.2, 66.4, 0.0),
+    ("C801", -16.943, 72.05, 180.0),
+    ("R803", -21.0, 69.5, 270.0),
+    ("TP801", -21.0, 73.0, 0.0),
+    ("C805", -17.6, 74.0, 0.0),
+]
+
+
+def leds():
+    """The RGB LED rings, their caps, the chain's driver and the status LED, as (ref, x, z, rotation)."""
+    return list(LEDS)

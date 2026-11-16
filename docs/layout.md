@@ -28,7 +28,7 @@ anything on the board.
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
 | Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
-| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 22 references with no room (C301, C302, C307, C308, C310, C312, C314, C317, C401, C402, FB301, FL401, L302, L401, R401 around the MCU and the RF strip's stitching; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns) are on F.Fab, sized to fit inside their part | D-035, D-041, D-047, D-048, D-049, `scripts/pcb/silk.py` |
+| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 31 references with no room are on F.Fab, sized to fit inside their part: C301, C302, C307, C308, C310, C312, C314, C317, C401, C402, FB301, FL401, L302, L401, R401 around the MCU and the RF strip's stitching; C203, C204, C205, R202, R204 in the power block; C801, C807, C809, D809 in the LED rings; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns | D-035, D-041, D-047 to D-050, `scripts/pcb/silk.py` |
 | Page | A3, so the staging area fits on the sheet | — |
 
 ## What DRC enforces (rule areas and project rules)
@@ -104,7 +104,7 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   - C208 / C206 / C207 (output) under L201, +5V pads up; U202 (TLV75533P) beside them, IN / EN toward C209, OUT toward
     C210.
   - R201 / R202 (EN), C205 (SS), R204 / R203 (FB) in a row above U201, the FB pair over FB (pin 8), away from SW;
-    TP201 (+5V), TP203 (GND), TP202 (+3V3) beside them.
+    TP201 (+5V), TP203 (GND) and TP202 (+3V3) right of L201 (moved there by D-050 so the LED rings leave their labels room).
   - Still yours, routing: VBAT and GND wide to C201–C203 and U201 with vias to L2; the SW node short and minimal,
     nothing under it on L3 / L4; the +5V sense to R203 from the output caps, away from L201; +5V on to the encoders and
     the LEDs, +3V3 on the L3 plane. C203's and C204's references are on F.Fab (no 1.0 mm spot, D-041).
@@ -128,6 +128,18 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
 - **Power entry and debug (owner, D-047): placed.** J101 (XT30) at the left edge, pins at x −38, z 56.4 / 61.4, with
   F101, Q101, D101 / D102, C101–C103 and R101–R105 beside it (x −38…−18, z 50–63); J301 (STDC14) left of the MCU at
   (−36.2, 97.2).
+- **RGB LEDs and status LED (D-050, `scripts/pcb/place_block.py leds`): placed** in the centre as two square rings,
+  mirrored about the centre line between the power block and the IMU:
+  - each ring has 6 WS2812B-2020 on a 7.0 mm square (corners plus the middle of the top and bottom sides, 3.5 mm pitch),
+    centred at (−9, 70.5) and (+9, 70.5);
+  - the chain runs D802 (bottom middle, left ring) round the left ring to D807, across to D808 and round the right ring
+    to D813;
+  - each LED's 100 nF cap sits inside its ring at the VDD pad (bottom row at 0°, top row at 180°);
+  - U804 (level shifter) with C801, R803, R802 at its output, C805 (bulk) and TP801 are left of the left ring;
+  - D801 (green status) with R801 sits on the centre line between the rings.
+  - Still yours, routing: the data chain in order (U804 → R802 → D802 DIN … D813), +5V and GND to every LED through
+    its cap, LED_DATA from PA7's fan-out via. Keep vias out of the NFC pour gap (x ≥ 6.1, z ≥ 72.1): the right ring's
+    top row sits in it, 1.6 mm below the coil (`docs/nfc.md`).
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule).
 - **Holes for you to place (staged under "Mechanical"):** battery cradle MC1–MC4 and bumpers MH1/MH2. Footprints

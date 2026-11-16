@@ -150,3 +150,6 @@ External Qwiic devices must avoid 0x50 and 0x56.
 7. **`NFC_COIL` and `NFC_POUR_GAP` are off the board until the pours (owner, D-047).** The next `board.py` run re-adds
    them; until then nothing stops copper under or near the coil, which would detune it (D-039). C803 is parked off the
    board: place it back in ST's cluster.
+8. **The right LED ring's top row (D809–D811, D-050) sits in the 4.4 mm pour gap,** its pads about 1.6 mm below the coil.
+   D-039's rule forbids vias and pour there, not pads, and ST's own cluster copper sits in the gap too. Keep the LED
+   routing's vias out of it, and measure f0 with the LEDs fitted.

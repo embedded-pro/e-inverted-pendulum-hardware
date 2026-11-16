@@ -77,7 +77,7 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
   J301 are on the board, some support parts are parked off it, and the rule areas `ANTENNA_TAB`, `NFC_COIL`,
   `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out come back with the pours. Every MCU pin another part uses has a 0.2 mm stub to a 0.15 / 0.25 mm via, and the MCU decoupling is back on top beside the pins (D-048, `scripts/pcb/mcu_escape.py`). GND vias sit on a regular
   lattice in the MCU's exposed pad and over the RF strip, and the buck and LDO are placed right of the power entry
-  (D-049). The board has the outline, the bracket
+  (D-049). The drive stage sits 8 mm further right, and the RGB LEDs are two square rings in the centre (D-050). The board has the outline, the bracket
   rule areas and bracket holes; every other part sits in the staging area. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.
