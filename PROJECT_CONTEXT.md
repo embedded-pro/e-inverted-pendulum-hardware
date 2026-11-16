@@ -84,13 +84,13 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
   the test pads in rows per block. Only the cradle and bumper holes (MC1–MC4, MH1 / MH2) are still off the board, for
   the owner. Routing pass 1 is done (D-054, `scripts/pcb/route_simple.py`): 90 short single-layer links, 3 GND ties, 1
   gap and 83 GND vias; 204 connections are left for pass 2 and the owner (long buses, blocked hops, the power bus for
-  its pours, the vendor copies' own gaps). Routing pass 2 closed the vendor copies' open ends from their references (D-055, `scripts/pcb/vendor_gaps.py`). The power bus is poured (D-056, `scripts/pcb/power_pours.py`): L3 is a VBAT corridor plus GND, L1 pours at the power entry and the buck input. Routing pass 3 made 46 short connections around parts (D-057, `scripts/pcb/route_maze.py`); 118 are left. `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
+  its pours, the vendor copies' own gaps). Routing pass 2 closed the vendor copies' open ends from their references (D-055, `scripts/pcb/vendor_gaps.py`). The power bus is poured (D-056, `scripts/pcb/power_pours.py`): L3 is a VBAT corridor plus GND, L1 pours at the power entry and the buck input. Routing pass 3 made 46 short connections around parts (D-057) and pass 4 the long runs (D-058, `scripts/pcb/route_maze.py`): 60 connections, mostly at U301's crowded fan-out, the IMU's ground pins and the motor phases, are left for the owner (`docs/layout.md`). `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
   parts go to a free spot in the staging area, and parts removed from the schematic are removed.
 - Brief for the owner: `docs/layout.md`.
 
 ## Still to check or do
 
-- Routing pass 2 (long buses, blocked hops, vendor gaps from the references) and the power-bus pours, then DRC with schematic parity, and the `power-pcb-layout` §7 / `rf-layout` §12
+- The 60 connections routing left (`docs/layout.md`), GND fill on L1 / L4 with stitching, then DRC with schematic parity, and the `power-pcb-layout` §7 / `rf-layout` §12
   checklists (Phase 3 gate).
 - Mechanical ASSUMPTIONS in `docs/mechanical.md`: MG310 mass and stall current (the listing says "≤ 2 mA"), battery
   and component masses, the bracket's 18 mm reference face.

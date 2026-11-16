@@ -202,6 +202,17 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
   29 vias; supplies at 0.3 mm where 0.5 mm found no path. Unrouted 164 → 118. Still open among the short ones: U301's
   VDD pins (walled in by the MCU fan-out and the SMPS parts), the IMU's GND pins inside U701's no-track area, VDDA from
   FB301 to its caps, the motor phases to TI's pours.
+- **Routing pass 4 (D-058, `scripts/pcb/route_maze.py`): done.** 60 long runs by priority (encoders, VBAT_SENSE, the
+  DRV8711's control lines, SPI1 / IMU / flash, I2C3, SWD / VCP, supplies), 76 vias, F.Cu horizontal / B.Cu vertical.
+  Unrouted 118 → 60. **Yours to finish (60):**
+  - +3V3 at U301's VDD pins (30, 33, 44 / 45, 55) and their caps: the fan-out and the SMPS parts leave no channel; a
+    via-in-pad or moving a fan-out via frees one;
+  - GND at the IMU's pins 11 / 18 / 20 (U701's no-track area) and a few copy pads;
+  - the motor phases and sense nodes (MOT_*, SENSE_A / B) to TI's pours, 0.8 mm;
+  - single MCU lines into the crowded fan-out: SPI1_MOSI, IMU_MISO / INT / SCK / MOSI, DRV_BIN1 / BIN2 and four other
+    DRV lines, SWCLK, VCP_RX / TX, BOOT0, NRST, QWIIC_SDA / SCL;
+  - NFC_AC1 / GPO / RF_DIS, LED_DATA, LED_GREEN, SW_ON, VDDA.
+  After any change, `route_maze.py --apply` routes what has become routable and does nothing otherwise.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).
