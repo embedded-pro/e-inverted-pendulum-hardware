@@ -44,6 +44,8 @@ SKIP_CLASSES = {"PWR_BUS", "CRYSTAL"}
 # 0.09 mm): between the MCU's 0.15 / 0.25 mm fan-out vias (D-048) only 0.15 mm fits.
 NARROW = {"SUPPLY": 0.3, "Default": 0.15}
 FINE_PAD = 0.35
+# Between two islands, the closest TRIES_PER_GAP pairs of terminals are tried; if none routes, the gap is left open.
+TRIES_PER_GAP = 3
 GND = "GND"
 GND_REACH = 8.0
 SHORT_VIA_COST = 8.0
@@ -106,9 +108,15 @@ def stage(max_length, limit):
     via_cost = SHORT_VIA_COST if max_length is not None else LONG_VIA_COST
     routed, failed = [], []
     tried = 0
+    attempts = defaultdict(int)
     for length, name, a, b in pairs:
-        if islands.find(RS.uid(a.item)) == islands.find(RS.uid(b.item)):
+        ia, ib = islands.find(RS.uid(a.item)), islands.find(RS.uid(b.item))
+        if ia == ib:
             continue
+        key = (min(ia, ib), max(ia, ib))
+        if attempts[key] >= TRIES_PER_GAP:
+            continue
+        attempts[key] += 1
         if limit is not None and tried >= limit:
             break
         tried += 1
