@@ -80,7 +80,7 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | Debug | FTSH-107-01-L-DV-K (STDC14) | C5307809 | 616 |
 | RGB LED / LED buffer / switch / Qwiic | WS2812B-2020-V6 / SN74AHCT1G125DBVR / SS-12D10L5 / SM04B-SRSS-TB | C52917434 / C7484 / C319012 / C160404 | ok (2026-11-14) |
 
-Stock risk: the MCU (225) and DRV8711 (128) are thin. Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
+Stock risk (2026-11-04): the MCU (225) and DRV8711 (128) are thin; on 2026-11-16 the MCU is down to 158 and the DRV8711 at 6006 (all 75 BOM lines in stock for 5 boards, about $44 per board at 1-off prices, `bom/stock_check.json`). Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
 
 ## Hardware repo layout (`e-inverted-pendulum-hardware`, the e-psu-hardware shape since D-033)
 ```
@@ -238,12 +238,16 @@ Gate:
 
 **Gate.**
 - DRC clean with schematic parity;
-- quality-bar metrics (`route_metrics.py`);
-- `power-pcb-layout` §7 and `rf-layout` §12 checklists;
-- JLC DFM: min track/space and 0.3 mm vias.
+- quality-bar metrics: the `pcb-design-rules` gate (`pcb_rules.py check --fab jlcpcb`, without `--allow-unrouted`);
+- `power-pcb-layout` §7, `rf-layout` §12 and `interface-layout` §2 checklists (`docs/checklists/phase3.md`);
+- JLC DFM: JLCPCB's rules (D-036). Vias: 335 of 654 have a 0.3 mm or larger hole; the rest are 0.15 / 0.25 (the
+  owner's fan-out and GND lattice, D-048 / D-049) and 0.2 / 0.3–0.45 (ST's RF-corner copy, D-037). JLCPCB builds them
+  but charges extra below a 0.30 mm hole (`pcb-design-rules` skill, fab table): since ST's copy already needs 0.2 mm
+  holes, the small-via option is part of this board's price. Get the quote with 0.15 mm and with 0.2 mm as the
+  smallest hole before ordering.
 
 ## Phase 4: fab and bring-up
-- `export_fab.sh`: Gerbers, drill, and BOM/CPL in JLC format via `kicad-cli`. Check rotations in JLC's viewer. Order 5 PCBs, 2–3 assembled.
+- `scripts/export_jlcpcb.py`: Gerbers, drill, and BOM/CPL in JLC format via `kicad-cli`. Check rotations in JLC's viewer. Order 5 PCBs, 2–3 assembled.
 - `docs/bringup.md`, in order:
   1. Bench supply 12 V at 100 mA, then the rails.
   2. SWD connect; HSE and LSE start.
@@ -271,8 +275,8 @@ Gate:
 
 ## Verification
 - `kicad-cli sch erc` and `kicad-cli pcb drc --schematic-parity`, both with zero errors, in CI.
-- `python -m simulation.run_all` regenerates every number in `simulation/REPORT.md`; all checks pass.
-- `scripts/jlc_stock.py kicad/*.kicad_sch` reports every LCSC part in stock for the build quantity.
+- `python3 simulation/run_all.py` regenerates every number in `simulation/REPORT.md`; all checks pass (re-run 2026-11-16 after D-042 / D-043: no result changed).
+- `python3 scripts/export_bom.py`, then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5 --json bom/stock_check.json`, reports every LCSC part in stock for the build quantity.
 - CubeMX opens the `.ioc` with no pin conflicts.
 - Per-layer SVG renders reviewed at each layout phase.
 - Bring-up checklist results recorded in `docs/bringup.md`.

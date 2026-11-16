@@ -72,6 +72,7 @@ Status legend: ✅ done · ⚠️ open (reason given) · ➖ not applicable.
 
 1. Get the Samtec FTSH-107-01-L-DV-K SMT drawing and confirm or replace the STDC14 footprint.
 2. Get ST AN5165, AN2867 and the STM32WB55 errata.
-3. Get TI SWRA117D; check the antenna's reference thickness and ground clearance.
+3. ~~Get TI SWRA117D; check the antenna's reference thickness and ground clearance.~~ Superseded: the antenna is
+   MB1355's meander (ST AN3359 type), copied with ST's tab and clearances (D-037, `docs/rf.md`).
 4. Confirm the motor/encoder cable pinout against the purchased parts (D-016) and re-pin J601–J604 if needed.
-5. Confirm the XT30UPB-F polarity marking and the MLT-8530 pad view (top or bottom) against the physical parts.
+5. Confirm the XT30UPB-F polarity marking against the physical part. (The MLT-8530 buzzer was removed, D-035.)
