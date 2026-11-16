@@ -101,6 +101,10 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/power_pours.py --apply`: the power bus (D-056). L3 = `L3_VBAT` corridor (`placement.L3_VBAT`) +
   `L3_GND`; `BUCK_SW_QUIET` on L3 / L4; L1 pours from `placement.L1_POWER`; VBAT via arrays (5 × 0.3 mm at Q101, 2 at the
   buck) and one via per VBAT pad off the plane; TP102 joined. Checks necks (L1 deflated 1.1 mm, L3 5.6 mm). One shot.
+- `python3 scripts/pcb/route_maze.py --apply [--max-length 8]`: routing passes 3 / 4 (D-057, D-058). Each net's islands
+  joined closest-first by `maze.py` (F.Cu / B.Cu, ≤ 2 vias, no jogs); `--max-length` = pass 3 (short, vias costly),
+  without = pass 4 (by priority: encoders, VBAT_SENSE, DRV8711, SPI, I2C, SWD, supplies). Skips PWR_BUS and the
+  crystals. Supplies fall back to 0.3 mm. No-op when nothing routable is left.
 - `scripts/pcb/maze.py`: the grid router (0.05 mm, F.Cu / B.Cu, 45° turns only, layer-direction costs, ≤ 2 vias, every
   segment and via checked exactly) that `vendor_gaps.py` and `route_maze.py` use.
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`

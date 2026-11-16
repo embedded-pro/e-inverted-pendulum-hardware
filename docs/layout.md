@@ -198,6 +198,10 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
   ≥ 11.3 mm) and GND elsewhere; the buck's switch node has nothing under it on L3 / L4 (`BUCK_SW_QUIET`). L1 pours carry
   BAT_P, BAT_F, PP_S and VBAT at Q101 and at the buck input (outlines in `placement.L1_POWER`, editable), with 5 vias to
   L3 at Q101 and 2 at the buck. If you move a power part, edit the outline and refill (`B` in KiCad). Unrouted 185 → 164.
+- **Routing pass 3 (D-057, `scripts/pcb/route_maze.py --max-length 8`): done.** 46 short connections around parts,
+  29 vias; supplies at 0.3 mm where 0.5 mm found no path. Unrouted 164 → 118. Still open among the short ones: U301's
+  VDD pins (walled in by the MCU fan-out and the SMPS parts), the IMU's GND pins inside U701's no-track area, VDDA from
+  FB301 to its caps, the motor phases to TI's pours.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).
