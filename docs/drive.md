@@ -77,23 +77,24 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
     moved the stage with its tracks 2.85 mm right (D-047, 49b38c1), and D-050 moved it 8 mm further right with its
     copper (`scripts/pcb/shift_block.py drive`): it is centred on x +10.85 now, about 12.8 mm clear of the left encoder chain.
   - The FETs are nearest the strip, in a row at z 25.0; the DRV8711 is above them, at (6.9, 40.0) (was −4.0, then −1.1).
-  - The 12 corner exclusions in the project still name the old positions, so DRC flags TI's 90° corners there
-    (24 errors). The owner chose not to re-key them for now (2026-11-15).
+  - TI's bends are exactly 45° since D-053 (`scripts/pcb/tidy_copper.py`): TI's mil coordinates left the diagonals
+    1–100 nm off, which DRC read as 134.99°; each bend point slid along its straight track. No exclusions are needed.
   - Bridge A is on the right and drives the right motor (J602); bridge B is on the left and drives the left motor
     (J601). The phase pours end at z 13.5 on their own side, so the outputs don't cross (D-042). The bulk C507 is
     bottom-right, at (24.7, 18.9).
   - The DRV8711's 12 PowerPAD thermal vias (0.33 mm, plated, no lead) now sit inside `BATTERY_BACK`. The battery rule
     was scoped to plated holes over 0.4 mm, so they count as vias (already allowed there); real leads are still caught.
 - **Copper:** TI's 2-layer copper went on our F.Cu and B.Cu: 173 tracks, 144 vias and 12 pours (VM, phase, GND_A / B,
-  GND). **Since D-046 (owner) the group and the 12 pours are gone**; the parts, tracks and vias stay, unlocked, for the
-  owner to edit. The pours carried the bridge current (VM to the high-side drains, the phase nodes, the shunts' GND_A /
-  GND_B), so the owner re-creates that copper: MOTOR / PWR_BUS widths or pours, hot loops as tight as TI's.
+  GND). Since D-046 (owner) the group is gone; the parts, tracks and vias stay, unlocked, for the owner to edit.
+  **TI's 12 pours are back since D-053** (`scripts/pcb/pours.py`, TI's polygons and settings moved with the stage): they
+  carry the bridge current again (VM to the high-side drains, the phase nodes, the shunts' GND_A / GND_B) and connect
+  TI's 118 GND / VBAT vias.
   - L2 stays solid GND under it, never cut: closer to the hot loops than TI's bottom layer.
   - Two of TI's vias moved 0.01 mm, to reach JLCPCB's 0.20 mm hole-to-copper from the net ties' bridges.
 - **Project DRC rules**, scoped by net since D-046:
   - TI's 0.178 mm clearance on the DRV8711's own nets (DRV_*), except to pours (under our 0.2 mm MOTOR / PWR_BUS class
     value, above JLCPCB's 0.09);
-  - TI's 90° corners are DRC exclusions in the project, so anything new is checked in full.
+  - no DRC exclusions: TI's corners are exact 45° bends (D-053), so everything is checked in full.
 - **Routing gate:** `--gate jogs=5 --gate track_junctions=1`.
   - One of the jogs is TI's: 0.19 mm on A2HS.
   - The other four jogs and the T-junction are ST's copies.

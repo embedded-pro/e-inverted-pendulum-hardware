@@ -161,16 +161,15 @@ MCU fan-out:
     unlocked (D-045).
   - Kept, as rule areas: the L2 cut-out under the RF line and ST's two pad keep-outs. The RF line needs them; delete them
     only with ST's reference in hand.
-  - Removed: ST's five pours. They were the RF strip's L1 / L3 / B.Cu ground, which made the line coplanar (GCPW), and the
-    small RF_50 copper patch between FL401 and R401. The owner re-pours the ground: the RF netclass keeps a pour 0.2 mm
-    from the RF line (ST's gap), and L3 must stay ground under the strip. RF_50 needs a short track or patch again.
+  - ST's pours, removed by D-046, are back since D-053 (`scripts/pcb/pours.py`, ST's polygons and settings): the strip's
+    F.Cu ground beside the line (coplanar, GCPW), the In2.Cu ground the line references, the B.Cu ground, and the
+    small RF_50 patch between FL401 and R401. ST's In1.Cu ground is the board's L2 plane, with ST's cut-out.
   - `rf_block.py` does nothing once U301 is on the board; `--replace` refuses, since there is no group left.
 - **Project DRC rules** (`scripts/pcb/board.py`), scoped by net and reference since D-046:
   - ST's 0.10 mm clearance on the RF nets, the SMPS nets, the HSE nets and C318, except to pours (JLCPCB's floor is
     0.09);
   - ST's tight placement: Y301 against U301, Y302 against SC403;
-  - ST's 90° corners (four) are DRC exclusions in the project, so anything new is checked in full
-    (`scripts/pcb/ungroup_copies.py`).
+  - no DRC exclusions: ST's near-45° bends (1–500 nm off) are exact since D-053 (`scripts/pcb/tidy_copper.py`).
   - The RF1 fan-out from pin 31 keeps 0.104 mm between the 0.4 mm-pitch pins.
 - **Exception to "L2 is solid GND, never cut"** (CLAUDE.md): only the copied cut-out under the RF line and match.
 - **Routing-quality gate:** ST's routing has four short sideways jogs (0.15–0.23 mm, on VFBSMPS, VDDSMPS and
@@ -201,17 +200,17 @@ MCU fan-out:
 2. Ask JLCPCB whether they hold a non-standard GCPW (0.6 / 0.2 mm referenced to L3) under impedance control; if not,
    order without it.
 3. Check AN5165 (RF hardware for STM32WB) and AN2867 against the copy once st.com can be read.
-4. Owner: route the decoupling (C301–C313, C317, FB301) to its pins and +3V3, pour the board-wide ground, and keep the
-   bumper screws clear of the tab.
+4. Owner: route the decoupling (C301–C313, C317, FB301) to its pins and +3V3, and keep the bumper screws clear of the
+   tab. The board-wide ground (L2) is poured (D-053).
 5. Check the VDDA / VREF+ caps (4.35–6.0 mm from pins 13 / 14). They are the farthest; unlock the group to bring
    them closer if routing frees a spot.
-6. **The L2 cut-out under the RF line is off the board (owner, D-047).** It comes back with the L2 ground pour: without
-   it the line references L2 and is 33.9 Ω, not 56.9 Ω (`scripts/gcpw.py`, table above). Copy it from b177b8d's rule
-   area "MB1355 L2 cut-out (RF line references L3)" (no tracks, no pour on In1.Cu).
+6. **The L2 cut-out under the RF line is back (D-053),** with the L2 plane and ST's In2.Cu ground under the line, so the
+   line references L3 again: 56.9 Ω (`scripts/gcpw.py`); without the cut-out it would be 33.9 Ω.
 7. **ST's RF-strip ground field (236 GND vias) was removed by the owner (D-047);** the 54 vias beside the RF line stay.
-   A regular 1.2 mm stitching grid replaces the field (128 vias, D-049). Re-create the strip's L1 / L3 / L4 ground pours
-   over it when the pours are made, and the `ANTENNA_TAB` rule area (the next `board.py` run adds it).
-8. **Owner's GND via at (−19.3, 105.2)** is 0.18 mm hole-to-copper from RF_50; JLCPCB's floor is 0.20 mm (DRC error).
+   A regular 1.2 mm stitching grid replaces the field (128 vias, D-049). The strip's ground pours and `ANTENNA_TAB` are
+   back over it (D-053).
+8. **The owner's GND via beside RF_50** moved from (−19.30, 105.20) to (−19.39, 105.27) (D-053): it was 0.18 mm
+   hole-to-copper from RF_50, under JLCPCB's 0.20 mm.
 9. The MCU decoupling is back on the board (D-048). R301 (SPI1 SCK 33 Ω source termination) is placed 6 mm down the
    SCK route from its fan-out via (D-051): route pin 63's via to it first, then on to U702 and U501.
 10. U301's exposed pad has its ground vias back: 33 on a 0.8 mm lattice in the paste gaps (D-049), where ST had 50

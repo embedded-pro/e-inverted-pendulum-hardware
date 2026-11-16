@@ -84,7 +84,11 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot; no-op once U301 is on the board).
   The scripts lock nothing: locking is the owner's, in KiCad (D-045).
 - `python3 scripts/pcb/ungroup_copies.py --apply | --exclusions`: the three copies without groups or pours (D-046), and the
-  copied routing's 90° corners as DRC exclusions in the project (`--exclusions` recomputes them).
+  copied routing's corners as DRC exclusions in the project (`--exclusions` recomputes them: none since D-053).
+- `python3 scripts/pcb/pours.py --apply`: the solid L2 GND plane over the board, ST's RF-strip pours and the L2 cut-out,
+  ST's NFC B.Cu ground, TI's 12 drive pours, and the board's rule areas; fills the zones (D-053). One shot.
+- `python3 scripts/pcb/tidy_copper.py --apply`: exact 45° bends (copied diagonals 1–500 nm off), branches started on
+  pads, a ground tee turned into a via, vias moved to JLCPCB's 0.20 mm hole-to-copper (D-053). No-op when tidy.
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->

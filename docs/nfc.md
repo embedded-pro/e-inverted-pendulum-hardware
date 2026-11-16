@@ -123,8 +123,9 @@ External Qwiic devices must avoid 0x50 and 0x56.
     doc asked for: accepted by the owner with the 90° turn. Expect more downward detuning; C821–C823 are the spares;
   - from the 2.4 GHz antenna (x ≤ −14.0): ≥ 24.5 mm.
 - **DRC and the routing gate:**
-  - ST's GND T-branch on B.Cu (from the VSS via to the C6 / C8 ground vias) stays as copied.
-  - ST's 90° corners are DRC exclusions in the project (D-046), so anything new is checked in full.
+  - ST's GND T-branch on B.Cu (from the VSS via to the C6 / C8 ground vias) is a 0.45 / 0.20 mm via at the junction
+    since D-053: the two in-line arms went, the branch ends on the via, and ST's B.Cu ground pour (restored, D-053) and
+    the L2 plane tie the three vias. ST's near-45° bends are exact; no DRC exclusions are left.
   - The routing gate runs with `--gate track_junctions=1` (and `jogs=4` for MB1355). Shorts, clearance and the fab
     floor are not relaxed.
 - **Deviation:** ST's drill file lists ANT14's two layer changes as **non-plated** 0.5 mm holes. A non-plated hole
@@ -147,9 +148,8 @@ External Qwiic devices must avoid 0x50 and 0x56.
 4. Owner: keep the bumper screws, the battery cradle and any metal out of `NFC_POUR_GAP`.
 5. **ASSUMPTION:** the coil's 2 mm from the board edge. Check the phone read range with the bumper fitted.
 6. The coil is 1.5 mm above the battery (owner, 2026-11-15). Measure f0 with the battery fitted, not on a bare board.
-7. **`NFC_COIL` and `NFC_POUR_GAP` are off the board until the pours (owner, D-047).** The next `board.py` run re-adds
-   them; until then nothing stops copper under or near the coil, which would detune it (D-039). C803 is back on ST's
-   land in the cluster (D-051).
+7. **`NFC_COIL` and `NFC_POUR_GAP` are back on the board (D-053),** with ST's B.Cu ground pour cut to the cluster (ST's
+   1.5 mm² F.Cu patch is left out: here it would reach one pad only). C803 is back on ST's land in the cluster (D-051).
 8. **The right LED ring's top row (D809–D811, D-050) sits in the 4.4 mm pour gap,** its pads about 1.6 mm below the coil.
    D-039's rule forbids vias and pour there, not pads, and ST's own cluster copper sits in the gap too. Keep the LED
    routing's vias out of it, and measure f0 with the LEDs fitted.

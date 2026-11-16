@@ -36,10 +36,8 @@ anything on the board.
 
 These are on the board as rule areas (they can be moved or edited in KiCad) and in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_dru`.
 
-**Off the board until the pours (owner, D-047):** `ANTENNA_TAB`, `NFC_COIL`, `NFC_POUR_GAP`, `BATTERY_BACK` and MB1355's
-L2 cut-out under the RF line were deleted in KiCad. The next `scripts/pcb/board.py` run re-adds the four board areas;
-the L2 cut-out comes back with the L2 pour (`docs/rf.md`). Until then the project rules that name them check nothing,
-and silk.py keeps labels off the tab's polygon from `placement.py`.
+**Back with the pours (D-053, `scripts/pcb/pours.py`):** `ANTENNA_TAB`, `NFC_COIL`, `NFC_POUR_GAP`, `BATTERY_BACK` and
+MB1355's L2 cut-out under the RF line, which the owner had deleted until the pours (D-047), are on the board again.
 
 | Name | Where | Rule | Why |
 |---|---|---|---|
@@ -69,9 +67,8 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   Its position on the outline (the tab) is part of the copy. Still yours:
   - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
   - route the MCU's signals on from the fan-out vias (below);
-  - pour the RF strip's ground over the 1.2 mm stitching grid (D-049, `scripts/pcb/gnd_vias.py`); U301's exposed pad
-    has 33 ground vias on a 0.8 mm lattice in its paste gaps;
-  - pour the board-wide ground.
+  - nothing for the ground: ST's RF-strip pours are back over the 1.2 mm stitching grid and the L2 plane is in (D-053);
+    U301's exposed pad has 33 ground vias on a 0.8 mm lattice in its paste gaps.
 - **MCU fan-out (D-048, `scripts/pcb/mcu_escape.py --fanout`): done.** Each of the 38 U301 pins another part uses
   has a 0.2 mm stub on F.Cu to a 0.15 / 0.25 mm via, 0.30 or 0.75 mm past the pad (0.40 mm for pins 6 and 16),
   alternating rows. Route on from the vias on any layer; the via size is in the project's via list. Power, ground and
@@ -92,9 +89,10 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks and vias, turned 90° from ST's
   board and 8 mm below the corner: the coil at the right edge, the tag to its left, beside the MCU. Still yours (the cluster's GND pour included): route NFC_GPO (PA2), NFC_RF_DIS (PA3),
   QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
-- **Motor drive (`docs/drive.md`):** done by the copy (ungrouped, its 12 pours removed since D-046). It holds TI's power stage (U501,
+- **Motor drive (`docs/drive.md`):** done by the copy (ungrouped since D-046; TI's 12 pours back since D-053). It holds TI's power stage (U501,
   Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks and vias, turned 180°
-  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), from z 13.5 to 50.5, centred on x +10.85 since the owner moved it 2.85 mm right (D-047) and D-050 another 8 mm (`scripts/pcb/shift_block.py drive`), and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Still yours: the power copper
+  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), from z 13.5 to 50.5, centred on x +10.85 since the owner moved it 2.85 mm right (D-047) and D-050 another 8 mm (`scripts/pcb/shift_block.py drive`), and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). TI's VM, phase, sense and GND pours
+  carry the bridge current again (D-053). Still yours: the power copper
   the pours carried (VM, phases, GND_A / GND_B), the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (D-049, `scripts/pcb/place_block.py power`, `docs/power-map.md`, power-pcb-layout §3): placed** right of the
   power entry, x −15.5…+3.5, z 51.2–64.1, all on top, to TI's layout guidance (TPS62933 datasheet ZHCSO99D §12.1, Fig.
@@ -169,6 +167,15 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
       ENC_VCC / GND at z 26.0 below F601.
   - Still yours, routing: SW_ON to R102; I2C3 J801 → U801 → R808 / R809 → U802 → MCU and on to U803; each test pad's
     stub to the copper it probes, short and on top.
+- **Pours and DRC (D-053, `scripts/pcb/pours.py`, `scripts/pcb/tidy_copper.py`): done.**
+  - L2_GND: one solid GND pour on In1.Cu over the whole board, cut only by ST's RF cut-out and the NFC / antenna keep-outs;
+    every GND via reaches it.
+  - ST's RF-strip pours (F.Cu ground beside the coplanar line, the RF_50 patch at FL401, In2.Cu ground under the line,
+    B.Cu ground), ST's NFC B.Cu ground and TI's 12 drive pours, at their copies' positions and settings.
+  - The copied routing's diagonals are exactly 45° (they were 1–500 nm off and DRC flagged them), the ENC_L_A_RAW and
+    ENC_R_B_RAW branches start on their pads, ST's NFC ground tee is a 0.45 / 0.20 mm via, and the GND via beside RF_50
+    moved 0.11 mm to JLCPCB's 0.20 mm hole-to-copper. No DRC exclusions are left.
+  - DRC: no errors; 51 warnings, every one a signal fan-out via that connects when you route its net.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).

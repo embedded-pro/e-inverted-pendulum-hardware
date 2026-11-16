@@ -75,8 +75,9 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position (ungrouped, no pours since D-046)
   (D-037), the NFC and drive copies (D-039, D-040) the motor connectors with their encoder inputs at the side edges
   (D-042), and the IMU, flash and EEPROM (D-043). Since 49b38c1 the owner places in KiCad (D-047): the power entry and
-  J301 are on the board, and the rule areas `ANTENNA_TAB`, `NFC_COIL`,
-  `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out come back with the pours. Every MCU pin another part uses has a 0.2 mm stub to a 0.15 / 0.25 mm via, and the MCU decoupling is back on top beside the pins (D-048, `scripts/pcb/mcu_escape.py`). GND vias sit on a regular
+  J301 are on the board. The pours are back (D-053): a solid L2 ground plane, ST's RF-strip and NFC ground, TI's drive
+  pours, with the rule areas `ANTENNA_TAB`, `NFC_COIL`, `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out; DRC has no
+  errors and no exclusions (51 fan-out vias wait for routing). Every MCU pin another part uses has a 0.2 mm stub to a 0.15 / 0.25 mm via, and the MCU decoupling is back on top beside the pins (D-048, `scripts/pcb/mcu_escape.py`). GND vias sit on a regular
   lattice in the MCU's exposed pad and over the RF strip, and the buck and LDO are placed right of the power entry
   (D-049). The drive stage sits 8 mm further right, and the RGB LEDs are two square rings in the centre (D-050). The
   rest is placed for short tracks (D-051): SW101 and the Qwiic port at the left edge, the support parts at their pins,
