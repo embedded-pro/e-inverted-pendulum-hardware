@@ -581,8 +581,31 @@ class Router:
             return False
         return True
 
+    def crossing(self, legs, layer, width, net, terminals):
+        """Same-net copper the new legs would touch other than by sharing an end point at a via or track-end
+        terminal (pads are exempt: tracks may meet anywhere on their pad). A crossing of a track's body is a junction
+        KiCad's track_angle check flags."""
+        points = {(t.at.x, t.at.y) for t in terminals if t.kind != "pad"}
+        pads = [t.item.GetEffectiveShape(layer) for t in terminals if t.kind == "pad" and t.item.IsOnLayer(layer)]
+        for p, q in legs:
+            shape = pcbnew.SHAPE_SEGMENT(p, q, width)
+            for item in self.world.tracks:
+                if item.GetNetCode() != net or not item.IsOnLayer(layer):
+                    continue
+                if not item.GetEffectiveShape(layer).Collide(shape, 0):
+                    continue
+                ends = [item.GetPosition()] if item.GetClass() == "PCB_VIA" else [item.GetStart(), item.GetEnd()]
+                shared = [e for e in ends if e in (p, q) and (e.x, e.y) in points]
+                if shared:
+                    continue
+                if any(pad.Collide(pcbnew.SHAPE_CIRCLE(e, 1), 0) for pad in pads for e in ends) and \
+                        any(pad.Collide(pcbnew.SHAPE_CIRCLE(e, 1), 0) for pad in pads for e in (p, q)):
+                    continue
+                return True
+        return False
+
     def legs_ok(self, legs, layer, width, probe, own, net):
-        if RS.tee_problem(self.world, legs, layer, net):
+        if RS.tee_problem(self.world, legs, layer, net) or self.crossing(legs, layer, width, net, own):
             return False
         return all(self.world.track_problem(p, q, layer, width, probe, own, pours=False) is None
                    and self.pour_problem(p, q, layer, width, probe) is None for p, q in legs)
@@ -712,6 +735,8 @@ class Router:
                     return "jog"
             if RS.tee_problem(self.world, legs, layer, net):
                 return "tee"
+            if self.crossing(legs, layer, width, net, (a, b)):
+                return "crossing"
             for p, q in legs:
                 why = self.world.track_problem(p, q, layer, width, probe, (a, b), pours=False) or \
                     self.pour_problem(p, q, layer, width, probe)

@@ -46,6 +46,9 @@ NARROW = {"SUPPLY": 0.3, "Default": 0.15}
 FINE_PAD = 0.35
 # Between two islands, the closest TRIES_PER_GAP pairs of terminals are tried; if none routes, the gap is left open.
 TRIES_PER_GAP = 3
+# Rounds until one routes nothing: a pair a round never reached (its gap's tries went to others) gets its chance, so a
+# second run is a no-op.
+ROUNDS = 4
 GND = "GND"
 GND_REACH = 8.0
 SHORT_VIA_COST = 8.0
@@ -104,10 +107,23 @@ def stage(max_length, limit):
     islands = RS.Islands(board)
     plane = islands.find(RS.uid(world.plane))
     router = M.Router(board, world, islands)
-    pairs = candidates(board, islands, RS.terminals(board), plane, max_length)
     via_cost = SHORT_VIA_COST if max_length is not None else LONG_VIA_COST
     routed, failed = [], []
     tried = 0
+    for _ in range(ROUNDS):
+        before = len(routed)
+        tried = route_round(board, islands, router, plane, max_length, via_cost, routed, failed, limit, tried)
+        if len(routed) == before:
+            break
+    failed = [f for f in failed if islands.find(f[-1][0]) != islands.find(f[-1][1])]
+    seen = set()
+    failed = [f for f in failed if not (f[:3] in seen or seen.add(f[:3]))]
+    report(board, routed, failed)
+
+
+def route_round(board, islands, router, plane, max_length, via_cost, routed, failed, limit, tried):
+    """One round over every candidate pair, closest first (TRIES_PER_GAP per pair of islands)."""
+    pairs = candidates(board, islands, RS.terminals(board), plane, max_length)
     attempts = defaultdict(int)
     for length, name, a, b in pairs:
         ia, ib = islands.find(RS.uid(a.item)), islands.find(RS.uid(b.item))
@@ -140,7 +156,10 @@ def stage(max_length, limit):
         layers = sorted({board.GetLayerName(t.GetLayer()) for t in tracks})
         routed.append((name, a.name(), b.name(), length, routed_length, len(vias), "+".join(layers), width / 1e6, spent))
         print(f"... {name} {a.name()} -> {b.name()}: routed, {len(vias)} via(s) ({spent:.1f} s)", flush=True)
-    failed = [f for f in failed if islands.find(f[-1][0]) != islands.find(f[-1][1])]
+    return tried
+
+
+def report(board, routed, failed):
     if not routed:
         print("nothing routable left: nothing to do")
         for name, a, b, length, why, _ in failed:
