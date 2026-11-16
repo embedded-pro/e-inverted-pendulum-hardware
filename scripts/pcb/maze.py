@@ -61,6 +61,8 @@ BODY_GAP = 0.1
 LABEL_GAP = 0.05
 VIA_SIZES = ((0.6, 0.3), (0.45, 0.2))
 MAX_VIAS = 2
+# A search gives up after this many cells (about 20 s): a connection that needs more is left for the owner.
+MAX_EXPANSIONS = 600_000
 # A segment shorter than this between two parallel runs is a jog (pcb-design-rules gate, pcb_rules.JOG_MM).
 JOG_MM = 0.25
 DIRS = ((1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1))
@@ -359,10 +361,14 @@ class Router:
             start_dirs[idx] = allowed
             heapq.heappush(heap, (h(i, j), 0.0, idx))
         target_index = {l * n + j * nx + i: allowed for (l, i, j), allowed in targets.items()}
+        expanded = 0
         while heap:
             f, gc, idx = heapq.heappop(heap)
             if gc > g[idx]:
                 continue
+            expanded += 1
+            if expanded > MAX_EXPANSIONS:
+                return None
             if idx in target_index:
                 allowed = target_index[idx]
                 if allowed is None or heading[idx] in allowed:

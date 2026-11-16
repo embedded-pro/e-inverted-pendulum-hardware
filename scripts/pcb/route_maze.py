@@ -41,6 +41,7 @@ SKIP_CLASSES = {"PWR_BUS", "CRYSTAL"}
 # 0.12 mm for 0.5 A on 1 oz outer copper (docs/power-map.md).
 NARROW = {"SUPPLY"}
 NARROW_WIDTH = 0.3
+FINE_PAD = 0.35
 GND = "GND"
 GND_REACH = 8.0
 SHORT_VIA_COST = 8.0
@@ -53,12 +54,22 @@ def priority(name):
     return next((k for k, keys in enumerate(PRIORITY) if any(name.startswith(key) for key in keys)), len(PRIORITY))
 
 
+def escaped(islands, terms):
+    """Fine-pitch pads (under FINE_PAD mm) whose island already has a via or a free track end: the route starts there
+    (the MCU's fan-out, D-048), not at the pin."""
+    exits = {islands.find(RS.uid(t.item)) for t in terms if t.kind != "pad"}
+    return {RS.uid(t.item) for t in terms if t.kind == "pad" and islands.find(RS.uid(t.item)) in exits
+            and min(t.item.GetSize().x, t.item.GetSize().y) < M.mm(FINE_PAD)}
+
+
 def candidates(board, islands, found, plane, max_length):
     """(length, net name, a, b) between terminals of one net in different islands, closest first."""
     pairs = []
     for net, terms in found.items():
         if not terms:
             continue
+        skip = escaped(islands, terms)
+        terms = [t for t in terms if RS.uid(t.item) not in skip]
         name = RS.short(terms[0].item.GetNetname())
         if terms[0].item.GetNetClassName() in SKIP_CLASSES:
             continue
