@@ -7,7 +7,8 @@ plane and L3 holds the planes (D-056).
   - The window covers both terminals plus a margin. Its grid (PITCH) is aligned to a point terminal (a track end or a
     via), so the track ends exactly on it.
   - The board's copper is drawn into the window per layer, sorted three ways. Other nets' copper keeps the class
-    clearance, 0.2 mm for the PWR_BUS / MOTOR / RF classes, other nets' pours and the board edge. The net's own copper
+    clearance, 0.2 mm for the PWR_BUS / MOTOR / RF classes, other nets' pours and the board edge. A GND fill outside
+    TI's bridges (TI's drive GND, ST's NFC ground) gives way: it is refilled around the new track (soft_fill). The net's own copper
     that is not a terminal is never touched (that would be a tee). Rule areas that forbid tracks are never entered. NPTH
     holes keep 0.5 mm. A via also stays off every part's body and the test pads' names, out of the via keep-outs and
     ST's RF ground strip, and 0.2 mm from other holes.
@@ -85,6 +86,27 @@ def outlines(poly):
         found.append(np.array([(chain.CPoint(k).x, chain.CPoint(k).y) for k in range(chain.PointCount())],
                               dtype=np.float64))
     return found
+
+
+# TI's bridges, their phase / sense pours and shunts (mechanical x, z): a GND fill keeps its copper here, where it carries
+# the hot loops' current; elsewhere it gives way to tracks and vias (soft_fill).
+BRIDGES = (-10.0, 32.0, 12.5, 33.5)
+
+
+def bridges():
+    x0, x1, z0, z1 = BRIDGES
+    poly = pcbnew.SHAPE_POLY_SET()
+    poly.NewOutline()
+    for x, z in ((x0, z0), (x1, z0), (x1, z1), (x0, z1)):
+        poly.Append(RS.B.to_board(x, z))
+    return poly
+
+
+def soft_fill(zone):
+    """A GND fill a track or via may cut into (it is refilled around them), outside BRIDGES: TI's drive GND and ST's
+    NFC ground, which tie ground pads to the L2 plane. ST's RF-strip ground (the RF line's coplanar ground) and every
+    pour that carries current (VBAT, the phases, the sense nodes, the power entry) stay solid."""
+    return RS.short(zone.GetNetname()) == "GND" and not zone.GetZoneName().startswith("MB1355")
 
 
 def hot_for(name):
@@ -185,6 +207,7 @@ class Router:
         self.keep_vias = []
         owned = [zone for fp in board.GetFootprints() for zone in fp.Zones()]
         self.fills = {layer: [] for layer in LAYERS}
+        self.hard = {layer: [] for layer in LAYERS}
         for zone in list(board.Zones()) + owned:
             if zone.GetIsRuleArea():
                 for layer in LAYERS:
@@ -193,11 +216,15 @@ class Router:
                 if zone.GetDoNotAllowVias():
                     self.keep_vias += outlines(zone.Outline())
                 continue
+            gap = mm(max(WIDE_CLEARANCE, zone.GetLocalClearance() / 1e6 if zone.GetLocalClearance() else 0))
             for layer in LAYERS:
                 if zone.IsOnLayer(layer):
-                    fill = zone.GetFilledPolysList(layer)
+                    fill = pcbnew.SHAPE_POLY_SET(zone.GetFilledPolysList(layer))
+                    if fill.OutlineCount() and soft_fill(zone):
+                        fill.BooleanIntersection(bridges())
                     if fill.OutlineCount():
                         self.fills[layer].append((zone.GetNetCode(), RS.short(zone.GetNetname()), outlines(fill)))
+                        self.hard[layer].append((zone.GetNetCode(), fill, gap))
         x0, x1, z0, z1 = G.strip_rectangle()
         self.strip = pcbnew.SHAPE_POLY_SET()
         self.strip.NewOutline()
@@ -512,8 +539,18 @@ class Router:
     def legs_ok(self, legs, layer, width, probe, own, net):
         if RS.tee_problem(self.world, legs, layer, net):
             return False
-        return all(self.world.track_problem(p, q, layer, width, probe, own, pours=not self.soft_pours) is None
-                   for p, q in legs)
+        return all(self.world.track_problem(p, q, layer, width, probe, own, pours=False) is None
+                   and self.pour_problem(p, q, layer, width, probe) is None for p, q in legs)
+
+    def pour_problem(self, a, b, layer, width, probe):
+        """Another net's pour that the track would cut into (the hard ones: see soft_fill)."""
+        if self.soft_pours:
+            return None
+        shape = pcbnew.SHAPE_SEGMENT(a, b, width)
+        for net, poly, gap in self.hard[layer]:
+            if net != probe.GetNetCode() and poly.Collide(shape, gap):
+                return "pour"
+        return None
 
     def via_problem(self, at, diameter, drill, probe, own_net_ok=False, ignore_bodies=(), soft_pours=False):
         """Why a signal via here would break a rule, or None (exact, like route_simple.World.via_problem, but the inner
@@ -548,7 +585,7 @@ class Router:
                         shape.Collide(hole, mm(HOLE_TO_COPPER)):
                     return "copper"
         for layer in (LAYERS if not soft_pours else ()):
-            for net, poly, gap in world.fills[layer]:
+            for net, poly, gap in self.hard[layer]:
                 if net != probe.GetNetCode() and poly.Collide(ring, gap):
                     return "pour"
         return None
@@ -631,7 +668,8 @@ class Router:
             if RS.tee_problem(self.world, legs, layer, net):
                 return "tee"
             for p, q in legs:
-                why = self.world.track_problem(p, q, layer, width, probe, (a, b), pours=not self.soft_pours)
+                why = self.world.track_problem(p, q, layer, width, probe, (a, b), pours=False) or \
+                    self.pour_problem(p, q, layer, width, probe)
                 if why:
                     return why
         first_layer, first_pts = runs[0]
