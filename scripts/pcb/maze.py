@@ -42,6 +42,9 @@ RS.B.pcbnew = pcbnew
 mm = pcbnew.FromMM
 V = pcbnew.VECTOR2I
 PITCH = 0.05
+# A window larger than COARSE_AREA (mm2) is searched on COARSE_PITCH first, then on PITCH if that fails.
+COARSE_PITCH = 0.1
+COARSE_AREA = 600.0
 MARGINS = (4.0, 12.0)
 SLACKS = (0.4, 0.9)
 ERROR = mm(0.002)
@@ -575,33 +578,35 @@ class Router:
             pad = mm(margin)
             box = (min(a.at.x, b.at.x) - pad, min(a.at.y, b.at.y) - pad,
                    max(a.at.x, b.at.x) + pad, max(a.at.y, b.at.y) + pad)
-            win = Window(box, origin)
-            dist = self.distances(win, net, (a, b), soft_pours)
-            for slack in SLACKS:
+            area = (box[2] - box[0]) * (box[3] - box[1]) / 1e12
+            for pitch in (COARSE_PITCH, PITCH) if area > COARSE_AREA else (PITCH,):
+                win = Window(box, origin, pitch)
+                dist = self.distances(win, net, (a, b), soft_pours)
                 for size in (VIA_SIZES if allow_vias else VIA_SIZES[:1]):
-                    free, via_ok, cost = self.masks(dist, clearance, wide, width / 1e6, slack, size, win.pitch)
-                    sources = [(k, i, j, allowed) for (k, i, j), allowed in self.ends(win, a, width, free, True).items()]
-                    targets = self.ends(win, b, width, free, False)
-                    if not sources or not targets:
-                        why = "terminal blocked"
-                        continue
-                    for k, i, j, _ in sources:
-                        via_ok[j, i] = False
-                    for k, i, j in targets:
-                        via_ok[j, i] = False
-                    goal = win.cell(b.at)
-                    path = self.search(win, free, via_ok, cost, sources, targets, goal, allow_vias, via_cost, layers)
-                    if path is None:
-                        why = "no path"
-                        if not allow_vias:
+                    for slack in SLACKS:
+                        free, via_ok, cost = self.masks(dist, clearance, wide, width / 1e6, slack, size, win.pitch)
+                        sources = [(k, i, j, allowed)
+                                   for (k, i, j), allowed in self.ends(win, a, width, free, True).items()]
+                        targets = self.ends(win, b, width, free, False)
+                        if not sources or not targets:
+                            why = "terminal blocked"
                             break
-                        continue
-                    runs, via_points = self.geometry(win, path, a, b)
-                    runs = self.straighten(runs, net, width, probe, a, b)
-                    problem = self.check(runs, via_points, width, probe, a, b, size)
-                    if problem is None:
-                        return self.lay(runs, via_points, width, a, b, size), None
-                    why = problem
+                        for k, i, j, _ in sources:
+                            via_ok[j, i] = False
+                        for k, i, j in targets:
+                            via_ok[j, i] = False
+                        goal = win.cell(b.at)
+                        path = self.search(win, free, via_ok, cost, sources, targets, goal, allow_vias, via_cost,
+                                           layers)
+                        if path is None:
+                            why = "no path"
+                            break
+                        runs, via_points = self.geometry(win, path, a, b)
+                        runs = self.straighten(runs, net, width, probe, a, b)
+                        problem = self.check(runs, via_points, width, probe, a, b, size)
+                        if problem is None:
+                            return self.lay(runs, via_points, width, a, b, size), None
+                        why = problem
         return None, why
 
     def check(self, runs, via_points, width, probe, a, b, size):

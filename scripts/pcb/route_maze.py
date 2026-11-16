@@ -100,6 +100,7 @@ def stage(max_length, limit):
         spent = time.time() - started
         if result is None:
             failed.append((name, a.name(), b.name(), length, why, (RS.uid(a.item), RS.uid(b.item))))
+            print(f"... {name} {a.name()} -> {b.name()}: {why} ({spent:.1f} s)", flush=True)
             continue
         tracks, vias = result
         if name == GND:
@@ -108,6 +109,7 @@ def stage(max_length, limit):
         routed_length = sum(t.GetLength() for t in tracks) / 1e6
         layers = sorted({board.GetLayerName(t.GetLayer()) for t in tracks})
         routed.append((name, a.name(), b.name(), length, routed_length, len(vias), "+".join(layers), width / 1e6, spent))
+        print(f"... {name} {a.name()} -> {b.name()}: routed, {len(vias)} via(s) ({spent:.1f} s)", flush=True)
     failed = [f for f in failed if islands.find(f[-1][0]) != islands.find(f[-1][1])]
     if not routed:
         print("nothing routable left: nothing to do")
