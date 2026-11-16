@@ -9,7 +9,8 @@ Each net's islands are joined closest-first (route_simple.Islands, so no loop is
 on F.Cu and B.Cu: 45-degree geometry, horizontal-preferred F.Cu and vertical-preferred B.Cu, at most two vias (0.3 / 0.6
 mm, or 0.2 / 0.45 mm where that does not fit), every segment and via checked exactly before it is added.
   - Widths: the class width (docs/power-map.md), narrowed only to a narrower pad, never below 0.15 mm (route_simple.
-    link_width).
+    link_width); a supply that finds no path at 0.5 mm tries 0.3 mm (still above IPC-2221's 0.12 mm for 0.5 A).
+  - No jogs: a route with a segment under 0.25 mm between parallel runs is refused (pcb-design-rules gate).
   - Left alone: PWR_BUS (its pours, power_pours.py, D-056), the crystal nets (at the pins, no vias: the power map), and
     GND, except a ground pad still off the plane, which is joined to the nearest grounded copper. The vendor copies'
     own connections are first closed from their references (vendor_gaps.py, D-055); what that leaves (ST's VDD pins,
@@ -36,6 +37,10 @@ import maze as M  # noqa: E402
 import route_simple as RS  # noqa: E402
 
 SKIP_CLASSES = {"PWR_BUS", "CRYSTAL"}
+# Supplies that find no path at the class width (0.5 mm) try this: they carry at most 0.6 A (+5V), and IPC-2221 asks
+# 0.12 mm for 0.5 A on 1 oz outer copper (docs/power-map.md).
+NARROW = {"SUPPLY"}
+NARROW_WIDTH = 0.3
 GND = "GND"
 GND_REACH = 8.0
 SHORT_VIA_COST = 8.0
@@ -97,6 +102,9 @@ def stage(max_length, limit):
         width = RS.link_width(a.item.GetNetClassName(), a, b)
         started = time.time()
         result, why = router.route(a, b, width, allow_vias=True, via_cost=via_cost)
+        if result is None and a.item.GetNetClassName() in NARROW and width > M.mm(NARROW_WIDTH):
+            width = M.mm(NARROW_WIDTH)
+            result, why = router.route(a, b, width, allow_vias=True, via_cost=via_cost)
         spent = time.time() - started
         if result is None:
             failed.append((name, a.name(), b.name(), length, why, (RS.uid(a.item), RS.uid(b.item))))

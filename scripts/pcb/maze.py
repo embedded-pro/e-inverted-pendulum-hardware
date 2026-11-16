@@ -60,6 +60,8 @@ BODY_GAP = 0.1
 LABEL_GAP = 0.05
 VIA_SIZES = ((0.6, 0.3), (0.45, 0.2))
 MAX_VIAS = 2
+# A segment shorter than this between two parallel runs is a jog (pcb-design-rules gate, pcb_rules.JOG_MM).
+JOG_MM = 0.25
 DIRS = ((1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1))
 SQRT2 = math.sqrt(2)
 COS45 = math.cos(math.radians(45)) - 1e-6
@@ -620,6 +622,12 @@ class Router:
                 nu, nw = math.hypot(u.x, u.y), math.hypot(w.x, w.y)
                 if nu and nw and (u.x * w.x + u.y * w.y) / (nu * nw) < COS45:
                     return "corner"
+            for k in range(1, len(pts) - 2):
+                middle = (pts[k + 1] - pts[k]).EuclideanNorm()
+                before, after = pts[k] - pts[k - 1], pts[k + 2] - pts[k + 1]
+                if middle < mm(JOG_MM) and before.x * after.y - before.y * after.x == 0 and \
+                        before.x * after.x + before.y * after.y > 0:
+                    return "jog"
             if RS.tee_problem(self.world, legs, layer, net):
                 return "tee"
             for p, q in legs:
