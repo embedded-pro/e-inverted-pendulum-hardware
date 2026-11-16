@@ -510,7 +510,7 @@ class Router:
         return all(self.world.track_problem(p, q, layer, width, probe, own, pours=not self.soft_pours) is None
                    for p, q in legs)
 
-    def via_problem(self, at, diameter, drill, probe, own_net_ok=False):
+    def via_problem(self, at, diameter, drill, probe, own_net_ok=False, ignore_bodies=(), soft_pours=False):
         """Why a signal via here would break a rule, or None (exact, like route_simple.World.via_problem, but the inner
         planes are carved by it rather than in its way)."""
         ring = pcbnew.SHAPE_CIRCLE(at, diameter // 2)
@@ -520,7 +520,7 @@ class Router:
             return "edge"
         if any(area.Collide(ring, 0) for area in world.keep_vias) or self.strip.Collide(ring, 0):
             return "rule area"
-        if any(body.Collide(ring, mm(BODY_GAP)) for body in world.bodies.values()):
+        if any(body.Collide(ring, mm(BODY_GAP)) for ref, body in world.bodies.items() if ref not in ignore_bodies):
             return "body"
         if any(label.Collide(ring, mm(LABEL_GAP)) for label in world.labels):
             return "label"
@@ -542,7 +542,7 @@ class Router:
                 elif shape.Collide(ring, mm(R.rule_clearance(item, probe))) or \
                         shape.Collide(hole, mm(HOLE_TO_COPPER)):
                     return "copper"
-        for layer in LAYERS:
+        for layer in (LAYERS if not soft_pours else ()):
             for net, poly, gap in world.fills[layer]:
                 if net != probe.GetNetCode() and poly.Collide(ring, gap):
                     return "pour"

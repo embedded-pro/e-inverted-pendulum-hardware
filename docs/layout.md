@@ -194,6 +194,10 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
   references: ST's HSE_OUT and SMPS_LX as drawn; HSE_IN, the OSC32 load caps, the SMPS loop, +3V3 on U301 pins 44–45 /
   1–68, NFC_VCC and NFC_RF_DIS re-joined by the grid router (`scripts/pcb/maze.py`) at the vendor's width; TI's 2 vias
   that fit; one GND via at each of the copies' open ground pads. Unrouted 204 → 185.
+- **Power bus (D-056, `scripts/pcb/power_pours.py`): done.** L3 is a VBAT corridor (power entry → buck input → drive,
+  ≥ 11.3 mm) and GND elsewhere; the buck's switch node has nothing under it on L3 / L4 (`BUCK_SW_QUIET`). L1 pours carry
+  BAT_P, BAT_F, PP_S and VBAT at Q101 and at the buck input (outlines in `placement.L1_POWER`, editable), with 5 vias to
+  L3 at Q101 and 2 at the buck. If you move a power part, edit the outline and refill (`B` in KiCad). Unrouted 185 → 164.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).

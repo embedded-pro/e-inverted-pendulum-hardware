@@ -13,7 +13,7 @@ come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way 
 
 | Net / group | Kind | I cont / peak | V max | Rule | Class |
 |---|---|---|---|---|---|
-| BAT_P → F101 → BAT_F → Q101 → PP_S → VBAT | high current | 1.2 A / 4.2 A | 12.6 V (SMBJ15A clamp 24 V) | Pours on L1 + L3; ≥ 5 vias per layer change; no necks below 2.2 mm outer | `PWR_BUS` |
+| BAT_P → F101 → BAT_F → Q101 → PP_S → VBAT | high current | 1.2 A / 4.2 A | 12.6 V (SMBJ15A clamp 24 V) | Pours on L1 + L3; ≥ 5 vias per layer change; no necks below 2.2 mm outer. Done (D-056): VBAT on L3 as one ≥ 11.3 mm corridor, L1 pours at Q101 and the buck input with 5 + 2 vias; the entry hops (BAT_P, BAT_F, PP_S, < 6 mm) on L1 only, each ≥ 2.2 mm | `PWR_BUS` |
 | VBAT at the bridges (HS drains; C502/C503 bridge A, C505/C506 bridge B, C507 bulk, C508 / C514 VM) | hot-loop member | 1.0 A / 4.0 A | 12.6 V | TI's BOOST-DRV8711 VM pours on L1 / L4 (D-040, `docs/drive.md`); L2 GND directly under | `PWR_BUS` |
 | MOT_L_P, MOT_L_N, MOT_R_P, MOT_R_N | switch node (25 kHz, IDRIVE 00) | 0.5 A / 2.0 A | 12.6 V | 0.8 mm. Only the copper the current needs, from the FET to the SS34 and the PH 6-pin connector (2 A contacts, D-028). No sense or encoder trace beside or under it on any layer | `MOTOR` |
 | SENSE_A, SENSE_B (LS sources → Rsense) | hot-loop member | 0.5 A / 2.0 A | < 0.1 V | TI's GND_A / GND_B pours; the current flows straight through R509/R512 (D-040) | `MOTOR` |
@@ -29,7 +29,7 @@ come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way 
 | RF1, RF_50, RF_MATCH, RF_ANT | RF (MB1355 copy) | — | — | MB1355's 0.6 mm L1 line, 0.2 mm gaps, referenced to L3 (L2 cut out); RF1 fan-out 0.265 mm (`docs/rf.md`, D-037) | `RF` |
 | HSE_IN/OUT, OSC32_IN/OUT | crystal | µA | 3.3 V | At the pins, short and symmetric, GND guard, no vias | `CRYSTAL` |
 | ENC_* (raw, filtered, buffered) | off-board digital input | mA | 5 V | Away from MOT_* on every layer; ESD part at the connector, pass-through | Default |
-| GND | plane | — | — | L2 solid and never cut; GND fill on L1/L4; stitching about every 5 mm | — |
+| GND | plane | — | — | L2 solid and never cut; L3 GND outside the VBAT corridor (D-056); GND fill on L1/L4; stitching about every 5 mm | — |
 | Everything else | digital | mA | 3.3 V | 0.2 mm, 0.15 mm clearance | Default |
 
 | Class | Track (mm) | Clearance (mm) | Via (mm, drill / pad) | Diff pair (mm, width / gap) |

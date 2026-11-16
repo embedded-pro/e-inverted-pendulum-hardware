@@ -98,6 +98,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   references where their ends land (or up to a hop onto a part that moved), the rest of a copy's own open connections
   re-joined by `maze.py` at the vendor's width (crystals, switch nodes, RF: F.Cu, no via; crystals as a pair), TI's missing
   vias where they fit, one GND via per open vendor ground pad. No-op when nothing is left.
+- `python3 scripts/pcb/power_pours.py --apply`: the power bus (D-056). L3 = `L3_VBAT` corridor (`placement.L3_VBAT`) +
+  `L3_GND`; `BUCK_SW_QUIET` on L3 / L4; L1 pours from `placement.L1_POWER`; VBAT via arrays (5 × 0.3 mm at Q101, 2 at the
+  buck) and one via per VBAT pad off the plane; TP102 joined. Checks necks (L1 deflated 1.1 mm, L3 5.6 mm). One shot.
 - `scripts/pcb/maze.py`: the grid router (0.05 mm, F.Cu / B.Cu, 45° turns only, layer-direction costs, ≤ 2 vias, every
   segment and via checked exactly) that `vendor_gaps.py` and `route_maze.py` use.
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`

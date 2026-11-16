@@ -117,6 +117,22 @@ RULE_AREAS = [
                  (BATTERY["x1"] + 1, BATTERY["z1"] + 1), (BATTERY["x0"] - 1, BATTERY["z1"] + 1)]},
 ]
 
+# Power-bus copper (D-056, docs/power-map.md), mechanical x, z. L3 (In2.Cu) carries VBAT in one wide corridor from the
+# power entry past the buck input to the drive (4.2 A on 0.5 oz inner copper needs 11.3 mm, IPC-2221 at 10 degC), with a
+# lobe under TP101; the rest of L3 is GND. L1 carries the short hops of the power entry (BAT_P, BAT_F, PP_S, each at least
+# 2.2 mm, the 4.2 A outer width) and VBAT at Q101 and at the buck input, where the via arrays drop to L3.
+L3_VBAT = [(-41.0, 64.0), (-30.0, 64.0), (-30.0, 70.0), (-26.0, 70.0), (-26.0, 64.0), (-3.0, 64.0), (-3.0, 50.0),
+           (29.0, 50.0), (29.0, STRIP_TOP_Z), (-22.0, STRIP_TOP_Z), (-22.0, 47.0), (-41.0, 47.0)]
+L1_POWER = {
+    "L1_BAT_P": ("BAT_P", [(-39.6, 49.6), (-36.4, 49.6), (-36.4, 58.2), (-39.6, 58.2)]),
+    "L1_BAT_F": ("BAT_F", [(-35.8, 49.6), (-31.5, 49.6), (-31.5, 55.85), (-35.8, 55.85)]),
+    "L1_PP_S": ("PP_S", [(-28.75, 53.7), (-22.6, 53.7), (-22.6, 57.2), (-28.75, 57.2)]),
+    "L1_VBAT_ENTRY": ("VBAT", [(-35.3, 56.3), (-31.5, 56.3), (-31.5, 60.2), (-33.9, 60.2), (-33.9, 64.0),
+                               (-35.3, 64.0)]),
+    "L1_VBAT_BUCK": ("VBAT", [(-22.2, 57.2), (-19.6, 57.2), (-19.6, 56.0), (-16.6, 56.0), (-16.6, 57.4), (-8.2, 57.4),
+                              (-8.2, 60.4), (-22.2, 60.4)]),
+}
+
 _M3 = "MountingHole_M3_NPTH_KeepOut7mm"
 _M2 = "MountingHole_M2_NPTH_KeepOut5.5mm"
 MECHANICAL = [
