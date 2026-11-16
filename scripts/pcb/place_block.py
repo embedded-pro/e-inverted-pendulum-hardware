@@ -7,6 +7,8 @@
                                                             the MCU, with their support parts (D-043)
     python3 scripts/pcb/place_block.py --apply power         the TPS62933F buck and the TLV75533P LDO right of the power
                                                             entry, to TI's layout guidance (D-049)
+    python3 scripts/pcb/place_block.py --apply power_entry   J101 (XT30), the fuse, Q101 and their parts at the left edge,
+                                                            the owner's arrangement (D-047), J101 2.5 mm from the edge (D-052)
     python3 scripts/pcb/place_block.py --apply leds          the 12 RGB LEDs as two square rings in the centre, their
                                                             caps, the chain's driver and the status LED (D-050)
     python3 scripts/pcb/place_block.py --apply rest          the rest: the power switch and the Qwiic port at the left
@@ -23,13 +25,16 @@ and the script refuses if any part:
   - touches another part's courtyard, comes closer than rf_block.PART_CLEARANCE to another net's copper, or overlaps
     another silk outline (rf_block.spot_ok);
   - opens solder mask under another part's silkscreen outline, or lays its outline over another part's pad (DRC
-    silk_over_copper: the fab would clip the silk).
+    silk_over_copper: the fab would clip the silk);
+  - comes within ASSEMBLY_GAP of another part, body or pads, or puts its body within EDGE_GAP of the board edge
+    (assembly_problems, D-052).
 It lays the silkscreen labels out (silk.py, D-041) and locks nothing: locking is the owner's (D-045). Re-running is a
 no-op once the block's anchors are on the board; --replace moves an already placed block to its table again (after the owner changes it).
 Run board.py first so the parts exist.
 """
 
 import argparse
+import math
 import pathlib
 import subprocess
 import sys
@@ -43,10 +48,31 @@ import rf_block as RF  # noqa: E402
 import silk  # noqa: E402
 
 SILK_TO_MASK = 0.0
+# JLCPCB assembly (Terms and Conditions of JLCPCB Assembly Service, s2 Notes on DFM, checked 2026-11-16): footprints and
+# placement to IPC-7351B medium or low density, "high density is not supported" (item 1); the components' bodies 2.5 mm
+# or more from the board edge (item 3). IPC-7351B density level B (nominal) keeps a 0.25 mm courtyard excess round each
+# part's pads and body, so neighbours keep 0.5 mm between them (D-052).
+ASSEMBLY_GAP = 0.5
+EDGE_GAP = 2.5
+GAP_TOLERANCE = 0.0005
+# Package bodies, from the parts' datasheets, for footprints that draw none on F.Fab (long side, short side; the long
+# side lies along the pads' longer extent).
+BODY_MM = {
+    "MB1355_NX2016_4P": (2.0, 1.6),
+    "MB1355_NX2012_2P": (2.0, 1.2),
+    "MB1355_ST_CSP650x58P2x3_160x100x42": (1.6, 1.0),
+    "MB1355_0805_COIL": (2.0, 1.25),
+    "MB1355_0402_CAP_NPOL": (1.0, 0.5),
+    "MB1355_0402_RES": (1.0, 0.5),
+    "MB1355_0402_COIL": (1.0, 0.5),
+    "MB1355_IND_0402_MURATA_LQW15AN_H0P5": (1.0, 0.5),
+    "BOOST_R-PDSO-G38": (9.7, 4.4),
+}
 BLOCKS = {
     "motor_io": (placement.motor_io, ("J601", "J602")),
     "imu_memory": (placement.imu_memory, ("U701",)),
     "power": (placement.power, ("U201",)),
+    "power_entry": (placement.power_entry, ("J101",)),
     "leds": (placement.leds, ("D802",)),
     "rest": (placement.rest, ("SW101",)),
 }
@@ -78,6 +104,102 @@ def problems(board, fp, outline, others):
     if not RF.spot_ok(board, fp, others):
         found.append("touches a courtyard, another net's copper or a silk outline")
     found += mask_under_silk(fp, others)
+    found += assembly_problems(fp, others, outline)
+    return found
+
+
+def is_test_pad(fp):
+    return fp.GetFPIDAsString().startswith("TestPoint:")
+
+
+def assembled(fp):
+    """A part JLCPCB places, fitted now or later (DNP parts count): not board-only, not left out of the BOM (antennas,
+    net ties and holes are copper or holes, not parts). A test pad is bare copper: it counts by its pads only."""
+    attributes = fp.GetAttributes()
+    if is_test_pad(fp):
+        return True
+    return not attributes & (pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_BOARD_ONLY)
+
+
+_BODIES = {}
+
+
+def body(fp):
+    """The part's pads and its package body (the F.Fab outline's box, or BODY_MM), as polygons."""
+    key = (fp.GetReference(), fp.GetPosition().x, fp.GetPosition().y, fp.GetOrientationDegrees(), fp.IsFlipped())
+    if key in _BODIES:
+        return _BODIES[key]
+    poly = pcbnew.SHAPE_POLY_SET()
+    error = pcbnew.FromMM(0.005)
+    for pad in fp.Pads():
+        layer = pcbnew.F_Cu if pad.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu
+        pad.TransformShapeToPolygon(poly, layer, 0, error, pcbnew.ERROR_OUTSIDE)
+    fab_layer = pcbnew.B_Fab if fp.IsFlipped() else pcbnew.F_Fab
+    fab = pcbnew.BOX2I()
+    for item in fp.GraphicalItems():
+        if item.GetLayer() == fab_layer and item.GetClass() == "PCB_SHAPE":
+            fab.Merge(item.GetBoundingBox())
+    corners = []
+    if fab.GetWidth() > 0 and fab.GetHeight() > 0:
+        corners = [(fab.GetLeft(), fab.GetTop()), (fab.GetRight(), fab.GetTop()), (fab.GetRight(), fab.GetBottom()),
+                   (fab.GetLeft(), fab.GetBottom())]
+    elif fp.GetFPID().GetLibItemName().wx_str() in BODY_MM and not is_test_pad(fp):
+        long_side, short_side = (pcbnew.FromMM(v) for v in BODY_MM[fp.GetFPID().GetLibItemName().wx_str()])
+        angle = math.radians(fp.GetOrientationDegrees())
+        origin = fp.GetPosition()
+        local = []
+        for pad in fp.Pads():
+            d = pad.GetPosition() - origin
+            local.append((d.x * math.cos(angle) - d.y * math.sin(angle), d.x * math.sin(angle) + d.y * math.cos(angle)))
+        xs, ys = [p[0] for p in local], [p[1] for p in local]
+        cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+        w, h = (long_side, short_side) if max(xs) - min(xs) >= max(ys) - min(ys) else (short_side, long_side)
+        for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+            lx, ly = cx + sx * w / 2, cy + sy * h / 2
+            corners.append((origin.x + lx * math.cos(angle) + ly * math.sin(angle),
+                            origin.y - lx * math.sin(angle) + ly * math.cos(angle)))
+    if corners:
+        poly.NewOutline()
+        for x, y in corners:
+            poly.Append(int(round(x)), int(round(y)))
+    poly.Simplify()
+    _BODIES[key] = poly
+    return poly
+
+
+def gap_problem(fp, other):
+    """True when the two parts' bodies or pads come within ASSEMBLY_GAP; two test pads are bare copper, never a pair."""
+    if not assembled(other) or (is_test_pad(fp) and is_test_pad(other)):
+        return False
+    a, b = body(fp), body(other)
+    if not a.OutlineCount() or not b.OutlineCount():
+        return False
+    reach = a.BBox()
+    reach.Inflate(pcbnew.FromMM(ASSEMBLY_GAP))
+    if not reach.Intersects(b.BBox()):
+        return False
+    return a.Collide(b, pcbnew.FromMM(ASSEMBLY_GAP - GAP_TOLERANCE))
+
+
+def edge_problem(fp, outline):
+    """True when an assembled part's body (not a test pad) comes within EDGE_GAP of the board edge."""
+    if is_test_pad(fp) or not assembled(fp):
+        return False
+    inner = pcbnew.SHAPE_POLY_SET(outline)
+    inner.Deflate(pcbnew.FromMM(EDGE_GAP - GAP_TOLERANCE), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, pcbnew.FromMM(0.005))
+    rest = pcbnew.SHAPE_POLY_SET(body(fp))
+    rest.BooleanSubtract(inner)
+    return not rest.IsEmpty()
+
+
+def assembly_problems(fp, others, outline):
+    """JLCPCB's assembly rules for a part on the board: ASSEMBLY_GAP to every other part, EDGE_GAP to the edge (D-052)."""
+    if not assembled(fp):
+        return []
+    found = [f"within {ASSEMBLY_GAP} mm of {other.GetReference()}" for other in others
+             if other.GetReference() != fp.GetReference() and gap_problem(fp, other)]
+    if edge_problem(fp, outline):
+        found.append(f"body within {EDGE_GAP} mm of the board edge")
     return found
 
 

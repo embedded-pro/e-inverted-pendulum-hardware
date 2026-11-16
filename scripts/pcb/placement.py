@@ -148,42 +148,46 @@ DRAWINGS = [
 # the left edge, pins z 35.5-45.5, the upper four over the battery cradle's relief (BATTERY_RELIEF), pin 1 (M-) at the
 # top. Each chain runs inward from its connector: the ESD array beside the pins, the four row parts (A pull-up DNP, A
 # 100 Ohm, B 100 Ohm, B pull-up DNP) in a column, the 1 nF caps, then the SN74LVC3G17 with its bypass. The right side is
-# the owner's own arrangement, not an exact mirror. The encoder supply sits below the left chain.
+# the owner's own arrangement, not an exact mirror. The encoder supply sits below the left chain. Both chains and the
+# supply sit 2.05 mm in from the owner's spots, moved with their tracks by shift_block.py motor_left / motor_right, so
+# J601 / J602's bodies keep JLCPCB's 2.5 mm from the edge (D-052).
 MOTOR_IO_LEFT = [
-    ("J601", -35.7, 40.5, 270.0),
-    ("U601", -32.635, 40.5, 0.0),
-    ("C603", -35.25, 32.0, 180.0),
-    ("R603", -32.0, 45.0, 0.0),
-    ("R604", -32.0, 43.25, 0.0),
-    ("R606", -32.0, 38.0, 0.0),
-    ("R605", -32.0, 36.25, 0.0),
-    ("C604", -28.75, 43.25, 0.0),
-    ("C605", -28.75, 38.0, 0.0),
-    ("U602", -27.5, 40.5, 0.0),
-    ("C606", -26.0, 38.0, 180.0),
-    ("TP601", -25.5, 43.5, 0.0),
-    ("TP602", -25.5, 34.5, 0.0),
+    ("J601", -33.65, 40.5, 270.0),
+    ("U601", -30.585, 40.5, 0.0),
+    ("C603", -33.2, 32.0, 180.0),
+    ("R603", -29.95, 45.0, 0.0),
+    ("R604", -29.95, 43.25, 0.0),
+    ("R606", -29.95, 38.0, 0.0),
+    ("R605", -29.95, 36.25, 0.0),
+    ("C604", -26.7, 43.25, 0.0),
+    ("C605", -26.7, 38.0, 0.0),
+    ("U602", -25.45, 40.5, 0.0),
+    ("C606", -23.95, 38.0, 180.0),
+    ("TP601", -23.45, 43.5, 0.0),
+    ("TP602", -23.45, 34.5, 0.0),
 ]
 MOTOR_IO_RIGHT = [
-    ("J602", 35.7, 40.5, 90.0),
-    ("U603", 32.75, 40.5, 180.0),
-    ("C607", 35.25, 32.0, 0.0),
-    ("R609", 31.5, 45.0, 180.0),
-    ("R610", 31.5, 43.0, 180.0),
-    ("R608", 31.5, 37.75, 180.0),
-    ("R607", 31.5, 36.0, 180.0),
-    ("C609", 28.25, 43.0, 180.0),
-    ("C608", 28.225, 37.75, 180.0),
-    ("U604", 27.75, 40.5, 180.0),
-    ("C610", 25.5, 43.0, 0.0),
+    ("J602", 33.65, 40.5, 90.0),
+    ("U603", 30.7, 40.5, 180.0),
+    ("C607", 33.2, 32.0, 0.0),
+    ("R609", 29.45, 45.0, 180.0),
+    ("R610", 29.45, 43.0, 180.0),
+    ("R608", 29.45, 37.75, 180.0),
+    ("R607", 29.45, 36.0, 180.0),
+    ("C609", 26.2, 43.0, 180.0),
+    ("C608", 26.175, 37.75, 180.0),
+    ("U604", 25.7, 40.5, 180.0),
+    ("C610", 23.45, 43.0, 0.0),
+    ("TP603", 23.45, 44.5, 0.0),
+    ("TP604", 23.45, 36.0, 0.0),
 ]
 # Encoder supply: +5V -> R601 (or R602, DNP, from +3V3) -> F601 PTC -> C601 / C602 -> ENC_VCC.
 MOTOR_IO_SUPPLY = [
-    ("R601", -31.75, 32.0, 0.0),
-    ("R602", -31.75, 30.25, 0.0),
-    ("F601", -28.25, 32.0, 0.0),
-    ("C601", -28.25, 30.0, 180.0),
-    ("C602", -28.25, 28.25, 180.0),
+    ("R601", -29.7, 32.0, 0.0),
+    ("R602", -29.7, 30.25, 0.0),
+    ("F601", -26.2, 32.0, 0.0),
+    ("C601", -26.2, 30.0, 180.0),
+    ("C602", -26.2, 28.25, 180.0),
 ]
 # Through-hole parts whose pins may sit over the battery: the cradle has a relief for them (owner, D-044, D-047).
 BATTERY_RELIEF = {"J601", "J602", "J101"}
@@ -249,6 +253,31 @@ def power():
     """The buck and the LDO with their support parts and test pads, as (ref, x, z, rotation)."""
     return list(POWER)
 
+# The power entry at the left edge, the owner's arrangement (D-047, 49b38c1), placed by scripts/pcb/place_block.py
+# power_entry. (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. J101 (XT30) moved 0.9 mm inward
+# so its body keeps JLCPCB's 2.5 mm from the edge, and R104 / C103 / R105 (0.5 mm), Q101 (0.35 mm) and D101 (0.05 mm)
+# moved right with it to keep their 0.5 mm (D-052).
+POWER_ENTRY = [
+    ("J101", -37.1, 58.9, 90.0),
+    ("F101", -36.4, 50.7, 0.0),
+    ("Q101", -30.225, 56.005, 180.0),
+    ("D101", -25.25, 53.4, 270.0),
+    ("D102", -18.1, 55.2, 270.0),
+    ("R101", -25.7, 57.575, 270.0),
+    ("R102", -23.9, 57.6, 270.0),
+    ("R103", -21.4, 53.6, 90.0),
+    ("R104", -32.4, 59.7, 0.0),
+    ("R105", -32.4, 63.3, 180.0),
+    ("C101", -21.4, 56.9, 90.0),
+    ("C102", -23.1, 53.6, 90.0),
+    ("C103", -32.4, 61.5, 180.0),
+]
+
+
+def power_entry():
+    """The battery connector, the fuse, the reverse / soft-start FETs and their parts, as (ref, x, z, rotation)."""
+    return list(POWER_ENTRY)
+
 
 # The 12 RGB LEDs in the centre as two square rings (owner, D-050), placed by scripts/pcb/place_block.py leds.
 # (ref, x, z, rotation): mechanical, at the centre of the footprint's pads. Each ring has 6 WS2812B-2020 on a 7.0 mm square:
@@ -302,25 +331,27 @@ def leds():
 # The remaining parts (owner, D-051), placed by scripts/pcb/place_block.py rest: the edge parts first, then the support
 # parts at their pins, then the test pads in rows per block in the room left. (ref, x, z, rotation): mechanical, at the
 # centre of the footprint's pads. Each spot clears every courtyard, other-net copper and silk outline (place_block), keeps
-# the existing silkscreen labels where they are, and leaves its own label a clean spot (silk.py, D-041), except R302 and
-# TP704 (F.Fab). Parked for the owner: MC1-MC4 and MH1 / MH2 (the cradle and the bumpers aren't designed yet).
+# JLCPCB's assembly spacing (0.5 mm to every part, bodies 2.5 mm from the edge, D-052) and leaves each test pad's name a
+# clean spot (silk.py). The edge parts sit 2 mm in from where D-051 put them (D-052). Parked for the owner: MC1-MC4 and
+# MH1 / MH2 (the cradle and the bumpers aren't designed yet).
 REST_EDGE = [
-    ("SW101", -38.75, 83.7, 90.0),
-    ("J801", -39.15, 70.0, 270.0),
-    ("U801", -34.6, 68.5, 0.0),
+    ("SW101", -36.5, 83.7, 90.0),
+    ("J801", -37.18, 70.0, 270.0),
+    ("U801", -32.63, 68.5, 0.0),
 ]
 # Support parts at the nearest spot to the pin they serve that keeps every label; C803 on ST's MB1163 land (D-039).
 # R808 / R809 (I2C3 pull-ups) by the Qwiic port's ESD, where the bus enters; R301 (SPI1 SCK 33 Ohm) 6 mm down the SCK
-# route from its fan-out via; R302 (BOOT0 pull-down) 3.8 mm from its via; R702 clear of U702's pin-1 mark.
+# route from its fan-out via; R302 (BOOT0 pull-down) 3.8 mm from its via; R702 clear of U702's pin-1 mark; C704 0.5 mm
+# from U702 (D-052).
 REST_SUPPORT = [
     ("C803", -9.85, 90.45, 90.0),
-    ("C704", -30.06, 79.924, 0.0),
+    ("C704", -30.21, 79.85, 0.0),
     ("R702", -21.0, 79.45, 0.0),
     ("R703", -20.812, 83.53, 90.0),
     ("R704", -31.62, 82.011, 90.0),
     ("C802", -22.0, 91.0, 90.0),
-    ("R808", -32.6, 74.5, 90.0),
-    ("R809", -32.6, 71.4, 90.0),
+    ("R808", -31.6, 74.8, 90.0),
+    ("R809", -31.6, 71.7, 90.0),
     ("R301", -19.3, 87.5, 90.0),
     ("R302", -9.6, 97.5, 0.0),
 ]
@@ -344,18 +375,19 @@ def tp_row(refs, x, z, along="x"):
 # Test pads in rows per block (owner), each beside the copper it probes: the power entry in a column right of the
 # Qwiic port's pull-ups, BAT_F / PP_G nearest Q101; the Qwiic port's beside it; the drive's logic in a row right of the
 # power block, above the DRV8711's logic vias; its power test pads in one row per bridge, below each motor's phase route
-# (left: MOT_L, SENSE_B; right: MOT_R, SENSE_A); the MCU's above J301 (NRST, VFBSMPS nearest their pins); the IMU's
-# SPI2 / INT with FLASH_NCS in one row left of the IMU; the right encoder's beside U604, as the left's; ENC_VCC with a
-# GND below the encoder supply.
+# (left: MOT_L, SENSE_B; right: MOT_R, SENSE_A); the MCU's above J301 (NRST, VFBSMPS nearest their pins), but VDDA's
+# (TP303) beside the VDDA caps, 2.1 mm from C311's pad (D-052); the IMU's SPI2 / INT with FLASH_NCS in one row left of the
+# IMU; ENC_VCC with a GND below the encoder supply. The right encoder's (TP603 / TP604) are in MOTOR_IO_RIGHT, as the
+# left's. The Qwiic column runs SDA, GND, SCL so QWIIC_SDA's name has room (D-052).
 REST_TEST_PADS = (
-    tp_row(("TP102", "TP103", "TP101", "TP105", "TP104"), -30.0, 73.5, "z")
-    + tp_row(("TP802", "TP803", "TP804"), -26.0, 73.0, "z")
+    tp_row(("TP102", "TP103", "TP101", "TP105", "TP104"), -28.0, 73.5, "z")
+    + tp_row(("TP802", "TP804", "TP803"), -24.0, 72.6, "z")
     + tp_row(("TP511", "TP515", "TP512", "TP514", "TP513", "TP508", "TP507", "TP509", "TP510"), 9.0, 53.5)
     + tp_row(("TP503", "TP504", "TP502", "TP516"), -17.0, 29.0)
     + tp_row(("TP517", "TP501", "TP506", "TP505"), 27.0, 28.0)
-    + tp_row(("TP301", "TP304", "TP303", "TP302"), -37.5, 104.0)
+    + tp_row(("TP301", "TP304", "TP302"), -37.5, 104.0)
     + tp_row(("TP706", "TP704", "TP701", "TP702", "TP703", "TP705"), -16.9, 80.9)
-    + [("TP603", 25.5, 44.5, 0.0), ("TP604", 25.5, 36.0, 0.0)]
+    + [("TP303", -6.0, 98.5, 0.0)]
     + tp_row(("TP605", "TP606"), -28.0, 26.0)
 )
 

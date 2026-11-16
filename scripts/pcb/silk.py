@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
-"""Lay out the silkscreen labels: each part's reference (a test pad's net name, D-035) at JLCPCB's smallest text, clear
-of everything else on the silkscreen (D-041).
+"""Lay out the silkscreen labels: only the test pads' net names (D-035, D-052), at JLCPCB's smallest text, clear of
+everything else on the silkscreen (D-041); every other part's reference goes on the fab layer, the assembly drawing.
 
-    python3 scripts/pcb/silk.py            move the labels that are not clean, keep the ones that are
-    python3 scripts/pcb/silk.py --check    report only; exit 1 if a label would move
+    python3 scripts/pcb/silk.py             move the labels that are not clean, keep the ones that are
+    python3 scripts/pcb/silk.py --check     report only; exit 1 if a label would move or a reference is not on F.Fab
+    python3 scripts/pcb/silk.py --relayout  lay every label out afresh, clean or not (once, after the board changed a lot)
+
+References (D-052): the silkscreen carried every part's reference until the owner found it too busy; now each part's
+reference sits on the fab layer, inside its outline, sized to fit (fab_references, Label.to_fab), for the assembly
+drawing and rework. A net tie shows nothing. The footprints' own silkscreen (outlines, pin-1 marks, J101's polarity)
+stays.
 
 board.py and the paste scripts run it last; run it yourself after moving parts in KiCad. Text is 1.0 mm high with a
 0.15 mm line, JLCPCB's minimum (board.SILK_TEXT_MIN, pcb-design-rules jlcpcb profile), in KiCad's stroke font. A label
 is clean when its ink box:
   - is upright, at 0 or 90 degrees;
-  - clears every other label, every footprint's silk outline and every solder-mask opening (pads, holes) by 0.15 mm,
-    JLCPCB's silk-to-pad and the board's min_silk_clearance;
+  - clears every footprint's silk outline and every solder-mask opening (pads, holes) by 0.15 mm, JLCPCB's silk-to-pad
+    and the board's min_silk_clearance, and every other label by LABEL_GAP (0.5 mm), so two names never read as one
+    (D-052);
   - does not touch a via (ink over a tented hole breaks up);
 and, for a part on the board (the staging area is not built, so there only the rules above apply):
   - does not touch any part's courtyard, where it would sit under a body, nor the antenna tab (ANTENNA_TAB, or its
@@ -40,6 +47,7 @@ import board as B  # noqa: E402
 mm = pcbnew.FromMM
 TEXT_SIZE, TEXT_LINE = (mm(v) for v in B.SILK_TEXT_MIN)
 SILK_CLEARANCE = mm(0.15)
+LABEL_GAP = mm(0.5)
 EDGE_CLEARANCE = mm(0.5)
 SEARCH_MM = 3.0
 STEP = mm(0.1)
@@ -92,19 +100,19 @@ class Placed:
 
     def add(self, label, box):
         self.boxes[label] = box
-        for key in Grid.keys(grow(box, SILK_CLEARANCE)):
+        for key in Grid.keys(grow(box, LABEL_GAP)):
             self.cells.setdefault(key, set()).add(label)
 
     def remove(self, label):
         box = self.boxes.pop(label)
-        for key in Grid.keys(grow(box, SILK_CLEARANCE)):
+        for key in Grid.keys(grow(box, LABEL_GAP)):
             self.cells[key].discard(label)
 
     def blockers(self, box, label):
         found = set()
-        for key in Grid.keys(grow(box, SILK_CLEARANCE)):
+        for key in Grid.keys(grow(box, LABEL_GAP)):
             for other in self.cells.get(key, ()):
-                if other is not label and gap(box, self.boxes[other]) < SILK_CLEARANCE:
+                if other is not label and gap(box, self.boxes[other]) < LABEL_GAP:
                     found.add(other)
         return sorted(found, key=lambda lb: lb.ref)
 
@@ -355,7 +363,40 @@ class Label:
         self.field.SetPosition(pcbnew.VECTOR2I(box[0] - ink[0], box[1] - ink[1]))
 
 
-def layout(board, check):
+def field_state(field):
+    return (field.GetLayer(), field.IsVisible(), field.GetTextSize().x, field.GetTextSize().y, field.GetTextThickness(),
+            field.GetTextAngleDegrees(), field.GetPosition().x, field.GetPosition().y, field.IsMirrored())
+
+
+def fab_references(board, check):
+    """Every part's reference (board.fab_label) on its side's fab layer, inside its outline, sized to fit (Label.to_fab).
+    Returns the references that were not there (with check, they are left as they were)."""
+    changed = []
+    for fp in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        field = B.fab_label(fp)
+        if field is None:
+            continue
+        before = field_state(field)
+        label = Label(fp, field, True)
+        label.to_fab()
+        if field_state(field) != before:
+            changed.append(fp.GetReference())
+            if check:
+                layer, visible, sx, sy, thick, angle, x, y, mirrored = before
+                field.SetLayer(layer)
+                field.SetVisible(visible)
+                field.SetTextSize(pcbnew.VECTOR2I(sx, sy))
+                field.SetTextThickness(thick)
+                field.SetTextAngleDegrees(angle)
+                field.SetPosition(pcbnew.VECTOR2I(x, y))
+                field.SetMirrored(mirrored)
+    return changed
+
+
+def layout(board, check, relayout=False, fab_changed=None):
+    changed = fab_references(board, check)
+    if fab_changed is not None:
+        fab_changed.extend(changed)
     outline = pcbnew.SHAPE_POLY_SET()
     board.GetBoardPolygonOutlines(outline, False)
     labels = [Label(fp, B.silk_label(fp), outline.Contains(fp.GetPosition()))
@@ -364,7 +405,7 @@ def layout(board, check):
     placed = Placed()
     kept, todo = [], []
     for label in labels:
-        box = label.ink() if label.is_styled() else None
+        box = label.ink() if label.is_styled() and not relayout else None
         if box is not None and sides[label.flipped].fits(box, label) and placed.free(box, label):
             placed.add(label, box)
             kept.append(label)
@@ -472,25 +513,32 @@ def report(kept, moved, failed, check):
         print(f"  {label.ref}: no clean spot within {SEARCH_MM} mm; label on {'B' if label.flipped else 'F'}.Fab")
 
 
-def stage(check):
+def stage(check, relayout):
     board = pcbnew.LoadBoard(str(B.BOARD))
-    kept, moved, failed = layout(board, check)
+    fab_changed = []
+    kept, moved, failed = layout(board, check, relayout, fab_changed)
     report(kept, moved, failed, check)
+    if fab_changed:
+        print(f"references {'not yet' if check else 'moved'} on the fab layer: {len(fab_changed)}")
     if check:
-        sys.exit(1 if moved else 0)
+        sys.exit(1 if moved or fab_changed else 0)
     pcbnew.SaveBoard(str(B.BOARD), board)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--check", action="store_true", help="report only; exit 1 if a label would move")
+    parser.add_argument("--relayout", action="store_true", help="lay every label out afresh, clean or not")
     parser.add_argument("--pcbnew-stage", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.check and args.relayout:
+        parser.error("--check and --relayout don't go together")
     if args.pcbnew_stage:
-        stage(args.check)
+        stage(args.check, args.relayout)
         return
     project = B.PROJECT.read_bytes()
-    result = subprocess.run([sys.executable, __file__, "--pcbnew-stage"] + (["--check"] if args.check else []))
+    flags = (["--check"] if args.check else []) + (["--relayout"] if args.relayout else [])
+    result = subprocess.run([sys.executable, __file__, "--pcbnew-stage"] + flags)
     B.PROJECT.write_bytes(project)
     if result.returncode or args.check:
         sys.exit(result.returncode)

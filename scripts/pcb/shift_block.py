@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Move a placed block of parts together with its copper, to a target set by its anchor part (owner, D-050).
 
-    python3 scripts/pcb/shift_block.py --apply drive    the BOOST-DRV8711 stage and our extras beside it
+    python3 scripts/pcb/shift_block.py --apply drive        the BOOST-DRV8711 stage and our extras beside it (D-050)
+    python3 scripts/pcb/shift_block.py --apply motor_left   J601's chain and the encoder supply, to J601's table spot
+    python3 scripts/pcb/shift_block.py --apply motor_right  J602's chain, to J602's table spot (D-052: 2.5 mm from the edge)
 
-A block (BLOCKS) is a list of references in placement.py and the target of its anchor's footprint position. The script
+A block (BLOCKS) is a list of references in placement.py and the target of its anchor: the footprint position (drive),
+or the centre of its pads as the placement tables hold it (the motor chains, whose tables place_block.py uses). The script
 moves the parts, and every track and via that lies inside their courtyards' box (plus REACH) on one of their nets, by the
 offset that puts the anchor on its target: copied routing stays with its parts, the owner's copper elsewhere stays put.
 It refuses, before saving, if a moved courtyard touches a part that stays, moved copper comes within CLEARANCE of
-copper that stays (other nets), or anything leaves the board. A second run finds the anchor on its target and changes
+copper that stays (other nets), a moved part breaks JLCPCB's assembly gap or edge distance (place_block, D-052), or
+anything leaves the board. A second run finds the anchor on its target and changes
 nothing. Nothing is locked (D-045); silk.py lays the labels out last.
 """
 
@@ -20,6 +24,7 @@ import pcbnew
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import board as B  # noqa: E402
+import place_block as P  # noqa: E402
 import placement  # noqa: E402
 import rf_block as RF  # noqa: E402
 import silk  # noqa: E402
@@ -27,8 +32,16 @@ import silk  # noqa: E402
 mm = pcbnew.FromMM
 REACH = 1.0
 CLEARANCE = 0.15
+def _table_spot(table, ref):
+    return next((x, z) for r, x, z, _ in table if r == ref)
+
+
 BLOCKS = {
-    "drive": (placement.DRIVE_REFS, "U501", placement.DRIVE_TARGET),
+    "drive": (placement.DRIVE_REFS, "U501", placement.DRIVE_TARGET, "position"),
+    "motor_left": (tuple(r for r, *_ in placement.MOTOR_IO_LEFT + placement.MOTOR_IO_SUPPLY), "J601",
+                   _table_spot(placement.MOTOR_IO_LEFT, "J601"), "pads"),
+    "motor_right": (tuple(r for r, *_ in placement.MOTOR_IO_RIGHT), "J602",
+                    _table_spot(placement.MOTOR_IO_RIGHT, "J602"), "pads"),
 }
 
 
@@ -74,6 +87,7 @@ def problems(board, parts, copper):
     outline = pcbnew.SHAPE_POLY_SET()
     board.GetBoardPolygonOutlines(outline, False)
     for fp in parts:
+        found += [f"{fp.GetReference()}: {why}" for why in P.assembly_problems(fp, staying, outline)]
         for layer, court in courtyards(fp):
             box = court.BBox()
             if not (outline.Contains(box.GetOrigin()) and outline.Contains(box.GetEnd())):
@@ -99,12 +113,20 @@ def problems(board, parts, copper):
     return sorted(set(found))
 
 
+def pads_centre(fp):
+    pads = pcbnew.BOX2I()
+    for pad in fp.Pads():
+        pads.Merge(pad.GetBoundingBox())
+    return pads.GetCenter()
+
+
 def stage(name):
     board = pcbnew.LoadBoard(str(B.BOARD))
-    refs, anchor, target = BLOCKS[name]
+    refs, anchor, target, kind = BLOCKS[name]
     parts, copper = select(board, refs)
     anchor_fp = next(fp for fp in parts if fp.GetReference() == anchor)
-    delta = exact(*target) - anchor_fp.GetPosition()
+    here = anchor_fp.GetPosition() if kind == "position" else pads_centre(anchor_fp)
+    delta = (exact(*target) if kind == "position" else B.to_board(*target)) - here
     if delta.x == 0 and delta.y == 0:
         print(f"{anchor} is on its target: nothing to do")
         sys.exit(3)

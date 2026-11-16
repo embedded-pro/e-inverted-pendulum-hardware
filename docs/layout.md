@@ -28,7 +28,8 @@ anything on the board.
 | Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
 | Net classes | PWR_BUS 2.2 mm, MOTOR 0.8, SWITCH 0.5, SUPPLY 0.5, GATE 0.3, RF 0.6 / 0.2 gap (MB1355), NFC 0.25, SENSE and CRYSTAL 0.2, Default 0.2 / 0.15 | `docs/power-map.md` |
 | Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
-| Silkscreen | One label per part: the reference; a test pad's net name; nothing on a net tie. 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, next to its own part; outlines at 0.15 mm. 31 references with no room are on F.Fab, sized to fit inside their part: C301, C302, C307, C308, C310, C312, C314, C317, C401, C402, FB301, FL401, L302, L401, R401 around the MCU and the RF strip's stitching; C203, C204, C205, R202, R204 in the power block; C801, C807, C809, D809 in the LED rings; C503, Q504 beside TI's FETs; R604, R606, R608, R610, U603 in the motor-I/O columns | D-035, D-041, D-047 to D-050, `scripts/pcb/silk.py` |
+| Silkscreen | Only the test pads' net names: 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, 0.5 mm from each other so two names never read as one, next to their pad; every other part's reference is on F.Fab (the assembly drawing), sized inside the part; nothing on a net tie. Outlines at 0.15 mm, pin-1 marks and J101's polarity stay | D-035, D-041, D-052, `scripts/pcb/silk.py` |
+| Assembly spacing | 0.5 mm between neighbouring parts' pads and bodies (IPC-7351B medium density), 2.5 mm from every part's body to the board edge (JLCPCB assembly terms, DFM items 1 and 3); test pads count as pads, antennas, net ties and holes don't | D-052, `place_block.py`, `scripts/pcb/respace.py --check` |
 | Page | A3, so the staging area fits on the sheet | — |
 
 ## What DRC enforces (rule areas and project rules)
@@ -108,10 +109,11 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
     TP201 (+5V), TP203 (GND) and TP202 (+3V3) right of L201 (moved there by D-050 so the LED rings leave their labels room).
   - Still yours, routing: VBAT and GND wide to C201–C203 and U201 with vias to L2; the SW node short and minimal,
     nothing under it on L3 / L4; the +5V sense to R203 from the output caps, away from L201; +5V on to the encoders and
-    the LEDs, +3V3 on the L3 plane. C203's and C204's references are on F.Fab (no 1.0 mm spot, D-041).
+    the LEDs, +3V3 on the L3 plane.
 - **Motor connectors and encoder inputs (D-042, D-044, D-047, `scripts/pcb/place_block.py motor_io`): placed, arranged
   by the owner.**
-  - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±35.7 from z 35.5 to 45.5
+  - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±33.65 (2.05 mm inward for
+    JLCPCB's 2.5 mm body-to-edge, D-052) from z 35.5 to 45.5
     (raised 20 mm, D-044). The upper four pins of each sit over the battery's edge: the cradle needs a
     relief there (`docs/mechanical.md`). J601's pin 1 (M−) is at the top, J602's at the bottom.
   - Inward from each connector: the ESD (U601 / U603) beside pins 2–5, the four row parts (pull-up DNP, 100 Ω, 100 Ω,
@@ -127,9 +129,9 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
       encoder rows.
     - Connector → ESD with no via and no stub, a GND via at the ESD's GND pins (interface-layout §2).
     - ENC_VCC across to J602; the buffered outputs to PC0 / PC2 (left) and PA0 / PA1 (right).
-- **Power entry and debug (owner, D-047): placed.** J101 (XT30) at the left edge, pins at x −38, z 56.4 / 61.4, with
-  F101, Q101, D101 / D102, C101–C103 and R101–R105 beside it (x −38…−18, z 50–63); J301 (STDC14) left of the MCU at
-  (−36.2, 97.2).
+- **Power entry and debug (owner, D-047; `place_block.py power_entry`, D-052): placed.** J101 (XT30) at the left edge,
+  pins at x −37.1, z 56.4 / 61.4 (0.9 mm inward for the 2.5 mm edge rule), with F101, Q101, D101 / D102, C101–C103 and
+  R101–R105 beside it (x −37…−18, z 50–63); J301 (STDC14) left of the MCU at (−36.2, 97.2), its body 3.2 mm from the edge.
 - **RGB LEDs and status LED (D-050, `scripts/pcb/place_block.py leds`): placed** in the centre as two square rings,
   mirrored about the centre line between the power block and the IMU:
   - each ring has 6 WS2812B-2020 on a 7.0 mm square (corners plus the middle of the top and bottom sides, 3.5 mm pitch),
@@ -144,30 +146,37 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
     top row sits in it, 1.6 mm below the coil (`docs/nfc.md`).
 - **The rest (D-051, `scripts/pcb/place_block.py rest`): placed.** Edge parts first, then the support parts at their
   pins, then the test pads in rows per block in the room left. Every spot keeps the existing silkscreen labels where
-  they are and leaves its own label a clean spot, except R302 and TP704 (F.Fab, D-041).
-  - SW101 (power switch) at the left edge above the battery, turned 90°: pins at x −38.75, z 79.0 / 83.7 / 88.4, between
+  they are and leaves its own label a clean spot. Since D-052 only the test pads' names are on the silkscreen, all of
+  them clean; the edge parts sit 2 mm further in.
+  - SW101 (power switch) at the left edge above the battery, turned 90°: pins at x −36.5, z 79.0 / 83.7 / 88.4, between
     J801 and J301, lever on top (`docs/mechanical.md`). SW_ON runs about 30 mm down to R102.
-  - J801 (Qwiic) at the left edge between J101 and SW101, the cable entering from the edge, pads at x −37.15, z 68.5–71.5;
+  - J801 (Qwiic) at the left edge between J101 and SW101, the cable entering from the edge, pads at x −35.18, z 68.5–71.5;
     U801 (its ESD) beside the pads for pass-through routing (interface-layout §2); R808 / R809 (I2C3 pull-ups) right of
     U801, where the bus enters.
   - C704 / R702–R704 at U702's VCC, /CS, /WP, /HOLD; C802 at U802's VCC; R301 6 mm down the SCK route from its fan-out
     via; R302 3.8 mm from the BOOT0 via; C803 on ST's MB1163 land (D-039).
   - Test pads, 2.4 mm pitch (2.7 mm next to a 1.5 mm pad):
-    - power entry: a column at x −30, z 73.5 → 63.0 (BAT_F, PP_G, VBAT, GND, VBAT_SENSE), BAT_F / PP_G nearest Q101;
-    - Qwiic: a column at x −26, z 73.0 → 67.9 (SDA, SCL, GND);
+    - power entry: a column at x −28, z 73.5 → 63.0 (BAT_F, PP_G, VBAT, GND, VBAT_SENSE), BAT_F / PP_G nearest Q101;
+    - Qwiic: a column at x −24, z 72.6 → 67.2 (SDA, GND, SCL);
     - drive logic: a row at z 53.5, x 9.0 → 28.2 (nFAULT, MISO, SCS, MOSI, SCK, AIN2, AIN1, BIN1, BIN2), above the
       DRV8711's logic vias, in their order;
     - drive power: one row per bridge, below each motor's phase route: z 29.0, x −17.0 → −9.5 (MOT_L_P, MOT_L_N,
       SENSE_B, GND) and z 28.0, x 27.0 → 34.5 (GND, SENSE_A, MOT_R_N, MOT_R_P);
-    - MCU: a row above J301 at z 104.0, x −37.5 → −29.7 (NRST, VFBSMPS, VDDA, BOOT0);
+    - MCU: a row above J301 at z 104.0, x −37.5 → −32.7 (NRST, VFBSMPS, BOOT0); TP303 (VDDA) beside the VDDA caps at
+      (−6.0, 98.5), 2.1 mm from C311's pad (D-052);
     - IMU and flash: a row left of the IMU at z 80.9, x −16.9 → −4.9 (FLASH_NCS, IMU_NCS, SCK, MOSI, MISO, INT);
-    - encoders: TP603 / TP604 beside U604 at (25.5, 44.5) / (25.5, 36.0); ENC_VCC / GND at z 26.0 below F601.
+    - encoders: TP603 / TP604 beside U604 at (23.45, 44.5) / (23.45, 36.0), in the right chain's table since D-052;
+      ENC_VCC / GND at z 26.0 below F601.
   - Still yours, routing: SW_ON to R102; I2C3 J801 → U801 → R808 / R809 → U802 → MCU and on to U803; each test pad's
-    stub to the copper it probes, short and on top; VDDA's pad (TP303) is about 20 mm from its nearest cap (C312): keep
-    that stub thin and away from switching copper, or move the pad.
+    stub to the copper it probes, short and on top.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).
+- **Assembly spacing (D-052):** `python3 scripts/pcb/respace.py --check` lists any two parts closer than 0.5 mm and any
+  body within 2.5 mm of the edge; `--apply` moves the parts no table holds by the smallest step, keeping their tracks at
+  their angles. It moved 24 parts, among them the vendors' Y301, C309, C314–C316, C318, L301, L401, C401 (ST) and C510,
+  C511, C514 (TI) by 0.05–0.35 mm, and our MCU caps C302, C303, C307, C308 by 0.45–2.0 mm (their nearest pad now
+  1.9–3.6 mm from the pin). D504 and C503 left TI's copper they sat on: route them. Run `--check` after moving parts.
 - **Holes for you to place (staged under "Mechanical", the only parts still off the board, D-051):** battery cradle
   MC1–MC4 and bumpers MH1/MH2. Footprints
   `MountingHole_M3_NPTH_KeepOut7mm` and `..._M2_..._KeepOut5.5mm` are in the project library for more.
@@ -183,8 +192,10 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
    python3 scripts/pcb/board.py --rules <path to pcb_rules.py>
    ```
 
-   It ends by laying the silkscreen labels out (`scripts/pcb/silk.py`, D-041): labels that are clean stay put, the
-   others move next to their part. `python3 scripts/pcb/silk.py --check` reports without changing anything.
+   It ends by laying the silkscreen labels out (`scripts/pcb/silk.py`, D-041, D-052): the test pads' names that are clean
+   stay put, the others move next to their pad; references go to F.Fab. `python3 scripts/pcb/silk.py --check` reports
+   without changing anything; `--relayout` lays every name out afresh. `python3 scripts/pcb/respace.py --check` checks
+   JLCPCB's assembly spacing.
 
    ```bash
    kicad-cli pcb drc --schematic-parity --severity-all hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb

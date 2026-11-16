@@ -11,9 +11,9 @@ board geometry. This script never moves or reshapes anything that already exists
     bodies changed gets the new bodies in place (nothing moves or leaves its group); new parts go to the first
     free spot in the staging area right of the board; parts removed from the schematic are deleted (board-only
     footprints are never deleted);
-  - shows one label per part on the silkscreen: the reference, a test pad's net name instead, nothing on a net tie
-    (label_fields, D-035); then lays every label out with silk.py: JLCPCB's minimum text, clear of other labels,
-    outlines, pads, vias, bodies and the edge, next to its own part (D-041);
+  - shows only the test pads' net names on the silkscreen, every other part's reference on the fab layer (the assembly
+    drawing), nothing on a net tie (label_fields, D-035, D-052); then lays them out with silk.py: the names at
+    JLCPCB's minimum text, clear of other labels, outlines, pads, vias, bodies and the edge, next to their pad (D-041);
   - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the fab rules, the
     JLCPCB's (pcb-design-rules skill, pcb_rules.py, D-036), plus the project rules below.
 
@@ -379,22 +379,38 @@ DRIVE_GROUP = "BOOST-DRV8711 drive"
 COPIED_GROUPS = {RF_CORNER_GROUP, NFC_CORNER_GROUP, DRIVE_GROUP}
 
 
-def silk_label(fp):
-    """The field a part shows on the silkscreen (D-035): its reference, a test pad's net name, nothing on a net tie
-    (copper only, nothing to assemble). ANT14 also ties its pads, through the coil, but it is a part: it keeps its label."""
+def is_net_tie(fp):
     lib_id = fp.GetFPIDAsString()
-    if lib_id.startswith("NetTie:") or "Net-Tie" in lib_id:
+    return lib_id.startswith("NetTie:") or "Net-Tie" in lib_id
+
+
+def silk_label(fp):
+    """The field a part shows on the silkscreen: a test pad's net name, nothing else (D-035, D-052). Every other part's
+    reference is on the fab layer, the assembly drawing (fab_label)."""
+    return fp.Value() if fp.GetFPIDAsString().startswith("TestPoint:") else None
+
+
+def fab_label(fp):
+    """The field a part shows on the assembly drawing (F.Fab, D-052): its reference; none on a test pad (its net name is
+    on the silkscreen) or a net tie (copper only, nothing to assemble). ANT14 also ties its pads, through the coil, but
+    it is a part: it keeps its reference."""
+    if is_net_tie(fp) or silk_label(fp) is not None:
         return None
-    return fp.Value() if fp.GetFPIDAsString().startswith("TestPoint:") else fp.Reference()
+    return fp.Reference()
 
 
 def label_fields(fp):
-    """Only the part's silkscreen label is visible (silk_label); silk.py places and sizes it (D-041). The footprint's
-    other silkscreen is raised to JLCPCB's minimum and never lowered: text 1.0 mm high, lines and strokes 0.15 mm
-    (KiCad's library draws outlines at 0.12 mm)."""
-    label = silk_label(fp)
+    """A test pad shows only its net name on the silkscreen; every other part only its reference, on the fab layer;
+    silk.py places and sizes both (D-041, D-052). The footprint's other silkscreen (outlines, pin-1 marks, polarity) is
+    raised to JLCPCB's minimum and never lowered: text 1.0 mm high, lines and strokes 0.15 mm (KiCad's library draws
+    outlines at 0.12 mm)."""
+    silk, fab = silk_label(fp), fab_label(fp)
+    fab_layer = pcbnew.B_Fab if fp.IsFlipped() else pcbnew.F_Fab
     for field in (fp.Reference(), fp.Value()):
-        field.SetVisible(label is not None and field.GetName() == label.GetName())
+        shown = silk if silk is not None else fab
+        field.SetVisible(shown is not None and field.GetName() == shown.GetName())
+    if fab is not None:
+        fab.SetLayer(fab_layer)
     height, thickness = (pcbnew.FromMM(v) for v in SILK_TEXT_MIN)
     for item in fp.GraphicalItems():
         if item.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS):

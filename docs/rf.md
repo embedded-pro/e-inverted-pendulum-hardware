@@ -109,7 +109,9 @@ MCU fan-out:
 - While they were placed, the copy's routes the owner took up were kept free: VLXSMPS pin 43 → L302, HSE pins 34 / 35
   → Y301.
 - C301, C308, C310–C313 and FB301 stay where the owner placed them.
-- C302's and C317's references are on F.Fab, as are C308's, C314's and L302's now (no 1.0 mm spot left, D-041).
+- Since D-052 every reference is on F.Fab (only test pads' names on the silkscreen), and JLCPCB's 0.5 mm assembly gap
+  moved C302 (0.45 mm), C303 (1.4), C307 (1.2, turned), C308 (2.0, turned), C301 (+0.05) and C317 (+0.15): each
+  cap's nearest pad is now 1.9–3.6 mm from its pin (C306 10.2 mm, the Nucleo's spot).
 
 ## Stack-up and the RF line
 
@@ -174,8 +176,12 @@ MCU fan-out:
 - **Routing-quality gate:** ST's routing has four short sideways jogs (0.15–0.23 mm, on VFBSMPS, VDDSMPS and
   OSC32_IN, at the MCU pins). They stay as copied, so the gate is run as
   `pcb_rules.py check --allow-unrouted --gate jogs=4`. Shorts, clearance and the fab floor are not relaxed.
-- **Silkscreen:** references on the silk where a 1.0 mm label fits clear of everything (D-041). 17 do not: C301, C307,
-  C308, C310, C312, C314–C317, C401, C402, FL401, L302, L401, SC404, Y301, Y302. Their references are on F.Fab.
+- **Silkscreen:** no references on the silk since D-052, all on F.Fab (the assembly drawing).
+- **Assembly spacing (D-052):** JLCPCB assembles to IPC-7351B medium density, so neighbours keep 0.5 mm. ST packed
+  some parts tighter; `scripts/pcb/respace.py` nudged them, the copied tracks staying on the moved pads: Y301 0.20 mm
+  from U301, C309 0.15 from L301, C315 / C316 0.10 from Y302, L401 0.05 and C401 0.10 along the RF line (C402 stays:
+  ST's GND fence via leaves no room), C314 0.05, L301 0.05 and C318 0.35 from L302. The matching network's
+  geometry changes by at most 0.1 mm: tune C401 / C402 on the bench (open item 1, already planned).
 - **Ground and stitching:**
   - All ground pours are the owner's now (D-046), the RF strip's included; L2 stays cut out under the RF line.
   - Until then DRC lists ST's stitching vias as dangling.

@@ -69,8 +69,9 @@ The firmware is the requirement source: every hardware requirement in `docs/requ
 - Net classes from `docs/power-map.md`; JLC rules from the `pcb-design-rules` skill; custom DRC rules for the RF1
   trace, keep-outs and the bracket strip. RF line: MB1355's 0.6 / 0.2 mm on L1 over L3 (L2 cut out locally): 56.9 Ω
   vs 56.3 Ω on ST's board (`scripts/gcpw.py`).
-- Silkscreen shows references only; test pads show their net name (D-035). Labels are JLCPCB's smallest text, placed by
-  `scripts/pcb/silk.py` clear of everything; 12 with no room sit on F.Fab (D-041, D-047).
+- The silkscreen shows only the test pads' net names, at JLCPCB's smallest text, placed by `scripts/pcb/silk.py` clear
+  of everything; every reference is on F.Fab (D-035, D-041, D-052). Every part keeps JLCPCB's assembly spacing: 0.5 mm
+  to its neighbours, 2.5 mm from its body to the edge (`scripts/pcb/respace.py --check`, D-052).
 - **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position (ungrouped, no pours since D-046)
   (D-037), the NFC and drive copies (D-039, D-040) the motor connectors with their encoder inputs at the side edges
   (D-042), and the IMU, flash and EEPROM (D-043). Since 49b38c1 the owner places in KiCad (D-047): the power entry and

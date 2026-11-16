@@ -101,8 +101,10 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
 - **Phase outputs:** the phase copper (TI's pours until D-046) is the owner's, from the FETs to J601 / J602 (PH 6-pin at
   the side edges, D-044).
 - **Net ties on the bottom:** copper only, nothing to assemble, no label.
-- **Silkscreen (D-041):** every reference on the silk except C503 and Q504, which have no clean spot beside the FETs
-  since the owner's moves (D-047; their references are on F.Fab). The extras are placed so that no two outlines overlap.
+- **Silkscreen (D-041, D-052):** references on F.Fab only. The extras are placed so that no two outlines overlap.
+- **Assembly spacing (D-052):** JLCPCB's 0.5 mm between parts: TI's C510 (0.15 mm), C511 (0.15) and C514 (0.05) are
+  nudged, their tracks staying on the moved pads; our C503 (3.2 mm), D504 (0.5), R515 (3.0), R517 (1.8, turned), R518
+  (0.25) and D503 (0.05) move off TI's parts. D504 and C503 sat on TI's copper of their net and left it: route them.
 
 ## Open items
 

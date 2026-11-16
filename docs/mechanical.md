@@ -136,14 +136,16 @@ Result (S0, `simulation/results/sizing_summary.json`):
 5. Motor plugs (D-042): J601 / J602 face sits 0.55 mm inside the side edge (**ASSUMPTION**: the footprint's silk keeps
    JLCPCB's clearance to the edge). Check the PH plug, its latch and the cable bend against the bracket legs (x ±51,
    behind the board) and the wheels on the assembled robot.
-6. **Battery cradle relief (D-044):** J601 / J602's upper four pins (x ±35.7, z 39.5–45.5) sit over the battery's side
-   edges. Their through-hole tails stick out on the back (**ASSUMPTION**: about 1.5 mm; measure the S6B-PH-K), so the
-   cradle needs a relief at x ±34.3…±37.1, z 38.4–46.6 (pads plus 0.5 mm).
-   **J101 (D-047):** the owner placed the XT30 at the left edge with both pins (1.9 mm holes, 3.2 mm pads) at x −38,
-   z 56.4 / 61.4, over the battery's left edge (x −38.5). Its tails stick out on the back (**ASSUMPTION**: about 1.5 mm;
-   measure the XT30UPB-F), so the cradle needs a second relief at x −40.1…−35.9, z 54.3–63.5 (pads plus 0.5 mm).
-7. **Power switch (D-051):** SW101 (SS-12D10L5) at the left edge, turned 90° so it slides along z, pins at x −38.75,
-   z 79.0 / 83.7 / 88.4, 3.75 mm from the edge to the pin row. Its lever stands out of the front (component side) and is
+6. **Battery cradle relief (D-044, moved by D-052):** J601 / J602's upper four pins (x ±33.65, z 39.5–45.5) sit over
+   the battery's side edges. Their through-hole tails stick out on the back (**ASSUMPTION**: about 1.5 mm; measure the
+   S6B-PH-K), so the cradle needs a relief at x ±32.28…±35.03, z 38.4–46.6 (pads plus 0.5 mm).
+   **J101 (D-047, moved by D-052):** the XT30 at the left edge with both pins (1.9 mm holes, 3.2 mm pads) at x −37.1,
+   z 56.4 / 61.4, over the battery's left edge. Its tails stick out on the back (**ASSUMPTION**: about 1.5 mm; measure
+   the XT30UPB-F), so the cradle needs a second relief at x −39.2…−35.0, z 54.3–63.5 (pads plus 0.5 mm).
+   The connectors moved inward in D-052 so every part's body keeps JLCPCB's 2.5 mm from the board edge (assembly
+   terms, DFM item 3): their plugs now start about 2.5 mm inside the edge, the cables entering over the board.
+7. **Power switch (D-051, moved by D-052):** SW101 (SS-12D10L5) at the left edge, turned 90° so it slides along z, pins
+   at x −36.5, z 79.0 / 83.7 / 88.4, its body 2.5 mm from the edge. Its lever stands out of the front (component side) and is
    worked from the front; its through-hole tails are above the battery (z ≥ 79 > 75), so the cradle needs no relief.
    **ASSUMPTION**: lever and body heights from the part family, not measured; check that the lever clears a front cover
    or bumper, and that a fall on the left side doesn't hit it (HW-MEC-004 bumpers).

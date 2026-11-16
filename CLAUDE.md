@@ -73,11 +73,12 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/board.py --rules <pcb_rules.py>`: update the PCB from the schematic (footprints, nets, net classes
   from `docs/power-map.md`, JLCPCB rules, D-036). Placement is the owner's (D-032): it never
   moves or reshapes what is on the board; it adds missing items (new parts go to the first free spot in the staging
-  area) and removes parts deleted from the schematic. Only references show on the silkscreen; test pads show their net
-  (D-035). `--stage-all` is a one-shot reset to staging.
-- `python3 scripts/pcb/silk.py [--check]`: silkscreen labels at JLCPCB's 1.0 mm / 0.15 mm, clear of every label, outline,
-  pad, via, body and the edge, next to their part (D-041). `board.py` and the paste scripts run it last; run it after
-  moving parts in KiCad. Clean labels never move.
+  area) and removes parts deleted from the schematic. Only the test pads' net names show on the silkscreen; every
+  reference is on F.Fab (D-035, D-052). `--stage-all` is a one-shot reset to staging.
+- `python3 scripts/pcb/silk.py [--check | --relayout]`: the test pads' net names at JLCPCB's 1.0 mm / 0.15 mm, clear of
+  every label, outline, pad, via, body and the edge, next to their pad (D-041); every other reference on F.Fab, sized
+  inside its part (D-052). `board.py` and the paste scripts run it last; run it after moving parts in KiCad. Clean
+  labels never move; `--relayout` lays them all out afresh.
 - `python3 scripts/rf_reference.py`: ST's MB1355 files (`reference/mb1355/`, gitignored, OPLA) -> `scripts/pcb/mb1355_rf.json`
   and the `MB1355_*` footprints (D-037).
 - `python3 scripts/pcb/rf_block.py --apply`: paste the MB1355 RF corner (one shot; no-op once U301 is on the board).
@@ -92,15 +93,20 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   (`--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
   with their encoder chains and supply (D-042, D-044); `imu_memory` = the IMU on the centre line, the flash and the
   EEPROM left of the MCU (D-043); `power` = the TPS62933F buck and the TLV75533P LDO right of the power entry, to TI's
-  layout guidance (D-049); `leds` = the 12 RGB LEDs as two square rings in the centre, their caps, the chain's driver and
+  layout guidance (D-049); `power_entry` = J101, F101, Q101 and their parts at the left edge, the owner's arrangement
+  (D-047, D-052); `leds` = the 12 RGB LEDs as two square rings in the centre, their caps, the chain's driver and
   the status LED (D-050); `rest` = the power switch and the Qwiic port at the left edge, the support parts at their
   pins and the test pads in rows per block (D-051). The tables hold the owner's positions from KiCad (D-047): after
   moving parts, update them so `--replace` changes nothing; parts parked off the board (MC1–MC4, MH1 / MH2) are not in
-  them. It refuses a spot that touches a courtyard, other-net copper or a silk outline, or puts a pad under another
-  part's silkscreen.
-- `python3 scripts/pcb/shift_block.py --apply drive`: move a placed block with its copper (tracks and vias inside its
-  courtyards' box, on its nets) to the target of its anchor in `placement.py`; refuses on any clash; no-op once there
-  (D-050).
+  them. It refuses a spot that touches a courtyard, other-net copper or a silk outline, puts a pad under another
+  part's silkscreen, or breaks JLCPCB's assembly spacing (0.5 mm between parts, 2.5 mm body to edge, D-052).
+- `python3 scripts/pcb/respace.py --check | --apply`: JLCPCB's assembly spacing (IPC-7351B medium density: 0.5 mm
+  between neighbouring parts' pads and bodies; 2.5 mm from a body to the edge, D-052). `--apply` moves the parts no table
+  holds by the smallest step, tracks kept at their angles, a vendor's track end staying on the moved pad; one shot,
+  no-op when clean. Run `--check` after moving parts.
+- `python3 scripts/pcb/shift_block.py --apply drive | motor_left | motor_right`: move a placed block with its copper
+  (tracks and vias inside its courtyards' box, on its nets) to the target of its anchor in `placement.py`; refuses on
+  any clash or spacing break; no-op once there (D-050, D-052).
 - `python3 scripts/pcb/mcu_escape.py --fanout | --decoupling`: a 0.2 mm stub and a 0.15 / 0.25 mm via from every MCU pin
   another part uses, staggered in two rows, clear of the crystals and the RF nets; then the MCU decoupling caps at ST's
   lands, the Nucleo's spots or the nearest free spot to their pin, top side (D-048). One shot each; no-op when done.
