@@ -221,3 +221,9 @@ MCU fan-out:
    loop; one GND via at C309, C314, C315, C316 and C318. ST's +3V3 chain from pin 44 to C318 and its VFBSMPS chain now
    cross our MCU fan-out and C302 (D-048) and are not restored; U301's other VDD pins, which ST joins through its own
    planes, are routed in the later passes.
+11. **VDDRF on top through ST's strip ground (D-059):** pin 33 to C307 and C307 to C308 run on F.Cu, 0.2 mm (ST's VDD
+    stub width), through the strip's F.Cu ground, which flows round them as round ST's own VDDRF stubs; every such hop
+    keeps 0.5 mm from RF1 / RF_50 / RF_ANT copper (rf-layout §5). Pin 30 to C301 has no such path (C301 is right of the
+    RF1 line, boxed in by the fan-out). ST escapes pin 30 with a 0.64 mm L1 stub to a 0.3 / 0.2 mm via at
+    (−19.12, 101.76), 0.2 mm from RF1's copper, then L4 to its bottom-side cap: adding it changes the copy beside RF1,
+    so it is the owner's call.

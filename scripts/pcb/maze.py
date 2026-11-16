@@ -258,6 +258,8 @@ class Router:
         self.labels = [outlines(rect)[0] for rect in world.labels]
         self.npth = [pad for pad in world.pads if pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH]
         self.soft_pours = False
+        self.quiet = ((), 0.0)
+        self.gnd = board.GetNetcodeFromNetname("GND")
 
     # Obstacles in a window.
 
@@ -290,7 +292,7 @@ class Router:
                     for pts in shapes:
                         win.draw(canvases["hot"][1], pts)
             for zone_net, zone_name, fills in self.fills[layer]:
-                if zone_net != net and not soft_pours:
+                if zone_net != net and not self.soft(zone_net, soft_pours):
                     for pts in fills:
                         win.draw(canvases["zone"][1], pts)
                 if hot and any(zone_name.startswith(h) for h in hot):
@@ -610,14 +612,31 @@ class Router:
         return all(self.world.track_problem(p, q, layer, width, probe, own, pours=False) is None
                    and self.pour_problem(p, q, layer, width, probe) is None for p, q in legs)
 
+    def soft(self, zone_net, soft_pours):
+        """True when a pour of this net gives way in this route: every pour (soft_pours True) or the ground pours only
+        (soft_pours "GND")."""
+        return soft_pours is True or (soft_pours == "GND" and zone_net == self.gnd)
+
     def pour_problem(self, a, b, layer, width, probe):
         """Another net's pour that the track would cut into (the hard ones: see soft_fill)."""
-        if self.soft_pours:
-            return None
         shape = pcbnew.SHAPE_SEGMENT(a, b, width)
         for net, poly, gap in self.hard[layer]:
-            if net != probe.GetNetCode() and poly.Collide(shape, gap):
+            if net != probe.GetNetCode() and not self.soft(net, self.soft_pours) and poly.Collide(shape, gap):
                 return "pour"
+        return None
+
+    def quiet_problem(self, a, b, layer, width):
+        """A track within the quiet gap of the quiet nets' copper (route's quiet: the RF nets, rf-layout s5)."""
+        names, gap = self.quiet
+        if not names:
+            return None
+        shape = pcbnew.SHAPE_SEGMENT(a, b, width)
+        centre = pcbnew.VECTOR2I((a.x + b.x) // 2, (a.y + b.y) // 2)
+        reach = int((b - a).EuclideanNorm() / 2) + mm(3)
+        for item in self.world.near(self.world.pads + self.world.tracks, centre, reach):
+            if RS.short(item.GetNetname()) in names and item.IsOnLayer(layer) and \
+                    item.GetEffectiveShape(layer).Collide(shape, mm(gap)):
+                return "quiet"
         return None
 
     def via_problem(self, at, diameter, drill, probe, own_net_ok=False, ignore_bodies=(), soft_pours=False):
@@ -652,9 +671,9 @@ class Router:
                 elif shape.Collide(ring, mm(R.rule_clearance(item, probe))) or \
                         shape.Collide(hole, mm(HOLE_TO_COPPER)):
                     return "copper"
-        for layer in (LAYERS if not soft_pours else ()):
+        for layer in LAYERS:
             for net, poly, gap in self.hard[layer]:
-                if net != probe.GetNetCode() and poly.Collide(ring, gap):
+                if net != probe.GetNetCode() and not self.soft(net, soft_pours) and poly.Collide(ring, gap):
                     return "pour"
         return None
 
@@ -671,13 +690,16 @@ class Router:
             return own, own
         return default, max(default, WIDE_CLEARANCE)
 
-    def route(self, a, b, width, allow_vias=True, via_cost=3.0, layers=(0, 1), margins=MARGINS, soft_pours=False):
+    def route(self, a, b, width, allow_vias=True, via_cost=3.0, layers=(0, 1), margins=MARGINS, soft_pours=False,
+              quiet=((), 0.0)):
         """Route a to b (route_simple.Terminal) at this width (nm). Returns (tracks, vias) added, or (None, why).
-        soft_pours: other nets' pours are not obstacles (a vendor's own connection, which its pour flows around)."""
+        soft_pours: other nets' pours are not obstacles (a vendor's own connection, which its pour flows around); "GND":
+        only the ground pours give way. quiet: (net names, gap mm) the route keeps clear of."""
         net = a.item.GetNetCode()
         probe = RS.probe_for(self.board, a.item.GetNet())
         clearance, wide = self.clearances(probe)
         self.soft_pours = soft_pours
+        self.quiet = quiet
         origin = next((t.at for t in (a, b) if t.kind == "end"), None) or \
             next((t.at for t in (a, b) if t.kind == "via"), a.at)
         why = "no path"
@@ -739,7 +761,7 @@ class Router:
                 return "crossing"
             for p, q in legs:
                 why = self.world.track_problem(p, q, layer, width, probe, (a, b), pours=False) or \
-                    self.pour_problem(p, q, layer, width, probe)
+                    self.pour_problem(p, q, layer, width, probe) or self.quiet_problem(p, q, layer, width)
                 if why:
                     return why
         first_layer, first_pts = runs[0]

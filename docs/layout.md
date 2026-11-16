@@ -204,15 +204,24 @@ MB1355's L2 cut-out under the RF line, which the owner had deleted until the pou
   FB301 to its caps, the motor phases to TI's pours.
 - **Routing pass 4 (D-058, `scripts/pcb/route_maze.py`): done.** 60 long runs by priority (encoders, VBAT_SENSE, the
   DRV8711's control lines, SPI1 / IMU / flash, I2C3, SWD / VCP, supplies), 76 vias, F.Cu horizontal / B.Cu vertical.
-  Unrouted 118 → 60. **Yours to finish (60):**
-  - +3V3 at U301's VDD pins (30, 33, 44 / 45, 55) and their caps: the fan-out and the SMPS parts leave no channel; a
-    via-in-pad or moving a fan-out via frees one;
-  - GND at the IMU's pins 11 / 18 / 20 (U701's no-track area) and a few copy pads;
+  Unrouted 118 → 60.
+- **Placement study and the MCU's supply pins (D-059): done.** `scripts/pcb/improve_placement.py --study` ranks the
+  parts by how much ratsnest (per-net Manhattan MST) a move would save; the moves you chose (drive and MCU / IMU test
+  pads, J301, the flash) were tried on a copy with `scripts/pcb/ripup.py` and a full re-route, and made it worse (64
+  open against 63, 197 mm more track), so the placement is unchanged. The MCU's +3V3 hops now try ST's 0.2 mm stub and,
+  up to 4 mm, F.Cu through ST's strip ground 0.5 mm from RF1: pin 33, C307, C308 and C318 joined. Unrouted 60 → 57.
+  **Yours to finish (57):**
+  - +3V3 (7): pin 33's island (C307 / C308) to the rest of +3V3; pin 30 to C301 (no top path keeps 0.5 mm from RF1: ST
+    uses a 0.64 mm stub to a 0.3 / 0.2 mm via at (−19.12, 101.76) beside RF1, then the bottom side); pin 55 to C305;
+    R515 at the drive;
+  - GND (8): the IMU's pin 11 (U701's no-track area), Y301 pad 2, J801's shell, TI's drive GND fill islands;
   - the motor phases and sense nodes (MOT_*, SENSE_A / B) to TI's pours, 0.8 mm;
-  - single MCU lines into the crowded fan-out: SPI1_MOSI, IMU_MISO / INT / SCK / MOSI, DRV_BIN1 / BIN2 and four other
-    DRV lines, SWCLK, VCP_RX / TX, BOOT0, NRST, QWIIC_SDA / SCL;
+  - single MCU lines into the crowded fan-out: SPI1_MOSI / SCK, IMU_MISO / INT / SCK / MOSI, DRV_BIN1 / BIN2 / AIN2 /
+    SCS / NSLEEP / NFAULT, SWCLK, VCP_RX / TX, BOOT0, NRST, QWIIC_SDA / SCL;
   - NFC_AC1 / GPO / RF_DIS, LED_DATA, LED_GREEN, SW_ON, VDDA.
-  After any change, `route_maze.py --apply` routes what has become routable and does nothing otherwise.
+  After any change, `route_maze.py --apply` routes what has become routable and does nothing otherwise. After moving
+  parts, `ripup.py --apply` takes up passes 1, 3 and 4 so `route_simple.py` and `route_maze.py` (`--max-length 8`, then
+  without) re-route around the new spots.
 - **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
   J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
   battery (z ≥ 79).

@@ -355,6 +355,11 @@ REST_EDGE = [
     ("J801", -37.18, 70.0, 270.0),
     ("U801", -32.63, 68.5, 0.0),
 ]
+# The STDC14 debug connector (J301), where the owner placed it left of the MCU (D-047); in a table since D-059, so
+# improve_placement.py can move it and place_block.py --replace keeps it.
+REST_DEBUG = [
+    ("J301", -36.15, 97.19, 0.0),
+]
 # Support parts at the nearest spot to the pin they serve that keeps every label; C803 on ST's MB1163 land (D-039).
 # R808 / R809 (I2C3 pull-ups) by the Qwiic port's ESD, where the bus enters; R301 (SPI1 SCK 33 Ohm) 6 mm down the SCK
 # route from its fan-out via; R302 (BOOT0 pull-down) 3.8 mm from its via; R702 clear of U702's pin-1 mark; C704 0.5 mm
@@ -410,4 +415,4 @@ REST_TEST_PADS = (
 
 def rest():
     """The edge parts, the support parts and the test pads, as (ref, x, z, rotation)."""
-    return REST_EDGE + REST_SUPPORT + REST_TEST_PADS
+    return REST_EDGE + REST_DEBUG + REST_SUPPORT + REST_TEST_PADS

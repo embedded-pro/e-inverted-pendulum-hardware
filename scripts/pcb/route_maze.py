@@ -16,9 +16,13 @@ mm, or 0.2 / 0.45 mm where that does not fit), every segment and via checked exa
     GND, except a ground pad still off the plane, which is joined to the nearest grounded copper. The vendor copies'
     own connections are first closed from their references (vendor_gaps.py, D-055); what that leaves (ST's VDD pins,
     which ST joins through its own planes) is routed here like any other.
-  - Order: pass 3 shortest first, with vias expensive (F.Cu around a part first); pass 4 by priority (the encoders, kept
-    away from the motor phases; VBAT_SENSE; the DRV8711 control lines; the SPI buses; I2C3; SWD / VCP; the supplies;
-    the rest), shortest first within each.
+  - The MCU's supply pins: a hop that finds no path tries ST's 0.2 mm VDD stub width, and one up to 4 mm then tries F.Cu
+    through the ground pours (ST's RF-strip ground flows round it, as round ST's own VDDRF stubs), 0.5 mm from the RF
+    nets (D-059).
+  - Order: the MCU's supply pins first in both passes (+3V3 / VDDA within MCU_REACH of U301, D-059); then pass 3
+    shortest first, with vias expensive (F.Cu around a part first); pass 4 by priority (the encoders, kept away from the
+    motor phases; VBAT_SENSE; the DRV8711 control lines; the SPI buses; I2C3; SWD / VCP; the supplies; the rest),
+    shortest first within each.
 A connection that cannot be made is reported with its reason and left for the owner. Re-running is a no-op once nothing
 routable is left. The zones are refilled. Nothing is locked (D-045).
 """
@@ -55,10 +59,28 @@ SHORT_VIA_COST = 8.0
 LONG_VIA_COST = 3.0
 PRIORITY = (("ENC_",), ("VBAT_SENSE",), ("DRV_",), ("SPI1", "SPI2", "IMU_", "FLASH_"), ("QWIIC_", "I2C"),
             ("SWD", "SWCLK", "SWDIO", "VCP_", "NRST", "BOOT0"), ("+3V3", "+5V", "ENC_VCC", "VDDA", "NFC_VCC"))
+# The MCU's supply pins first, in both passes: a +3V3 / VDDA connection with both ends within MCU_REACH mm of U301's
+# centre routes before anything else can take the channel between the fan-out, the SMPS parts and the caps (D-059).
+MCU = "U301"
+MCU_SUPPLIES = ("+3V3", "VDDA")
+MCU_REACH = 10.0
+# An MCU supply hop that finds no path tries ST's own VDD stub width (MB1355.PcbDoc: 0.2 mm at U1 pins 45 and 55; IPC-2221
+# gives it about 0.7 A on 1 oz outer copper, the pins draw milliamps); one up to MCU_SOFT_LENGTH mm then tries F.Cu
+# alone, no via, through the ground pours (ST's RF-strip ground flows round it, as round ST's own VDDRF stubs at pins
+# 30 / 33; the VDDRF caps sit on top in that ground since D-037 / D-048), at least RF_GAP from the RF nets' copper
+# (mcu_escape.QUIET_GAP, rf-layout s5).
+MCU_STUB = 0.2
+MCU_SOFT_LENGTH = 4.0
+RF_NETS = ("RF1", "RF_50", "RF_ANT")
+RF_GAP = 0.5
 
 
 def priority(name):
     return next((k for k, keys in enumerate(PRIORITY) if any(name.startswith(key) for key in keys)), len(PRIORITY))
+
+
+def mcu_supply(name, a, b, centre):
+    return name in MCU_SUPPLIES and all((t.at - centre).EuclideanNorm() <= M.mm(MCU_REACH) for t in (a, b))
 
 
 def escaped(islands, terms):
@@ -94,10 +116,12 @@ def candidates(board, islands, found, plane, max_length):
                 if max_length is not None and length > max_length:
                     continue
                 pairs.append((length, name, a, b))
+    centre = board.FindFootprintByReference(MCU).GetPosition()
     if max_length is not None:
-        pairs.sort(key=lambda p: (p[0], p[1], p[2].name(), p[3].name()))
+        pairs.sort(key=lambda p: (not mcu_supply(p[1], p[2], p[3], centre), p[0], p[1], p[2].name(), p[3].name()))
     else:
-        pairs.sort(key=lambda p: (priority(p[1]), p[0], p[1], p[2].name(), p[3].name()))
+        pairs.sort(key=lambda p: (not mcu_supply(p[1], p[2], p[3], centre), priority(p[1]), p[0], p[1], p[2].name(),
+                                  p[3].name()))
     return pairs
 
 
@@ -124,6 +148,7 @@ def stage(max_length, limit):
 def route_round(board, islands, router, plane, max_length, via_cost, routed, failed, limit, tried):
     """One round over every candidate pair, closest first (TRIES_PER_GAP per pair of islands)."""
     pairs = candidates(board, islands, RS.terminals(board), plane, max_length)
+    centre = board.FindFootprintByReference(MCU).GetPosition()
     attempts = defaultdict(int)
     for length, name, a, b in pairs:
         ia, ib = islands.find(RS.uid(a.item)), islands.find(RS.uid(b.item))
@@ -143,6 +168,13 @@ def route_round(board, islands, router, plane, max_length, via_cost, routed, fai
         if result is None and narrow and width > M.mm(narrow):
             width = M.mm(narrow)
             result, why = router.route(a, b, width, allow_vias=True, via_cost=via_cost)
+        if result is None and mcu_supply(name, a, b, centre):
+            if width > M.mm(MCU_STUB):
+                width = M.mm(MCU_STUB)
+                result, why = router.route(a, b, width, allow_vias=True, via_cost=via_cost)
+            if result is None and length <= MCU_SOFT_LENGTH:
+                result, why = router.route(a, b, width, allow_vias=False, layers=(0,), soft_pours="GND",
+                                           quiet=(RF_NETS, RF_GAP))
         spent = time.time() - started
         if result is None:
             failed.append((name, a.name(), b.name(), length, why, (RS.uid(a.item), RS.uid(b.item))))

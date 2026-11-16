@@ -103,12 +103,20 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   buck) and one via per VBAT pad off the plane; TP102 joined. Checks necks (L1 deflated 1.1 mm, L3 5.6 mm). One shot.
 - `python3 scripts/pcb/route_maze.py --apply [--max-length 8]`: routing passes 3 / 4 (D-057, D-058). Each net's islands
   joined closest-first by `maze.py` (F.Cu / B.Cu, ≤ 2 vias, no jogs); `--max-length` = pass 3 (short, vias costly),
-  without = pass 4 (by priority: encoders, VBAT_SENSE, DRV8711, SPI, I2C, SWD, supplies). Skips PWR_BUS and the
-  crystals. Supplies fall back to 0.3 mm, signals to 0.15 mm; 3 tries per island gap, in rounds until one routes
-  nothing (several minutes to an hour). GND fills outside TI's bridges and ST's B.Cu strip below z 103 give way (D-058).
-  No-op when nothing routable is left.
+  without = pass 4 (by priority: encoders, VBAT_SENSE, DRV8711, SPI, I2C, SWD, supplies); in both, the MCU's +3V3 / VDDA
+  pins within 10 mm of U301 go first (D-059). Skips PWR_BUS and the crystals. Supplies fall back to 0.3 mm, signals to
+  0.15 mm; 3 tries per island gap, in rounds until one routes nothing (several minutes to an hour). GND fills outside
+  TI's bridges and ST's B.Cu strip below z 103 give way (D-058). No-op when nothing routable is left.
 - `scripts/pcb/maze.py`: the grid router (0.05 mm, F.Cu / B.Cu, 45° turns only, layer-direction costs, ≤ 2 vias, every
   segment and via checked exactly) that `vendor_gaps.py` and `route_maze.py` use.
+- `python3 scripts/pcb/ripup.py --apply`: take up the routing of passes 1, 3 and 4 (the tracks and vias they added, known
+  from the history: 86255bf vs 90d12ca, 6926847 vs ae59e46); the copies, pass 2, the power bus, the fan-out, the GND
+  lattice and the pours stay (D-059). No-op once gone. Re-route with `route_simple` then `route_maze` (pass 3, pass 4).
+- `python3 scripts/pcb/improve_placement.py --study | --apply <groups>`: the ratsnest's length (per-net Manhattan MST, the
+  pcb-design-rules skill's measure) and the parts / groups whose move would shorten it; `--apply` moves the named groups
+  (`j301`, `mcu_tp`, `flash`, `imu_tp`, `drive_tp`) each by the shortest-total translation that passes `place_block`'s
+  checks, the pours, the keep-outs and a clean silk spot for every name, and writes the new spots into `placement.py`
+  (D-059). Run it on a board without passes 1, 3 and 4.
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
