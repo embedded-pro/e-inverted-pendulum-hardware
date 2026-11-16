@@ -94,6 +94,9 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   EEPROM left of the MCU (D-043); `power` = the TPS62933F buck and the TLV75533P LDO right of the power entry, to TI's
   layout guidance (D-049). The tables hold the owner's positions from KiCad (D-047): after moving parts, update
   them so `--replace` changes nothing; parts parked off the board are not in them.
+- `python3 scripts/pcb/shift_block.py --apply drive`: move a placed block with its copper (tracks and vias inside its
+  courtyards' box, on its nets) to the target of its anchor in `placement.py`; refuses on any clash; no-op once there
+  (D-050).
 - `python3 scripts/pcb/mcu_escape.py --fanout | --decoupling`: a 0.2 mm stub and a 0.15 / 0.25 mm via from every MCU pin
   another part uses, staggered in two rows, clear of the crystals and the RF nets; then the MCU decoupling caps at ST's
   lands, the Nucleo's spots or the nearest free spot to their pin, top side (D-048). One shot each; no-op when done.

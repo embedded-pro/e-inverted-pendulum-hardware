@@ -68,6 +68,13 @@ _COIL = MB1163["coil"]["bbox"]
 NFC_TURN = 90.0  # degrees counter-clockwise from ST's board: D-039's 180, then the owner's 90 clockwise (2026-11-15)
 NFC_DROP = 8.0  # mm the NFC group sits below the corner, so the tag clears the RF corner (owner, 2026-11-15)
 DRIVE_TURN = 180.0  # degrees counter-clockwise from TI's board, about the stage's centre (owner, 2026-11-15)
+# The drive block as the owner and D-050 left it: TI's stage and our extras beside it, moved with their copper by
+# scripts/pcb/shift_block.py drive so that U501's footprint sits on DRIVE_TARGET (mechanical). The owner moved it 2.85 mm
+# right in KiCad (D-047); D-050 moves it 8 mm further right, off the crowded left side.
+DRIVE_REFS = ("U501", "Q501", "Q502", "Q503", "Q504", "R509", "R512", "NT501", "NT502", "NT503", "NT504",
+              "C501", "C502", "C503", "C504", "C505", "C506", "C507", "C508", "C509", "C510", "C511", "C512", "C513",
+              "C514", "D501", "D502", "D503", "D504", "R515", "R516", "R517", "R518")
+DRIVE_TARGET = (6.9, 39.9966)
 
 
 def _turn(a, b, degrees):

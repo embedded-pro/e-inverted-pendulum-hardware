@@ -92,7 +92,7 @@ and silk.py keeps labels off the tab's polygon from `placement.py`.
   QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
 - **Motor drive (`docs/drive.md`):** done by the copy (ungrouped, its 12 pours removed since D-046). It holds TI's power stage (U501,
   Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks and vias, turned 180°
-  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), from z 13.5 to 50.5, centred on x +2.85 since the owner moved it 2.85 mm right (D-047), and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Still yours: the power copper
+  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), from z 13.5 to 50.5, centred on x +10.85 since the owner moved it 2.85 mm right (D-047) and D-050 another 8 mm (`scripts/pcb/shift_block.py drive`), and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). Still yours: the power copper
   the pours carried (VM, phases, GND_A / GND_B), the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
 - **Power (D-049, `scripts/pcb/place_block.py power`, `docs/power-map.md`, power-pcb-layout §3): placed** right of the
   power entry, x −15.5…+3.5, z 51.2–64.1, all on top, to TI's layout guidance (TPS62933 datasheet ZHCSO99D §12.1, Fig.
