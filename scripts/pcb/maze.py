@@ -58,6 +58,7 @@ PAD_HOLE_GAP = 0.28
 HOLE_TO_HOLE = 0.2
 HOLE_TO_COPPER = 0.2
 BODY_GAP = 0.1
+MEETING_MM = 0.25
 LABEL_GAP = 0.05
 VIA_SIZES = ((0.6, 0.3), (0.45, 0.2))
 MAX_VIAS = 2
@@ -300,6 +301,9 @@ class Router:
             for pts in self.keep_tracks[layer]:
                 win.draw(canvases["keep"][1], pts)
             result[layer] = {key: win.distance(image) for key, (image, _) in canvases.items()}
+            meeting = self.meeting_area(win, terminals)
+            if meeting is not None:
+                result[layer]["own"][meeting] = 1e9
         canvases = {key: win.canvas() for key in ("npth", "holes", "keep_via")}
         for pad in self.npth:
             for pts in self.shapes.hole(pad):
@@ -314,6 +318,25 @@ class Router:
         result["via"] = {key: win.distance(image) for key, (image, _) in canvases.items()}
         result["hot"] = bool(hot)
         return result
+
+    @staticmethod
+    def meeting_area(win, terminals):
+        """Cells near a via or track-end terminal, where the net's own copper already there (the fan-out stub, a track
+        routed to the same via) may be met: the exact check allows tracks meeting at their terminal, angle_ok says
+        which way they may leave."""
+        points = [t for t in terminals if t.kind != "pad"]
+        if not points:
+            return None
+        jj, ii = np.mgrid[0:win.ny, 0:win.nx]
+        area = np.zeros((win.ny, win.nx), dtype=bool)
+        for t in points:
+            if t.kind == "via":
+                reach = t.item.GetWidth(pcbnew.F_Cu) / 2e6 + MEETING_MM
+            else:
+                reach = t.track.GetWidth() / 2e6 + MEETING_MM
+            ci, cj = (t.at.x - win.x0) / win.p, (t.at.y - win.y0) / win.p
+            area |= (ii - ci) ** 2 + (jj - cj) ** 2 <= (reach / win.pitch) ** 2
+        return area
 
     def masks(self, dist, clearance, wide, width, slack, via_size, pitch):
         """The cells a track centre may use on each layer, the cells a via centre may use, the cost multipliers.
