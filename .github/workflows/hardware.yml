@@ -15,14 +15,21 @@ jobs:
       - uses: actions/checkout@v4
       - name: Trust the workspace
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: KiCad global library tables (the container ships none)
+        run: |
+          mkdir -p "$RUNNER_TEMP/kicad/10.0"
+          cp /usr/share/kicad/template/sym-lib-table /usr/share/kicad/template/fp-lib-table "$RUNNER_TEMP/kicad/10.0/"
+          echo "KICAD_CONFIG_HOME=$RUNNER_TEMP/kicad" >> "$GITHUB_ENV"
       - name: Pin map against the package data
         run: python3 scripts/check_pinmap.py
       - name: Regenerate the schematic and require no diff
         run: |
-          python3 kicad/gen/build.py
-          git diff --exit-code -- kicad/
+          python3 scripts/schgen/build.py
+          git diff --exit-code -- hardware/ scripts/schgen/expected.json
+      - name: Netlist matches the generator's intent
+        run: python3 scripts/schgen/check.py
       - name: ERC
-        run: kicad-cli sch erc --severity-all --exit-code-violations -o erc.rpt kicad/e-inverted-pendulum.kicad_sch
+        run: kicad-cli sch erc --severity-all --exit-code-violations -o erc.rpt hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_sch
       - name: Netlist checks
         run: python3 scripts/check_netlist.py
       - name: Symbol/footprint checks

@@ -16,7 +16,7 @@ Goal: one 4-layer PCB that is also the robot's structural body. It carries the m
 | Battery | 3S LiPo pack, 9.0–12.6 V, XT30, external balance charger | DRV8711 needs VM ≥ 8 V |
 | IMU | **MPU-6500** (C50278) | Same accel/gyro die and registers as the MPU9250. Only WHO_AM_I changes (0x70). |
 | Chassis | Single vertical plate, about 100 × 160 mm (final size from sizing) | Motors on L-brackets at the bottom edge, battery strapped to the back face, antenna on the top edge |
-| Radio | Printed IFA + MLPF-WB55-01E3 IPD, DNP pi tuning network + DNP U.FL test port; no certification | Cheapest; VNA tuning in the final assembly |
+| Radio | RF corner copied from ST's NUCLEO-WB55 (MB1355 D-01): MLPF-WB55-01E3, 3.6 nH / 1.2 pF match, printed meander antenna, no SMA (D-038); no certification (D-037) | Lowest risk: ST's proven layout; VNA check in the final assembly |
 | Fab | JLCPCB 4-layer 1.6 mm (JLC04161H-7628), 1 oz outer / 0.5 oz inner, top-side PCBA | Solid L2 GND under RF and motor hot loops |
 | Debug | STDC14 (Samtec FTSH-107-01-L-DV-K, C5307809): SWD + NRST + USART1 VCP | No USB: TIM1_CH4 is only on PA11 = USB_DM |
 
@@ -27,10 +27,10 @@ Goal: one 4-layer PCB that is also the robot's structural body. It carries the m
   (rev-pol + on/off + soft-start, slide switch)   │                                     Rsense 2×50 mΩ ───────────────┴─ Motor R (bridge B) + enc R
                                                   ├─ VBAT divider ─ ADC
                                                   └─ TPS62933 buck → 5V0 ─ TLV75533 LDO → 3V3 ─ STM32WB55RG (SMPS on, 10µH+10nH)
-                                                                       │                         ├ SPI1 ─ DRV8711 + W25Q16 flash   ├ RF1 ─ MLPF ─ 50Ω ─ pi(DNP) ─ IFA
+                                                                       │                         ├ SPI1 ─ DRV8711 + W25Q16 flash   ├ RF1 ─ MLPF ─ match ─ antenna (MB1355)
                                                                        └ encoder VCC (0Ω opt)    ├ SPI2 ─ MPU-6500    ├ HSE 32 MHz / LSE 32.768 kHz
                                                                          ABZ ×2 ─ ESD ─ LVC3G17 ─┤ (5 V-tolerant Schmitt buffers powered from 3V3)
-                                                                                                 └ STDC14, LEDs, button, buzzer, Qwiic (I2C3)
+                                                                                                 └ STDC14, status LED, 12 RGB LEDs (D-035), Qwiic (I2C3)
 ```
 Back-to-back PMOS is used rather than an ideal diode: regenerated motor energy must be able to flow back into the battery while the board is on. When the board is off, the TVS and bulk capacitors absorb it.
 
@@ -47,8 +47,7 @@ Back-to-back PMOS is used rather than an ideal diode: regenerated motor energy m
 | Index as EXTI | PC5 = EXTI5, PC3 = EXTI3 | Wired so the firmware can latch the index later (REQ-ODOM-005); unique against EXTI0/4/6 |
 | Console USART1 → STDC14 VCP | PB6 TX / PB7 RX | SWO not available: PB3 = SPI1_SCK |
 | **New:** VBAT_SENSE | PC1 (ADC1_IN2) | |
-| **New:** buzzer, red fault LED, green LED | PA7 (TIM17_CH1), PB1, PB0 | |
-| **New:** user button | PD0 (EXTI0; Nucleo SW2 pin) | EXTI numbers stay unique |
+| **New:** RGB LED chain (D-035; replaced the buzzer, red LED and user button) | PA7 (TIM17_CH1 + DMA); green LED stays on PB0 | |
 | **New:** Qwiic I2C3 | PB10/PB11 | |
 | **New:** DRV nSTALL (optional) | PB2 | |
 | BOOT0 | PH3: 10 kΩ pull-down + pad | |
@@ -61,7 +60,7 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | MCU | STM32WB55RGV6 | C401505 | 225 |
 | RF IPD | MLPF-WB55-01E3 | C2651048 | 3.3k |
 | HSE 32 MHz (ST-recommended, no load caps, HSETUNE) | NX2016SA-32M-EXS00A-CS06465 | C1986260 | 49.7k |
-| LSE 32.768 kHz | NX3215SA family, C_L ≤ 7 pF (AN2867); choose the in-stock variant | C156244 etc. | 8–14k |
+| LSE 32.768 kHz | NX2012SA-32.768KHZ-STD-MUB-3 (C_L 6 pF) on MB1355's X2 land (D-037) | C889705 | 3.7k (2026-11-15) |
 | SMPS L / series L / caps | LQM21FN100M80L (10 µH) / LQG15HS10NJ02D (10 nH) / CL05A475MP5NRNC | C162582 / C77103 / C23733 | ok |
 | Motor driver | DRV8711DCPR | C60013 | 128 |
 | Bridge FETs (×4 duals, one half-bridge each) | CSD88537ND, 60 V | C117439 | 14.8k |
@@ -76,27 +75,26 @@ Before the schematic is frozen, confirm in CubeMX that PB11, PD0, PB2 and PA15 a
 | Motor connectors ×2 | JST S2B-XH-A (side entry, 3 A) | C157931 | 70k |
 | Encoder connectors ×2 | JST S5B-PH-K-S (side entry) | C157923 | 59k |
 | Encoder buffers ×2 (A/B/Z each) | SN74LVC3G17DCTR (Schmitt, 5 V-tolerant inputs, I_off) | C18213 | 8.9k |
-| Encoder ESD | TPD4E05U06DQAR | C138714 | 130k |
+| Encoder ESD | TPD4E05U06QDQARQ1 (SLVSCO7A; alternate TPD4E05U06DQAR C138714, same pinout and footprint) | C81353 | 2.4k (2026-11-14) |
 | SPI flash | W25Q16JVSSIQ, 2 MB, SOIC-8 208 mil (alternative: W25Q80DVSSIG, 1 MB, C98163, 29.7k, same footprint) | C131025 | 8.4k |
 | Debug | FTSH-107-01-L-DV-K (STDC14) | C5307809 | 616 |
-| Antenna test port (DNP) | BWU.FL-IPEX1 | C5137195 | 617k |
-| Buzzer / button / switch / Qwiic | MLT-8530 / TS-1187A-B-A-B / SS-12D10L5 / SM04B-SRSS-TB | C94599 / C318884 / C319012 / C160404 | ok |
+| RGB LED / LED buffer / switch / Qwiic | WS2812B-2020-V6 / SN74AHCT1G125DBVR / SS-12D10L5 / SM04B-SRSS-TB | C52917434 / C7484 / C319012 / C160404 | ok (2026-11-14) |
 
-Stock risk: the MCU (225) and DRV8711 (128) are thin. Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
+Stock risk (2026-11-04): the MCU (225) and DRV8711 (128) are thin; on 2026-11-16 the MCU is down to 158 and the DRV8711 at 6006 (all 75 BOM lines in stock for 5 boards, about $44 per board at 1-off prices, `bom/stock_check.json`). Order them with the first PCBA run, or reserve them through JLC parts pre-order. `scripts/jlc_stock.py` re-checks every BOM line against the JLC API before each order.
 
-## Hardware repo layout (`e-inverted-pendulum-hardware`, branch `claude/nice-ride-x9xyyl`)
+## Hardware repo layout (`e-inverted-pendulum-hardware`, the e-psu-hardware shape since D-033)
 ```
-README.md, CLAUDE.md (rules: skills to load, JLC constraints, no undocumented numbers)
-.claude/settings.json            # hardware-skills marketplace, project scope (skills README)
-docs/ requirements.md            # HW reqs traced to firmware REQ-IDs (DRIVE-005/007, SAFE-002/009, SYS-002/003, IMU-001/002, ODOM-001/003/005, RT-004)
-      architecture.md power-map.md pinmap.md mechanical.md rf.md bringup.md decisions.md
-cubemx/e-inverted-pendulum.ioc   # pin plan, validated by CubeMX
-kicad/  *.kicad_pro, hierarchical *.kicad_sch, *.kicad_pcb, lib/ (symbols, footprints, 3D)
-simulation/                      # exact layout from circuit-simulation §2
-mechanical/                      # STEP: motor, bracket, wheel, battery; mass/CoM script
-scripts/ jlc_stock.py, export_fab.sh, render_layers.py, route_metrics.py
-fab/                             # generated Gerbers, drill, BOM/CPL in JLC format
-.github/workflows/hardware.yml   # kicad-cli ERC/DRC, simulation run, fab artifact
+README.md, CLAUDE.md, PROJECT_CONTEXT.md, .mcp.json
+.claude/settings.json            # hardware-skills marketplace; agents/pendulum-board-reviewer.md
+docs/ requirements.md decisions.md plan.md design-calcs.md power-map.md pinmap.md mechanical.md rf.md nfc.md layout.md
+      robot-hardware-design-guide.md schematic.pdf images/
+hardware/e-inverted-pendulum/    # KiCad 10 project: root + 8 sheets, .kicad_pcb, .kicad_dru, project .kicad_sym / .pretty
+scripts/schgen/                  # schematic generator (design/*.py), check.py, check_equivalence.py, render.sh
+scripts/pcb/                     # board sync from the schematic (add-only, D-032), renders
+scripts/ export_review.py export_jlcpcb.py export_release.py visual_diff.py, check_*.py, export_bom.py, jlc_stock.py
+pin-data/ bom/ simulation/ mechanical/
+review_exports/ manufacturing/ release/ diff/   # generated, gitignored
+.github/workflows/               # hardware.yml, kicad-bot.yml, kicad-diff.yml, release.yml
 ```
 Tooling: KiCad 10 (`kicad-cli`, 10.0.8), ngspice (42 from Ubuntu; 47 if available), Python with numpy/scipy/matplotlib/spicelib.
 
@@ -148,13 +146,13 @@ Rules come from `mcu-circuit-design` §2–§12 and `analog-circuit-design`; the
    - HSE with no external capacitors.
    - LSE with load capacitors from the C_L formula (stated stray convention).
 4. **RF**:
-   - Copy the RF1 → MLPF-WB55-01E3 section from ST AN5165.
-   - 50 Ω GCPW to a DNP U.FL, then a pi network (0 Ω series, shunts DNP), then the IFA feed.
-   - Use a published IFA designed for 1.6 mm FR-4 (e.g. the 1.6 mm variant in Silicon Labs AN1088) and copy its geometry exactly.
+   - Since D-037 (2026-11-15): copy ST's NUCLEO-WB55 RF corner (MB1355 rev D-01) as a whole: schematic, parts, land
+     patterns and copper (`scripts/rf_reference.py`, `scripts/pcb/rf_block.py`, `docs/rf.md`).
+   - Earlier plan, superseded: MLPF section from AN5165, own 50 Ω GCPW to a DNP U.FL, pi network, published IFA.
 5. **Motor drive**, per the DRV8711 datasheet (SLVSC40) and the BOOST-DRV8711 reference:
    - VM decoupling;
    - VCP 1 µF to VM; CP1–CP2 100 nF (VM-rated); VINT 1 µF; V5 bypass;
-   - 0 Ω gate-resistor footprints;
+   - TI's BOOST-DRV8711 power stage copied (D-040, `docs/drive.md`), without gate resistors;
    - 4 × CSD88537ND;
    - 2 × 50 mΩ Rsense with Kelvin ISENP/ISENN;
    - nFAULT and nSTALL pull-ups to 3V3;
@@ -175,8 +173,7 @@ Rules come from `mcu-circuit-design` §2–§12 and `analog-circuit-design`; the
 7. **IMU**: MPU-6500 per its datasheet (REGOUT cap, VDDIO, decoupling) and SPI2, with the data-ready line on PC6.
 8. **UI and expansion**:
    - STDC14 pinout per ST UM2448;
-   - LEDs, user button (100 Ω + RC), BOOT0 pad;
-   - buzzer: NPN + flyback diode;
+   - status LED, BOOT0 pad (D-035 later replaced the user button, buzzer and red LED with a 12-LED RGB chain);
    - Qwiic port with ESD and 2.2 kΩ pull-ups (SLVA689A calculation).
 
 Gate:
@@ -216,12 +213,12 @@ Gate:
 
 **Floorplan of the vertical plate, top to bottom.**
 1. Antenna on the top edge with a keep-out on all layers, plus the MLPF and RF path.
-2. MCU, crystals, STDC14, LEDs, button, buzzer.
+2. MCU, crystals, STDC14, status LED, RGB LEDs.
 3. Battery zone on the back face, ≥ 25 mm below the antenna keep-out, with logic power on the front.
 4. IMU on the vertical centreline, about 30 mm above the axle and ≥ 15 mm from switch nodes. Its axes are aligned to the body frame; the mapping is written in `docs/pinmap.md` for the firmware.
 5. Bottom band: DRV8711, FETs, Rsense and bulk caps in the centre; XT30 and switch; XH motor and PH encoder connectors, with the encoder buffers and ESD next to them, plus bracket holes at the left and right corners. Encoder traces stay off the bridge switch-node copper on every layer.
 
-**Anchors the user places.** XT30, switch, XH/PH connectors, bracket and strap holes, antenna, MCU, IMU, STDC14, buttons, LEDs, bumpers.
+**Anchors the user places.** XT30, switch, XH/PH connectors, bracket and strap holes, antenna, MCU, IMU, STDC14, RGB LEDs, bumpers.
 
 **Rules.**
 - Power map table and net classes (`docs/power-map.md`), derived per skill §2.
@@ -241,12 +238,16 @@ Gate:
 
 **Gate.**
 - DRC clean with schematic parity;
-- quality-bar metrics (`route_metrics.py`);
-- `power-pcb-layout` §7 and `rf-layout` §12 checklists;
-- JLC DFM: min track/space and 0.3 mm vias.
+- quality-bar metrics: the `pcb-design-rules` gate (`pcb_rules.py check --fab jlcpcb`, without `--allow-unrouted`);
+- `power-pcb-layout` §7, `rf-layout` §12 and `interface-layout` §2 checklists (`docs/checklists/phase3.md`);
+- JLC DFM: JLCPCB's rules (D-036). Vias: 335 of 654 have a 0.3 mm or larger hole; the rest are 0.15 / 0.25 (the
+  owner's fan-out and GND lattice, D-048 / D-049) and 0.2 / 0.3–0.45 (ST's RF-corner copy, D-037). JLCPCB builds them
+  but charges extra below a 0.30 mm hole (`pcb-design-rules` skill, fab table): since ST's copy already needs 0.2 mm
+  holes, the small-via option is part of this board's price. Get the quote with 0.15 mm and with 0.2 mm as the
+  smallest hole before ordering.
 
 ## Phase 4: fab and bring-up
-- `export_fab.sh`: Gerbers, drill, and BOM/CPL in JLC format via `kicad-cli`. Check rotations in JLC's viewer. Order 5 PCBs, 2–3 assembled.
+- `scripts/export_jlcpcb.py`: Gerbers, drill, and BOM/CPL in JLC format via `kicad-cli`. Check rotations in JLC's viewer. Order 5 PCBs, 2–3 assembled.
 - `docs/bringup.md`, in order:
   1. Bench supply 12 V at 100 mA, then the rails.
   2. SWD connect; HSE and LSE start.
@@ -270,12 +271,12 @@ Gate:
 - Encoder CPR, gear ratio and wheel radius.
 - Index latch on EXTI3/EXTI5 to close REQ-ODOM-005; the hardware wires it.
 - SPI1 shared by the DRV8711 and the flash: per-device prescaler and CS polarity; parameter store and bonds in flash (REQ-TUNE-007).
-- Buzzer, LED and button pins; IWDG.
+- RGB LED chain on PA7 (TIM17 + DMA) and the status LED; IWDG.
 
 ## Verification
 - `kicad-cli sch erc` and `kicad-cli pcb drc --schematic-parity`, both with zero errors, in CI.
-- `python -m simulation.run_all` regenerates every number in `simulation/REPORT.md`; all checks pass.
-- `scripts/jlc_stock.py kicad/*.kicad_sch` reports every LCSC part in stock for the build quantity.
+- `python3 simulation/run_all.py` regenerates every number in `simulation/REPORT.md`; all checks pass (re-run 2026-11-16 after D-042 / D-043: no result changed).
+- `python3 scripts/export_bom.py`, then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5 --json bom/stock_check.json`, reports every LCSC part in stock for the build quantity.
 - CubeMX opens the `.ioc` with no pin conflicts.
 - Per-layer SVG renders reviewed at each layout phase.
 - Bring-up checklist results recorded in `docs/bringup.md`.

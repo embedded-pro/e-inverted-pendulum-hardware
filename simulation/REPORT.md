@@ -2,7 +2,7 @@
 
 Reproduce everything: `python3 simulation/fetch_models.py` (TI models, not committed) then
 `python3 simulation/run_all.py`. Per-step results are in `results/*.json` and plots in `plots/`.
-Values are read from `kicad/*.kicad_sch` (`kicad_values.py`); the Phase 1 values are kept as explicit
+Values are read from `hardware/e-inverted-pendulum/*.kicad_sch` (`kicad_values.py`); the Phase 1 values are kept as explicit
 comparison variants so the before/after numbers stay reproducible.
 
 ## Phase 2 summary
@@ -18,7 +18,7 @@ comparison variants so the before/after numbers stay reproducible.
 Device models: `models/devices.lib` (ours, from datasheets; cross-checked: CSD88537ND R_DS(on) 12.5 mΩ at
 10 V vs 12.5 typ; AO4805 15.0 mΩ at −10 V vs ~15 typ, 25.6 mΩ at −4.5 V vs ≤ 26 max). TI models for S4 are
 fetched by `fetch_models.py` (TI copyright, no redistribution grant). Assumptions are listed in `common.py`
-(battery 60/150 mΩ, MLCC DC-bias derating, motor R/L, logic load 1.56 W).
+(battery 60/150 mΩ, MLCC DC-bias derating, motor R/L, logic load 3.34 W with the 12 RGB LEDs at full white, D-035).
 
 ## S0: motor, voltage cap and current trip (`sizing.py`)
 
@@ -50,8 +50,9 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 - Body parameters come from `mechanical/mass_budget.csv` (bracket, motors, battery on the back; pivot on the axle).
 
 **Hand cross-checks.**
-- Body: m = 0.387 kg, ℓ = 28.6 mm, J = 4.35e-04 kg·m².
-  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.35e-04 + 0.387·0.0286²) / (0.387·9.81·0.0286)) =
+- Body: m = 0.386 kg, ℓ = 28.5 mm, J = 4.32e-04 kg·m² (outline with MB1355's antenna tab, D-037, and the top edge
+  raised for the MB1163 NFC corner, D-039).
+  τ = √((J + mℓ²)/(m·g·ℓ)) = √((4.32e-04 + 0.386·0.0285²) / (0.386·9.81·0.0285)) =
   83 ms. The script prints 83 ms.
 - Cruise voltage at 1.0 m/s = Ke·G·v/r + R·I₀ = 0.00609·20·1.0/0.0325 + 3.70·0.12 = 4.19 V. The script prints 4.19 V.
 - TORQUE at 2.0 A = 256·20·0.05·2.0/2.75 = 186 (ISGAIN 20). The script prints 186.
@@ -59,13 +60,13 @@ gear sweep behind D-013/D-014 is superseded; it is in git history (commit 802eb5
 ### Findings
 
 1. **The trip must be 2.0 A.** At every voltage cap, 1.0 A and 1.5 A trips recover only 12–18° worst case, short of
-   the 2 × 10° target. **2.0 A recovers 21.6–23.0°**, which passes but with little margin.
-2. **A 7.4 V cap is enough.** The cap barely changes recovery (23.0° at 7.4 V, 21.8° at 8.4 V, 21.6° at 9.9 V), and
+   the 2 × 10° target. **2.0 A recovers 21.8–23.2°**, which passes but with little margin.
+2. **A 7.4 V cap is enough.** The cap barely changes recovery (23.2° at 7.4 V, 21.9° at 8.4 V, 21.8° at 9.9 V), and
    cruising at 1.0 m/s needs 4.2 V (57 % of the cap) and at 1.5 m/s 6.1 V. **The firmware limits the average motor
    voltage to 7.4 V** (duty ≤ 0.59 at 12.6 V): the motor stays at its rating, and stall current at the cap equals
    the trip.
 3. **DRV8711 setting for Rsense = 50 mΩ:** I_trip 2.0 A → ISGAIN 20, TORQUE 186 (2.00 A). Rsense dissipates 0.2 W
-   at the trip, within the 1 W 1206 part.
+   at the trip, within the 3 W 2512 part (TI's CRA2512 from BOOST-DRV8711, D-040).
 4. **The 2.0 A trip equals the JST PH contact rating (2 A).** Peaks are short (recovery bursts). The motor's 0.5 A
    continuous rating is enforced by the firmware I²t model (D-014's approach, kept).
 5. **PWM ripple** at 25 kHz, D 0.5, 12.6 V with L = 1 mH: 126 mA p-p, 6 % of the trip (REQ-DRIVE-007).
@@ -96,7 +97,7 @@ purchased motor** (stall current at 7.4 V, no-load speed and current, L, spin-do
 
 **Scope.** Battery = EMF + R_int (60 / 150 mΩ) + 150 nH leads → fuse (35 mΩ) → AO4805 back-to-back pair with
 its gate network → VBAT bulk (220 µF electrolytic with ESR/ESL, MLCCs derated for DC bias) → SMBJ15A; the
-buck is a 1.56 W constant-power load above its 9.1 V UVLO; motors are R + L + back-EMF behind body diodes.
+buck is a 3.34 W constant-power load above its 9.1 V UVLO (RGB LEDs at full white); motors are R + L + back-EMF behind body diodes.
 
 ### Findings
 
@@ -110,21 +111,22 @@ buck is a 1.56 W constant-power load above its 9.1 V UVLO; motors are R + L + ba
 
 | Case | Phase 1 values | Current schematic |
 |---|---|---|
-| Switch-on inrush (new / aged pack) | 1.24 / 1.22 A | **0.54 / 0.54 A** |
-| Switch-on 10–90 % rise | 2.2 ms | 6.8 ms (hand: 0.08 mA / 47 nF ≈ 1.7 V/ms → ~7 ms) |
-| Hot plug, switch on: peak current | **44.6 A** | **0.54 A** |
+| Switch-on inrush (new / aged pack) | 1.24 / 1.22 A | **0.69 / 0.69 A** |
+| Switch-on 10–90 % rise | 2.2 ms | 7.2 ms (hand: 0.08 mA / 47 nF ≈ 1.7 V/ms → ~7 ms) |
+| Hot plug, switch on: peak current | **44.6 A** | **0.69 A** |
 | Hot plug, switch off: VBAT peak | **10.5 V** | **0.002 V** |
 | On-state V_GS at 12.6 V | −11.4 V | −5.5 V (R_DS(on) ≈ 20 mΩ) |
 | Reverse battery (switch on / off): load current, V_GS | 0, ≤ 0.69 V | 0, ≈ 0 V |
-| Switch-off with both MG310s stalled at full voltage (3.4 A each, no trip: pessimistic) | VBAT 12.84 V | VBAT 12.84 V; FET energy 2.1 mJ |
-| Switch-off while pushed at 20 V back-EMF (above no-load speed) | VBAT 17.84 V | VBAT 17.84 V (TVS onset); FET 34 mJ |
+| Switch-off with both MG310s stalled at full voltage (3.4 A each, no trip: pessimistic) | VBAT 12.84 V | VBAT 12.82 V; FET energy 7.1 mJ |
+| Switch-off while pushed at 20 V back-EMF (above no-load speed) | VBAT 17.84 V | VBAT 17.81 V (TVS onset); FET 32 mJ |
 
 Hand cross-check for the pushed case: 2 × (20 − 12.6 − 1.6) / 3.7 ≈ 3.1 A into the battery; simulated peak 2.9 A.
 Regeneration needs the wheels above the motors' no-load speed (MG310: 545 rpm × 12.6 / 7.4 = 928 rpm, ≈ 3.2 m/s on
 65 mm wheels), far outside the 1.5 m/s design limit, and even then the TVS keeps VBAT < 24 V. The FET energy
-(34 mJ) is spread over the ~100 ms soft turn-off, about 0.3 W on average. The LCSC datasheet for C3040596 is
+(32 mJ) is spread over the ~100 ms soft turn-off, about 0.3 W on average. The LCSC datasheet for C3040596 is
 image-only, so the transient thermal rating is a bench check (thermocouple on Q101 during a pushed switch-off).
-Re-run 2026-11-13 with the MG310 (D-027).
+Re-run 2026-11-13 with the MG310 (D-027), and 2026-11-14 with the 3.34 W logic load of the RGB LEDs (D-035): the
+larger buck load during the ramp raises the switch-on peak from 0.54 to 0.69 A, still far below the 4 A fuse.
 
 **Constraint:** turn-off is now slow (τ = 100k × 1.05 µF ≈ 105 ms); don't switch off while the motors are driven.
 
@@ -153,15 +155,15 @@ Hand cross-checks: ripple at D 0.5 = V·T/(4L) = 126 mA (sim 124 mA); stall curr
 ## S3: motor bus (`bus.py`)
 
 **Scope.** Both bridges reduced to their bus current (I_motor × square(duty), in phase on one timer),
-battery 60 / 150 mΩ, the VBAT capacitor set, 1.56 W logic load.
+battery 60 / 150 mΩ, the VBAT capacitor set, 3.34 W logic load.
 
 | Case | Result | Limit |
 |---|---|---|
 | Electrolytic C507 ripple, both motors at the 2.0 A trip, D 0.5 (recovery burst) | 0.878 A rms | 0.57 A (600 mA × 0.95 at 25 kHz): **exceeded during bursts only** |
 | C507 ripple at the continuous current (0.5 A each, D 0.5) | **0.219 A rms** | 0.57 A |
 | VBAT ripple p-p (2.0 A / 0.5 A) | 324 / 81 mV | — |
-| Sag, aged pack at 9.9 V OCV, 4.0 A step | 8.96 V (hand 8.97 V) | logic UVLO stop 8.47 V |
-| Sag, aged pack at 9.0 V OCV, 4.0 A step | 8.10 V (hand 8.06 V) | below 8.47 V: logic cuts off (intended); DRV8711 still above 8.0 V |
+| Sag, aged pack at 9.9 V OCV, 4.0 A step | 8.92 V (hand 8.92 V) | logic UVLO stop 8.47 V |
+| Sag, aged pack at 9.0 V OCV, 4.0 A step | 8.10 V (hand 8.02 V) | below 8.47 V: logic cuts off (intended); DRV8711 still above 8.0 V |
 
 **Constraints for firmware:** enforce the continuous current with the I²t model (the bulk capacitor is sized
 for it, not for sustained 2 A at D 0.5: electrolytic ripple heating is a thermal, time-averaged limit); raise an undervoltage fault and disarm below ~9.5 V under load so
@@ -174,8 +176,8 @@ ngspice-42: the time step collapses after ~10 µs whatever the integration metho
 STEADY_STATE setting. The board's TPS62933F has no unencrypted model at all. So the **buck is covered by the
 datasheet design equations** (SLUSEA4 s10.2.2), and its load-step and loop behaviour is a **bench item**.
 The **LDO is simulated with TI's TLV75533P transient model** (SBVM831), fed from a 5V0 that carries the buck's
-switching ripple, an assumed 50 mV p-p of the 25 kHz motor-bus ripple and an assumed 150 mV dip on the
-buzzer step.
+switching ripple, an assumed 50 mV p-p of the 25 kHz motor-bus ripple and an assumed 675 mV dip when the RGB chain steps from off
+to full white (+432 mA; the earlier 150 mV buzzer-step assumption scaled linearly, pessimistic).
 
 | Item | Result | Target |
 |---|---|---|
@@ -186,11 +188,11 @@ buzzer step.
 | UVLO start / stop (R201/R202) | 9.11 / 8.47 V | hysteresis ≥ 0.5 V |
 | 3V3 regulation at 60 mA | 3.312 V | ±1.5 % |
 | 3V3 start-up overshoot | 0.3 mV, in regulation 4.6 ms after the 5V0 ramp starts | < 3 % |
-| 3V3 dip: +50 mA step / 150 mV dip on 5V0 | 6.1 / 1.6 mV | < 100 mV |
+| 3V3 dip: +50 mA step / 675 mV dip on 5V0 | 6.1 / 7.0 mV | < 100 mV |
 | 3V3 ripple: switching / with 25 kHz line ripple | < 0.01 / 0.6 mV p-p | < 5 mV (AN5165 VDDRF window 5–15 mV) |
 
-**Bench items:** 5V0 response to the buzzer step and to motor-bus transients (expected well under the assumed
-150 mV); 5V0 ripple with the real inductor and layout; radio sensitivity with the STM32WB SMPS on and off
+**Bench items:** 5V0 response to the RGB-chain step (off to full white) and to motor-bus transients (expected well
+under the assumed 675 mV); 5V0 ripple with the real inductor and layout; radio sensitivity with the STM32WB SMPS on and off
 (rf-layout s5).
 
 

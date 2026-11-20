@@ -2,7 +2,7 @@
 """S1: battery input, back-to-back P-FET switch with Miller soft start, TVS, regeneration at switch-off.
 
 Values come from the schematic (kicad_values.get). Ideal or assumed parts are listed in common.ASSUMPTIONS:
-battery = EMF + R_int + lead inductance; buck = constant-power load (1.56 W) enabled above its 9.1 V UVLO;
+battery = EMF + R_int + lead inductance; buck = constant-power load (common.py logic_power) enabled above its 9.1 V UVLO;
 switch = 0.1 Ohm when closed; motors = R + L + back-EMF with the bridge FETs off (body diodes only).
 """
 

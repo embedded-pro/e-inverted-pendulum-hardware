@@ -3,7 +3,7 @@
 
 Bridges are reduced to their bus current: in slow decay the bus carries the motor current only during the
 drive phase (S2), so each bridge draws I_motor x square(duty) at 25 kHz, both in phase (one timer, TIM1).
-Battery = OCV + R_int + lead L; fuse and the two AO4805 FETs (~20 mOhm each at -6 V) in series; buck = 1.56 W.
+Battery = OCV + R_int + lead L; fuse and the two AO4805 FETs (~20 mOhm each at -6 V) in series; buck = the logic load in common.py (3.34 W with the RGB chain at full white).
 """
 
 import sys
@@ -61,7 +61,7 @@ def main():
         r = spice.run(f"s3_sag_{ocv}", netlist(ocv, A["battery_r_int"]["worst"], 1.0, 2.0, step_at=1e-3),
                       ["v(VBAT)"], "tran 1u 6m", timeout=600)
         results[f"sag_ocv_{ocv}V_aged"] = {"vbat_min_V": float(np.min(r["v(VBAT)"])),
-                                           "hand_V": ocv - (4.0 + 1.56 / ocv) * (A["battery_r_int"]["worst"] + A["fuse_r"]["value"] + 0.04)}
+                                           "hand_V": ocv - (4.0 + A['logic_power']['value'] / ocv) * (A["battery_r_int"]["worst"] + A["fuse_r"]["value"] + 0.04)}
         traces[f"sag_{ocv}"] = r
     limit = 0.600 * 0.95
     checks = {

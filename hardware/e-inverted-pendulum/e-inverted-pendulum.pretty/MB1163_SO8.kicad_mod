@@ -1,0 +1,148 @@
+(footprint "MB1163_SO8"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "SO-8 land of the M24SR64-Y, ST's land from MB1163 rev C-01 (X-NUCLEO-NFC01A1). Derived from STMicroelectronics MB1163 rev C-01 (X-NUCLEO-NFC01A1), www.st.com/opla")
+	(property "Reference" "REF**"
+		(at 0 -3.7 0)
+		(layer "F.SilkS")
+		(uuid "c14d5aa8-a606-5d88-a4d4-b64d86307f62")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MB1163_SO8"
+		(at 0 3.7 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "552c86b9-d681-5233-ae24-9ed56ac0f85f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "613a5943-d3db-54fd-8b2a-a2579ae29869")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "71d075a4-d779-5f33-ab31-2057faedd944")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -4.06 -2.7)
+		(end 4.06 2.7)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "5a33c58e-8721-5759-90e4-1570f816996c")
+	)
+	(fp_rect
+		(start -1.95 -2.45)
+		(end 1.95 2.45)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "1e10547b-ffa4-5378-9b52-c188a4007558")
+	)
+	(pad "1" smd oval
+		(at -2.794 -1.905)
+		(size 2.032 0.6096)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "354f37ea-f944-52c9-827a-0e0cefa5f129")
+	)
+	(pad "2" smd oval
+		(at -2.794 -0.635)
+		(size 2.032 0.61)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "4bac7d85-6b9c-5823-8f43-d02aaf24f852")
+	)
+	(pad "3" smd oval
+		(at -2.794 0.635)
+		(size 2.032 0.61)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "c8145726-d963-562b-a440-f54bcf638c49")
+	)
+	(pad "4" smd oval
+		(at -2.794 1.905)
+		(size 2.032 0.6096)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "beb38bd2-2fbb-5df4-8a06-9cf07a61a99b")
+	)
+	(pad "5" smd oval
+		(at 2.794 1.905)
+		(size 2.032 0.6096)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "e7864e81-6ac9-58d0-9f47-40f34dafb757")
+	)
+	(pad "6" smd oval
+		(at 2.794 0.635)
+		(size 2.032 0.6096)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "4c41c442-143c-5bc2-8b20-61aa9a1459a0")
+	)
+	(pad "7" smd oval
+		(at 2.794 -0.635)
+		(size 2.032 0.6096)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "137fb6f2-06fe-59aa-86ad-2bea4a75a204")
+	)
+	(pad "8" smd oval
+		(at 2.794 -1.905)
+		(size 2.032 0.6096)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.1016)
+		(uuid "4f15e2ae-48e1-50da-a5e2-5a541065eb16")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Package_SO.3dshapes/SOIC-8_3.9x4.9mm_P1.27mm.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

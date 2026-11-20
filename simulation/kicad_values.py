@@ -9,7 +9,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "kicad" / "gen"))
+sys.path.insert(0, str(ROOT / "scripts" / "schgen"))
 from sexpr import find, find_all, parse  # noqa: E402
 
 PROPOSED = {}
@@ -27,7 +27,7 @@ def parse_value(text):
     return float(number) * SI[prefix]
 
 
-def values(directory=ROOT / "kicad"):
+def values(directory=ROOT / "hardware" / "e-inverted-pendulum"):
     out = {}
     for path in sorted(directory.glob("*.kicad_sch")):
         tree = parse(path.read_text(encoding="utf-8"))

@@ -1,0 +1,123 @@
+(footprint "MB1355_0402_RES"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "ST land pattern Passive:0402_RES (MB1355 R5). Derived from STMicroelectronics MB1355 rev D-01 (NUCLEO-WB55), Open Platform License www.st.com/opla")
+	(tags "MB1355 NUCLEO-WB55 STM32WB RF")
+	(property "Reference" "REF**"
+		(at 0 -1.154 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "462c1d5e-ec70-4084-9831-3ed793757ee0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MB1355_0402_RES"
+		(at 0 1.154 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "c5e8f0e3-776b-4fec-96c1-a17458f2d155")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ad181e68-d82f-4bd5-a190-70043f4f8d80")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d435ab47-7ca4-4b35-8d13-33dfb16802ff")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(sheetname "RF")
+	(sheetfile "RF.kicad_sch")
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.01647 -0.354)
+		(end 1.01647 -0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "b327e22d-84b3-41d2-8406-bc412083ddc8")
+	)
+	(fp_line
+		(start -1.01647 0.354)
+		(end -1.01647 -0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "49ddcf94-0fec-48f0-b26c-470f1782bef6")
+	)
+	(fp_line
+		(start 1.01647 -0.354)
+		(end 1.01647 0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "eaea7b6f-2951-4bbd-aacc-63cc4e542da7")
+	)
+	(fp_line
+		(start 1.01647 0.354)
+		(end -1.01647 0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "719bb3c5-ddde-44dc-9740-4cff95492539")
+	)
+	(pad "1" smd rect
+		(at -0.59897 0)
+		(size 0.635 0.508)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "43660d97-bc61-4499-85da-7c1454e72ee7")
+	)
+	(pad "2" smd rect
+		(at 0.59897 0)
+		(size 0.635 0.508)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "cc65fde5-a3e5-4d2e-94a6-9736757afad5")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0402_1005Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

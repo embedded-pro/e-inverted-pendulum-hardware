@@ -1,8 +1,8 @@
 signal,pin,mode,function,firmware_symbol,net,notes
-BRIDGE_A_IN1,PA8,af,TIM1_CH1,leftInput1,DRV_AIN1,left motor (bridge A); pull-down keeps the bridge tri-stated while the MCU is in reset
-BRIDGE_A_IN2,PA9,af,TIM1_CH2,leftInput2,DRV_AIN2,pull-down
-BRIDGE_B_IN1,PA10,af,TIM1_CH3,rightInput1,DRV_BIN1,right motor (bridge B); pull-down
-BRIDGE_B_IN2,PA11,af,TIM1_CH4,rightInput2,DRV_BIN2,pull-down; PA11 is also USB_DM so the board has no USB (D-009)
+BRIDGE_B_IN1,PA8,af,TIM1_CH1,leftInput1,DRV_BIN1,left motor (bridge B since D-042); pull-down keeps the bridge tri-stated while the MCU is in reset
+BRIDGE_B_IN2,PA9,af,TIM1_CH2,leftInput2,DRV_BIN2,pull-down
+BRIDGE_A_IN1,PA10,af,TIM1_CH3,rightInput1,DRV_AIN1,right motor (bridge A since D-042); pull-down
+BRIDGE_A_IN2,PA11,af,TIM1_CH4,rightInput2,DRV_AIN2,pull-down; PA11 is also USB_DM so the board has no USB (D-009)
 DRV_FAULT_BREAK,PA6,af,TIM1_BKIN,faultBreak,DRV_NFAULT,same net as DRV_FAULT_IRQ; open-drain with 10k pull-up to 3V3
 DRV_FAULT_IRQ,PC4,exti,EXTI4,faultInterrupt,DRV_NFAULT,same net as DRV_FAULT_BREAK
 SPI1_SCK,PB3,af,SPI1_SCK,spiClock,SPI1_SCK,shared: DRV8711 + W25Q16 flash; SWO unavailable as a result
@@ -29,11 +29,10 @@ SWDIO,PA13,af,SYS_JTMS-SWDIO,,SWDIO,STDC14
 SWCLK,PA14,af,SYS_JTCK-SWCLK,,SWCLK,STDC14
 FLASH_CS,PA15,gpio_out,GPIO,,FLASH_NCS,new; 10k pull-up; JTDI must be released (SWD-only debug)
 VBAT_SENSE,PC1,adc,ADC1_IN2,,VBAT_SENSE,new; 100k/27k divider with charge-bucket capacitor
-BUZZER,PA7,af,TIM17_CH1,,BUZZER_PWM,new; NPN driver
-LED_FAULT,PB1,gpio_out,GPIO,,LED_RED,new
-USER_BUTTON,PD0,exti,EXTI0,,BTN_USER,new; same pin as NUCLEO SW2
+LED_RGB,PA7,af,TIM17_CH1,,LED_DATA,new (D-035); WS2812B chain through an AHCT buffer; TIM17 PWM + DMA
 I2C3_SCL,PB10,af,I2C3_SCL,,QWIIC_SCL,new; Qwiic expansion
 I2C3_SDA,PB11,af,I2C3_SDA,,QWIIC_SDA,new; Qwiic expansion
 DRV_STALLN,PB2,gpio_in,GPIO,,DRV_NSTALL,new; optional; open-drain with 10k pull-up
 BOOT0,PH3,boot,BOOT0,,BOOT0,10k pull-down + test pad
-NFC_GPO,PA2,exti,EXTI2,,NFC_GPO,new; ST25DV04KC GPO (open drain, 10k pull-up to 3V3), D-030
+NFC_GPO,PA2,exti,EXTI2,,NFC_GPO,new; M24SR64-Y GPO (open drain, 20k pull-up to 3V3 as MB1163 R8), D-039
+NFC_RF_DISABLE,PA3,gpio_out,GPIO,,NFC_RF_DIS,new; M24SR64-Y RF disable (high = RF off; 30k pull-down as MB1163 R9), D-039

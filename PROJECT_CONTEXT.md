@@ -1,0 +1,114 @@
+# e-inverted-pendulum: project context
+
+Paste or attach this file at the start of a new conversation to restore the context.
+
+## What it is
+
+The hardware for the embedded-pro `e-inverted-pendulum` two-wheeled self-balancing robot
+(github.com/embedded-pro/e-inverted-pendulum-hardware; firmware in github.com/embedded-pro/e-inverted-pendulum).
+The PCB is the robot's chassis: one vertical 85 × 130 mm board carries the electronics and the battery, and a WHEELTEC
+102 mm steel U-bracket with two MG310 gear motors bolts to its bottom 25 mm strip. Built and assembled at JLCPCB.
+
+The firmware is the requirement source: every hardware requirement in `docs/requirements.md` traces to a firmware
+`REQ-*` ID or a decision in `docs/decisions.md`. The work runs in phases with user gates (`docs/plan.md`).
+
+## Architecture (rev A schematic: KiCad 10, 8 sheets + root, 230 parts)
+
+### Power
+
+- **Battery:** 3S LiPo (9.0–12.6 V), XT30, 4 A fuse.
+- **Power switch (D-011, D-021):** back-to-back AO4805 P-FETs. FET A blocks a reversed pack, FET B switches the load
+  from a slide switch. Gate network: 100k / 100k divider, BZT52C15 V_GS clamp, Miller soft start (1k + 47 nF, ~0.7 A
+  inrush), 1 µF gate-source cap against hot-plug turn-on.
+- **Clamp and bulk:** SMBJ15A after the FETs; 220 µF + per-bridge 10 µF / 100 nF on VBAT.
+- **Rails:** TPS62933F buck VBAT → +5V at 1.2 MHz (EN UVLO start 9.1 V, stop 8.5 V); TLV75533P LDO +5V → +3V3.
+- **VBAT sense:** 100k / 27k to PC1, 100 nF bucket; per-board calibration.
+
+### MCU and radio
+
+- STM32WB55RGV6: internal SMPS (10 µH + 10 nH), HSE 32 MHz without external caps (HSETUNE), LSE 32.768 kHz,
+  STDC14 (SWD + virtual COM on USART1), BOOT0 pull-down + test pad (no button).
+- RF corner copied from ST's NUCLEO-WB55, MB1355 rev D-01 (D-037): RF1 → MLPF-WB55-01E3 → 0R switch → 3.6 nH / 1.2 pF
+  → printed meander antenna on ST's ground-free tab at the top-left corner; no SMA (D-038). SMPS, HSE, LSE and
+  their copper as ST laid them out, pasted by `scripts/pcb/rf_block.py`; ST's files stay in the gitignored `reference/`.
+- Pin map in `pin-data/pinmap.csv`, kept 1:1 with the firmware's NUCLEO-WB55RG target (`scripts/check_pinmap.py`).
+
+### Motor drive
+
+- DRV8711, PWMMODE 1 (TIM1 drives AIN1/2, BIN1/2 directly), four CSD88537ND dual N-FET half-bridges: the power stage
+  is a copy of TI's BOOST-DRV8711 (D-040), placed by `scripts/pcb/drv_block.py`; SS34 clamps on the phase nodes kept.
+- 50 mΩ 2512 low-side shunts with TI's four Kelvin net ties, DNP sense caps.
+- Trip 2.0 A (ISGAIN 20, TORQUE 186); the 0.5 A continuous rating is enforced by a firmware I²t model (D-027).
+
+### Encoders, sensors, I/O
+
+- One JST PH 6-pin per motor (MG310 pinout, D-028). Hall A/B → TPD4E05U06 ESD → 100 Ω + 1 nF → SN74LVC3G17 → LPTIM1 /
+  TIM2. No index: the third buffer input is grounded, so PC5 / PC3 read low.
+- MPU-6500 on SPI2 (INT to PC6); W25Q16JV on SPI1 shared with the DRV8711 (33 Ω SCK termination).
+- I2C3: Qwiic + ESD, M24C64 EEPROM at 0x50, M24SR64-Y NFC tag (Type 4) at 0x56: the NFC corner (tag, ST's ANT14 coil,
+  tuning caps, pour) is copied from ST's X-NUCLEO-NFC01A1, MB1163 rev C-01 (D-039); GPO on PA2, RF disable on PA3.
+- 12 × WS2812B-2020-V6 RGB LEDs on +5V from PA7 (TIM17 + DMA) through an SN74AHCT1G125; green status LED on PB0.
+  No buttons, no buzzer: the robot doubles as a toy (D-035).
+- Test pads with net names on the silkscreen on every sheet: rails, motor phases and shunts, PWM, SPI, encoders,
+  IMU, I2C, LED data (D-035).
+
+## Simulation (ngspice, `simulation/`, REPORT.md)
+
+- **S0 sizing:** the trip must be 2.0 A (1.0–1.5 A recover only 12–18° worst case); a 7.4 V average-voltage cap cruises
+  1.0 m/s at 57 % of the cap. Lean setpoint ~18° with the bracket.
+- **S1 power entry:** two failures found and fixed (hot-plug turn-on, 44.6 A inrush) by the D-021 gate network.
+- **S2 bridge:** phase node below the DRV8711 abs max; fixed with SS34 clamps, IDRIVE 00.
+- **S3–S5:** bus ripple, UVLO margins, rails, VBAT ADC and encoder edges pass, with firmware conditions
+  (`docs/firmware-interface.md`).
+
+## PCB (Phase 3, `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb`)
+
+- 85 × 130 mm (MB1355's antenna tab at the top-left; the top edge steps down 7.5 mm right of it, D-037), 4 layers
+  JLC04161H-7628, 1 oz outer / 0.5 oz inner. L1 parts and RF, L2 solid GND (never cut, except MB1355's cut-out), L3
+  power pours, L4 signals + GND fill. Built and assembled at JLCPCB only (D-036).
+- Net classes from `docs/power-map.md`; JLC rules from the `pcb-design-rules` skill; custom DRC rules for the RF1
+  trace, keep-outs and the bracket strip. RF line: MB1355's 0.6 / 0.2 mm on L1 over L3 (L2 cut out locally): 56.9 Ω
+  vs 56.3 Ω on ST's board (`scripts/gcpw.py`).
+- The silkscreen shows only the test pads' net names, at JLCPCB's smallest text, placed by `scripts/pcb/silk.py` clear
+  of everything; every reference is on F.Fab (D-035, D-041, D-052). Every part keeps JLCPCB's assembly spacing: 0.5 mm
+  to its neighbours, 2.5 mm from its body to the edge (`scripts/pcb/respace.py --check`, D-052).
+- **Placement belongs to the owner (D-032),** except the MB1355 RF corner, pasted at ST's position (ungrouped, no pours since D-046)
+  (D-037), the NFC and drive copies (D-039, D-040) the motor connectors with their encoder inputs at the side edges
+  (D-042), and the IMU, flash and EEPROM (D-043). Since 49b38c1 the owner places in KiCad (D-047): the power entry and
+  J301 are on the board. The pours are back (D-053): a solid L2 ground plane, ST's RF-strip and NFC ground, TI's drive
+  pours, with the rule areas `ANTENNA_TAB`, `NFC_COIL`, `NFC_POUR_GAP`, `BATTERY_BACK` and the L2 cut-out; DRC has no
+  errors and no exclusions (51 fan-out vias wait for routing). Every MCU pin another part uses has a 0.2 mm stub to a 0.15 / 0.25 mm via, and the MCU decoupling is back on top beside the pins (D-048, `scripts/pcb/mcu_escape.py`). GND vias sit on a regular
+  lattice in the MCU's exposed pad and over the RF strip, and the buck and LDO are placed right of the power entry
+  (D-049). The drive stage sits 8 mm further right, and the RGB LEDs are two square rings in the centre (D-050). The
+  rest is placed for short tracks (D-051): SW101 and the Qwiic port at the left edge, the support parts at their pins,
+  the test pads in rows per block. Only the cradle and bumper holes (MC1–MC4, MH1 / MH2) are still off the board, for
+  the owner. Routing pass 1 is done (D-054, `scripts/pcb/route_simple.py`): 90 short single-layer links, 3 GND ties, 1
+  gap and 83 GND vias; 204 connections are left for pass 2 and the owner (long buses, blocked hops, the power bus for
+  its pours, the vendor copies' own gaps). Routing pass 2 closed the vendor copies' open ends from their references (D-055, `scripts/pcb/vendor_gaps.py`). The power bus is poured (D-056, `scripts/pcb/power_pours.py`): L3 is a VBAT corridor plus GND, L1 pours at the power entry and the buck input. Routing pass 3 made 46 short connections around parts (D-057) and pass 4 the long runs (D-058, `scripts/pcb/route_maze.py`). A placement study (D-059, `scripts/pcb/improve_placement.py`, `scripts/pcb/ripup.py`) found the chosen moves made routing worse, so placement is unchanged; the MCU's +3V3 hops got ST's stub width and a top-side path through ST's strip ground. The motor phases run from TI's strips across the top of the bracket strip to J601 / J602, with the SS34 clamps re-placed on their own strips (D-060, `scripts/pcb/route_phases.py`). L1 and L4 carry GND fills stitched to L2 every 5 mm (D-061, `scripts/pcb/gnd_fills.py`): 46 connections, mostly at U301's crowded fan-out and the IMU's and TI's ground, are left for the owner (`docs/layout.md`). `scripts/pcb/board.py` only syncs from the schematic: it never moves or reshapes parts, new
+  parts go to a free spot in the staging area, and parts removed from the schematic are removed.
+- Brief for the owner: `docs/layout.md`.
+
+## Still to check or do
+
+- The 60 connections routing left (`docs/layout.md`), GND fill on L1 / L4 with stitching, then DRC with schematic parity, and the `power-pcb-layout` §7 / `rf-layout` §12
+  checklists (Phase 3 gate).
+- Mechanical ASSUMPTIONS in `docs/mechanical.md`: MG310 mass and stall current (the listing says "≤ 2 mA"), battery
+  and component masses, the bracket's 18 mm reference face.
+- Encoder resolution: 13 PPR is assumed (1040 counts per wheel revolution).
+- REQ-ODOM-005 (index pulse) can't be met with the MG310; reported to the firmware.
+- Bench items: buck load step, HSE trim, pi-network VNA tuning, NFC coil tuning (spares C821–C823), thermal soak (`docs/plan.md`
+  Phase 4).
+- Re-run the JLC stock check before the order.
+
+## Repository (same shape as embedded-pro/e-psu-hardware, D-033)
+
+- `hardware/e-inverted-pendulum/`: KiCad 10 project with project symbols and footprints.
+- `scripts/schgen/`: schematic generator (`design/*.py` → `hardware/`), e-psu's engine ported to KiCad 10; `check.py`
+  (netlist vs `expected.json`), `check_equivalence.py` (drawing-only changes), `render.sh`.
+- `scripts/pcb/`: board sync and renders. `scripts/export_*.py`, `visual_diff.py`: review, fab, release and diff
+  packages.
+- `simulation/`: S0–S5, values read from the schematic.
+- `docs/`: plan, requirements, decisions, design calcs, power map, RF, NFC, layout brief, design guide, schematic PDF.
+- `.claude/agents/pendulum-board-reviewer.md`: design-review agent.
+- `.github/workflows/`: hardware checks, kicad-bot ERC/DRC, visual diff, release-please.
+- Commit messages follow Conventional Commits (`feat:`, `fix:`, `chore:`, …).

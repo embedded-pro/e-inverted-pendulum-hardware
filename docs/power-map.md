@@ -1,7 +1,7 @@
 # Power map and net classes
 
-Built per `power-pcb-layout` §2 before placement. The net classes in `kicad/e-inverted-pendulum.kicad_pro`
-come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way round.
+Built per `power-pcb-layout` §2 before placement. The net classes in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pro`
+come from this table (`scripts/pcb/board.py`, `NET_CLASSES`), not the other way round.
 
 **Track widths:** IPC-2221, ΔT 10 °C, 1 oz outer / 0.5 oz inner (D-008), using the skill's `width_mm()`:
 - 4.2 A (two MG310s at the 2.0 A trip plus logic, D-027): 2.17 mm outer, 11.3 mm inner;
@@ -13,12 +13,12 @@ come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way ro
 
 | Net / group | Kind | I cont / peak | V max | Rule | Class |
 |---|---|---|---|---|---|
-| BAT_P → F101 → BAT_F → Q101 → PP_S → VBAT | high current | 1.2 A / 4.2 A | 12.6 V (SMBJ15A clamp 24 V) | Pours on L1 + L3; ≥ 5 vias per layer change; no necks below 2.2 mm outer | `PWR_BUS` |
-| VBAT at the bridges (HS drains; C502/C503 bridge A, C505/C506 bridge B, C507 bulk, C508 VM) | hot-loop member | 1.0 A / 4.0 A | 12.6 V | Pour on L1. The HF cap (100 nF) sits closest to each FET pair's drain and LS source; L2 GND directly under | `PWR_BUS` |
-| MOT_L_P, MOT_L_N, MOT_R_P, MOT_R_N | switch node (25 kHz, IDRIVE 00) | 0.5 A / 2.0 A | 12.6 V | 0.8 mm. Only the copper the current needs, from the FET to the SS34 and the PH 6-pin connector (2 A contacts, D-028). No sense or encoder trace beside or under it on any layer | `MOTOR` |
-| SENSE_A, SENSE_B (LS sources → Rsense) | hot-loop member | 0.5 A / 2.0 A | < 0.1 V | Short and wide (≥ 0.8 mm). The current flows straight through R509/R512 | `MOTOR` |
-| xHS_D/G, xLS_D/G (8 + 8 nets), PP_G | gate drive | mA / ~100 mA pulses | VBAT + 12 V | 0.3 mm. Gate R at the FET. Each route paired with its return: the phase node for HS, SENSE_x/GND for LS | `GATE` |
-| DRV_xISENP/N, KELVIN_xN | sense / Kelvin | µA | < 0.1 V | From the inner pad edges of Rsense (NT501/NT502 at the GND pad). Tight pair, filter at the DRV8711 | `SENSE` |
+| BAT_P → F101 → BAT_F → Q101 → PP_S → VBAT | high current | 1.2 A / 4.2 A | 12.6 V (SMBJ15A clamp 24 V) | Pours on L1 + L3; ≥ 5 vias per layer change; no necks below 2.2 mm outer. Done (D-056): VBAT on L3 as one ≥ 11.3 mm corridor, L1 pours at Q101 and the buck input with 5 + 2 vias; the entry hops (BAT_P, BAT_F, PP_S, < 6 mm) on L1 only, each ≥ 2.2 mm | `PWR_BUS` |
+| VBAT at the bridges (HS drains; C502/C503 bridge A, C505/C506 bridge B, C507 bulk, C508 / C514 VM) | hot-loop member | 1.0 A / 4.0 A | 12.6 V | TI's BOOST-DRV8711 VM pours on L1 / L4 (D-040, `docs/drive.md`); L2 GND directly under | `PWR_BUS` |
+| MOT_L_P, MOT_L_N, MOT_R_P, MOT_R_N | switch node (25 kHz, IDRIVE 00) | 0.5 A / 2.0 A | 12.6 V | 0.8 mm. Only the copper the current needs, from the FET to the SS34 and the PH 6-pin connector (2 A contacts, D-028). No sense or encoder trace beside or under it on any layer Done (D-060): each motor's pair on F.Cu at 0.8 mm across the top of the bracket strip, two vias where it crosses the connector's pins | `MOTOR` |
+| SENSE_A, SENSE_B (LS sources → Rsense) | hot-loop member | 0.5 A / 2.0 A | < 0.1 V | TI's GND_A / GND_B pours; the current flows straight through R509/R512 (D-040) | `MOTOR` |
+| A1HS … B2LS (8 nets), PP_G | gate drive | mA / ~100 mA pulses | VBAT + 12 V | TI's gate traces, straight from the DRV8711 (no series R, D-040); PP_G 0.3 mm | `GATE` |
+| DRV_xISENP/N | sense / Kelvin | µA | < 0.1 V | TI's net ties at the shunt pads (NT501 / NT502 SENSE side, NT503 / NT504 GND side, on B.Cu, D-040) | `SENSE` |
 | VBAT_SENSE | analog, high impedance | µA | 2.7 V | Divider and 100 nF at the ADC pin (PC1); away from switch nodes | `SENSE` |
 | BUCK_SW | switch node (1.2 MHz) | 0.5 A / 1 A | 12.6 V | Minimal copper U201 → L201; nothing under it on L3/L4; FB away from it | `SWITCH` |
 | BUCK_BST, BUCK_FB, BUCK_SS, BUCK_EN | bootstrap / feedback | µA–mA | 12.6 V | BST cap at the pins; FB divider at the IC, sensing at the output cap | Default |
@@ -26,10 +26,10 @@ come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way ro
 | +5V | supply | 0.3 A / 0.6 A | 5.0 V | Pour on L3 or 0.5 mm | `SUPPLY` |
 | +3V3, VDDA, ENC_VCC, DRV_V5, DRV_VINT, DRV_VCP | supply | ≤ 0.2 A | 3.3–24 V | 0.5 mm or a pour on L3; decoupling at each pin with its own via | `SUPPLY` |
 | DRV_CP1, DRV_CP2 | charge-pump switch node | mA | 24 V | Flying cap at the pins, short | `GATE` |
-| RF1, RF_50, RF_ANT, RF_UFL | RF 50 Ω | — | — | GCPW 0.27 / 0.15 mm (RF1 trace 0.2 / 0.104 mm per DS12804); L1 only, no vias; via fence 1.0–1.3 mm (`docs/rf.md`) | `RF` |
+| RF1, RF_50, RF_MATCH, RF_ANT | RF (MB1355 copy) | — | — | MB1355's 0.6 mm L1 line, 0.2 mm gaps, referenced to L3 (L2 cut out); RF1 fan-out 0.265 mm (`docs/rf.md`, D-037) | `RF` |
 | HSE_IN/OUT, OSC32_IN/OUT | crystal | µA | 3.3 V | At the pins, short and symmetric, GND guard, no vias | `CRYSTAL` |
 | ENC_* (raw, filtered, buffered) | off-board digital input | mA | 5 V | Away from MOT_* on every layer; ESD part at the connector, pass-through | Default |
-| GND | plane | — | — | L2 solid and never cut; GND fill on L1/L4; stitching about every 5 mm | — |
+| GND | plane | — | — | L2 solid and never cut; L3 GND outside the VBAT corridor (D-056); GND fill on L1/L4; stitching about every 5 mm | — |
 | Everything else | digital | mA | 3.3 V | 0.2 mm, 0.15 mm clearance | Default |
 
 | Class | Track (mm) | Clearance (mm) | Via (mm, drill / pad) | Diff pair (mm, width / gap) |
@@ -41,8 +41,8 @@ come from this table (`kicad/gen/board.py`, `NET_CLASSES`), not the other way ro
 | `SENSE` | 0.20 | 0.15 | 0.30 / 0.60 | 0.20 / 0.20 |
 | `SWITCH` | 0.50 | 0.15 | 0.30 / 0.60 | — |
 | `SUPPLY` | 0.50 | 0.15 | 0.30 / 0.60 | — |
-| `RF` | 0.27 | 0.15 | — (no vias on the line) | — |
+| `RF` | 0.6 | 0.2 | — (no vias on the line) | — |
 | `CRYSTAL` | 0.20 | 0.15 | — | — |
 
 The RF1 matching trace (200 µm wide, 104 µm gap, 1.5 mm long, DS12804 Fig. 13) is below the class values. A custom
-rule in `e-inverted-pendulum.kicad_dru` allows 0.10 mm clearance on RF1 only. That is above JLC's 0.09 mm floor.
+rule in `e-inverted-pendulum.kicad_dru` allows 0.104 mm clearance on RF1 only. That is above JLC's 0.09 mm floor.
