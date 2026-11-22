@@ -186,6 +186,8 @@ python3 scripts/pcb/nfc_block.py --apply
 
 ### Review and fabrication packages
 
+- The export, BOM, stock, datasheet and visual-diff scripts are thin wrappers around the hardware-design plugin's,
+  pinned in `scripts/plugin.py`; `python3 scripts/plugin_gates.py` runs the plugin's gates as CI does (D-064).
 - `python3 scripts/export_review.py`: ERC/DRC, netlist, BOM, PDFs and renders for a design review, used by the
   `pendulum-board-reviewer` agent in [`.claude/agents/`](.claude/agents/).
 - `python3 scripts/export_jlcpcb.py`: Gerbers, drill, BOM and CPL for JLCPCB.

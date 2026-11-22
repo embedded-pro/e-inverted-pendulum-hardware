@@ -39,3 +39,24 @@ jobs:
         with:
           name: erc-report
           path: erc.rpt
+
+  plugin-gates:
+    # The hardware-design plugin's gates at the pinned tag (scripts/plugin.py, D-064): net classes, routing geometry,
+    # ground and the scripted design review. Ratchet limits in scripts/plugin_gates.py.
+    runs-on: ubuntu-24.04
+    container:
+      image: kicad/kicad:10.0.8
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python packages for the plugin's copper checks
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends git python3-shapely python3-numpy python3-scipy
+      - name: Plugin gates
+        run: python3 scripts/plugin_gates.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plugin-gates
+          path: plugin-gates/
