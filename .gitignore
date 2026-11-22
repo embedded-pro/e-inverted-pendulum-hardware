@@ -47,3 +47,6 @@ simulation/models/ti-zips/
 
 # ST MB1355 reference material (OPLA): never committed, see docs/rf.md
 reference/
+# hardware-design plugin, pinned checkout (scripts/plugin.py, D-064)
+.hw/
+plugin-gates/

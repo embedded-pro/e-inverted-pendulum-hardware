@@ -151,6 +151,11 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
   (0.8 mm, in the paste gaps) and a 1.2 mm stitching grid over ST's RF ground strip, skipping points that don't fit
   (D-049). One shot; no-op when done.
 - `python3 scripts/pcb/render.py`: per-layer, side, overview and 3D renders into `docs/images/`.
+- `python3 scripts/plugin.py <skill> <script> [args]`: run any hardware-design plugin script at the pinned tag
+  (`PLUGIN_TAG`, fetched into the gitignored `.hw/`; `$HW` overrides). The export, BOM, stock, datasheet and visual-diff
+  scripts below are thin wrappers around the plugin's (D-064).
+- `python3 scripts/plugin_gates.py`: the plugin's gates as CI runs them (net classes, routing geometry, ground, the
+  scripted design review), with ratchet limits at today's counts; reports in `plugin-gates/` (D-064).
 - `python3 scripts/export_bom.py` then `python3 scripts/jlc_stock.py bom/bom.csv --boards 5`: BOM and stock.
 - `python3 scripts/fetch_datasheet.py <LCSC>`: datasheets into the gitignored `datasheets/`.
 - `python3 scripts/export_review.py`: review package in `review_exports/e-inverted-pendulum/`.
