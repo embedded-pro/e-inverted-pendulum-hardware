@@ -4,7 +4,7 @@
 TI's files stay in the gitignored reference/boost-drv8711/ (the package zip, its board files unpacked under design/
 and gerbers/). This reads BOARD/BOOST-DRV8711.PcbDoc through KiCad 10's Altium importer, like rf_reference.py does for
 ST's MB1355, and writes:
-  - scripts/pcb/boost_drv8711.json: the power stage's parts (TI ref -> ours, position, rotation, side, pad nets), its
+  - reference/boost-drv8711/boost_drv8711.json (gitignored, D-063): the power stage's parts (TI ref -> ours, position, rotation, side, pad nets), its
     tracks and vias, and its pours cut to the stage's box, in TI's board frame (KiCad import, mm, y down);
   - the BOOST_* footprints: TI's land patterns, re-centred on their pads, with KiCad library 3D bodies turned to match;
     the net ties rebuilt as KiCad net-tie footprints with TI's pad geometry.
@@ -35,7 +35,7 @@ from sexpr import Str, Sym, dump, parse  # noqa: E402
 
 REFERENCE = ROOT / "reference" / "boost-drv8711"
 PCBDOC = REFERENCE / "design" / "BOARD" / "BOOST-DRV8711.PcbDoc"
-OUT = ROOT / "scripts" / "pcb" / "boost_drv8711.json"
+OUT = ROOT / "reference" / "boost-drv8711" / "boost_drv8711.json"   # gitignored (D-063)
 PRETTY = RF.PRETTY
 LIBRARY = RF.LIBRARY
 SOURCE = "Derived from Texas Instruments BOOST-DRV8711 design files (SLVC575B)"

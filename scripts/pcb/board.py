@@ -27,6 +27,7 @@ Run: python3 scripts/pcb/board.py [--rules path/to/pcb_rules.py] [--stage-all]
 """
 
 import argparse
+import fnmatch
 import json
 import math
 import os
@@ -71,25 +72,38 @@ STACKUP = [
     ("B.SilkS", "Bottom Silk Screen", None, None, None),
 ]
 
+# The hardware-design plugin's standard net classes (pcb-copper skill, netclasses.py; D-062). The name says what sizes
+# the class: PWR_<I>A from the current in docs/power-map.md (IPC-2221 chart fit, dT 10 °C, on this stack-up's copper),
+# the rest the fab's design values; RF_50 is an impedance class, set by hand from docs/rf.md. Widths and clearances
+# below are what `netclasses.py apply` writes for them (it runs after this, with --rules). Lower priority number wins.
 NET_CLASSES = {
-    "PWR_BUS": {"track_width": 2.2, "clearance": 0.2,
-                "patterns": ["VBAT", "*/BAT_P", "*/BAT_F", "*/PP_S"]},
-    "MOTOR": {"track_width": 0.8, "clearance": 0.2,
-              "patterns": ["MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N", "*/SENSE_A", "*/SENSE_B"]},
-    "GATE": {"track_width": 0.3, "clearance": 0.15,
-             "patterns": ["*/A?HS", "*/A?LS", "*/B?HS", "*/B?LS", "*/PP_G", "*/DRV_CP1", "*/DRV_CP2"]},
-    "SENSE": {"track_width": 0.2, "clearance": 0.15, "diff_pair_width": 0.2, "diff_pair_gap": 0.2,
-              "patterns": ["*/DRV_?ISENP", "*/DRV_?ISENN", "VBAT_SENSE"]},
-    "SWITCH": {"track_width": 0.5, "clearance": 0.15,
-               "patterns": ["*/BUCK_SW", "*/SMPS_LX", "*/SMPS_MID"]},
-    "SUPPLY": {"track_width": 0.5, "clearance": 0.15,
-               "patterns": ["+5V", "+3V3", "VDDA", "*/ENC_VCC", "*/DRV_V5", "*/DRV_VINT", "*/DRV_VCP"]},
-    "RF": {"track_width": 0.6, "clearance": 0.2,
-           "patterns": ["RF1", "*/RF_50", "*/RF_MATCH", "*/RF_ANT"]},
-    "NFC": {"track_width": 0.25, "clearance": 0.15,
-            "patterns": ["*/NFC_AC0", "*/NFC_AC1"]},
-    "CRYSTAL": {"track_width": 0.2, "clearance": 0.15,
-                "patterns": ["*/HSE_IN", "*/HSE_OUT", "*/OSC32_IN", "*/OSC32_OUT"]},
+    "PWR_4.2A": {"track_width": 2.174, "clearance": 0.15,                     # 4.2 A peak bus: a pour (D-056)
+                 "patterns": ["VBAT", "*/BAT_P", "*/BAT_F", "*/PP_S"]},
+    "PWR_2A": {"track_width": 0.781, "clearance": 0.15,                       # 2 A peak per bridge (D-027)
+               "patterns": ["MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N", "*/SENSE_A", "*/SENSE_B"]},
+    "PWR_1A": {"track_width": 0.3, "clearance": 0.15,                         # BUCK_SW 1 A peak
+               "patterns": ["*/BUCK_SW"]},
+    "PWR_0.6A": {"track_width": 0.15, "clearance": 0.15,                      # +5V 0.6 A peak
+                 "patterns": ["+5V"]},
+    "PWR_0.2A": {"track_width": 0.15, "clearance": 0.15,                      # supplies and the MCU SMPS, <= 0.2 A
+                 "patterns": ["+3V3", "VDDA", "*/ENC_SRC", "*/ENC_VCC", "*/NFC_VCC", "*/DRV_V5", "*/DRV_VINT",
+                              "*/DRV_VCP", "*/SMPS_LX", "*/SMPS_MID"]},       # MCU SMPS 50 mA
+    "SENSE": {"track_width": 0.15, "clearance": 0.15, "diff_pair_width": 0.2, "diff_pair_gap": 0.2,  # Kelvin taps
+              "patterns": ["*/DRV_?ISENP", "*/DRV_?ISENN"]},
+    "ANALOG": {"track_width": 0.15, "clearance": 0.15,
+               "patterns": ["VBAT_SENSE"]},
+    "RF_50": {"track_width": 0.6, "clearance": 0.15,                          # MB1355's 0.6 mm line (docs/rf.md); the L1 fill keeps 0.2 mm
+              "patterns": ["RF1", "*/RF_50", "*/RF_MATCH", "*/RF_ANT"]},
+    "CLK": {"track_width": 0.15, "clearance": 0.15,                           # the two crystals
+            "patterns": ["*/HSE_IN", "*/HSE_OUT", "*/OSC32_IN", "*/OSC32_OUT"]},
+    "GND": {"track_width": 0.15, "clearance": 0.15,
+            "patterns": ["GND"]},
+    # Every other net with two or more pads: the gate drive (TI's traces, D-040), the charge pump, the NFC coil and the
+    # signals. write_net_classes() adds an exact pattern for each net the classes above don't cover, so no net is left
+    # in Default (a catch-all '*' would make KiCad composite classes, which the scripts' class tests don't expect).
+    "SIGNAL": {"track_width": 0.15, "clearance": 0.15,
+               "patterns": ["*/A?HS", "*/A?LS", "*/B?HS", "*/B?LS", "*/PP_G", "*/DRV_CP1", "*/DRV_CP2",
+                            "*/NFC_AC0", "*/NFC_AC1"]},
 }
 DEFAULT_CLASS = {"track_width": 0.2, "clearance": 0.15}
 
@@ -102,7 +116,7 @@ CUSTOM_RULES = """
   (constraint clearance (min 0.104mm)))
 
 (rule "MB1355 copy: ST's 0.1 mm on the RF, SMPS and HSE nets and C318, except to pours (they keep the RF class's 0.2 mm GCPW gap) (D-037, D-046)"
-  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetClass == 'RF' || B.NetClass == 'RF' || A.NetName == '*SMPS*' || B.NetName == '*SMPS*' || A.NetName == '*HSE_*' || B.NetName == '*HSE_*' || A.memberOfFootprint('C318') || B.memberOfFootprint('C318'))")
+  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetClass == 'RF_50' || B.NetClass == 'RF_50' || A.NetName == '*SMPS*' || B.NetName == '*SMPS*' || A.NetName == '*HSE_*' || B.NetName == '*HSE_*' || A.memberOfFootprint('C318') || B.memberOfFootprint('C318'))")
   (constraint clearance (min 0.1mm)))
 
 (rule "MB1355 copy: ST's own placement, crystals packed against the MCU and a shield clip (D-037, D-046)"
@@ -519,23 +533,37 @@ def write_stackup():
     BOARD.write_text(dump(tree) + "\n", encoding="utf-8")
 
 
+def unclassed_nets(patterns):
+    """The board's nets with two or more pads that no pattern covers (they would fall into Default)."""
+    pads = {}
+    for footprint in child(parse(BOARD.read_text(encoding="utf-8")), Sym("footprint")):
+        for pad in child(footprint, Sym("pad")):
+            for net in child(pad, Sym("net")):
+                name = str(net[-1])
+                pads[name] = pads.get(name, 0) + 1
+    return sorted(n for n, k in pads.items() if k >= 2 and n and not n.startswith("unconnected-")
+                  and not any(fnmatch.fnmatchcase(n, p["pattern"]) for p in patterns))
+
+
 def write_net_classes():
     project = json.loads(PROJECT.read_text(encoding="utf-8")) if PROJECT.exists() else {}
     template = {"bus_width": 12, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "diff_pair_width": 0.2,
                 "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1, "pcb_color": "rgba(0, 0, 0, 0.000)",
-                "schematic_color": "rgba(0, 0, 0, 0.000)", "via_diameter": 0.6, "via_drill": 0.3, "wire_width": 6}
+                "schematic_color": "rgba(0, 0, 0, 0.000)", "tuning_profile": "", "via_diameter": 0.6, "via_drill": 0.3,
+                "wire_width": 6}
     classes = [dict(template, name="Default", priority=2147483647, **DEFAULT_CLASS)]
     patterns = []
     for priority, (name, spec) in enumerate(NET_CLASSES.items()):
         values = {k: v for k, v in spec.items() if k != "patterns"}
         classes.append(dict(template, name=name, priority=priority, **values))
         patterns += [{"netclass": name, "pattern": pattern} for pattern in spec["patterns"]]
+    patterns += [{"netclass": "SIGNAL", "pattern": net} for net in unclassed_nets(patterns)]
     design = project.setdefault("board", {}).setdefault("design_settings", {})
     design.setdefault("rule_severities", {}).update({check: "error" for check in SILK_CHECKS})
     design.setdefault("defaults", {}).update({"silk_text_size_h": SILK_TEXT_MIN[0], "silk_text_size_v": SILK_TEXT_MIN[0],
                                               "silk_text_thickness": SILK_TEXT_MIN[1], "silk_line_width": SILK_TEXT_MIN[1]})
     settings = project.setdefault("net_settings", {})
-    settings.update({"classes": classes, "meta": {"version": 4}, "net_colors": None,
+    settings.update({"classes": classes, "meta": {"version": 5}, "net_colors": None,
                      "netclass_assignments": None, "netclass_patterns": patterns})
     PROJECT.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
 

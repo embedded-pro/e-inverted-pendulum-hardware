@@ -25,7 +25,7 @@
   (constraint clearance (min 0.104mm)))
 
 (rule "MB1355 copy: ST's 0.1 mm on the RF, SMPS and HSE nets and C318, except to pours (they keep the RF class's 0.2 mm GCPW gap) (D-037, D-046)"
-  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetClass == 'RF' || B.NetClass == 'RF' || A.NetName == '*SMPS*' || B.NetName == '*SMPS*' || A.NetName == '*HSE_*' || B.NetName == '*HSE_*' || A.memberOfFootprint('C318') || B.memberOfFootprint('C318'))")
+  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetClass == 'RF_50' || B.NetClass == 'RF_50' || A.NetName == '*SMPS*' || B.NetName == '*SMPS*' || A.NetName == '*HSE_*' || B.NetName == '*HSE_*' || A.memberOfFootprint('C318') || B.memberOfFootprint('C318'))")
   (constraint clearance (min 0.1mm)))
 
 (rule "MB1355 copy: ST's own placement, crystals packed against the MCU and a shield clip (D-037, D-046)"

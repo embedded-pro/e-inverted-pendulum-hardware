@@ -92,7 +92,7 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/route_simple.py --apply`: routing pass 1 (D-054). Each net's islands joined closest-first: pad-to-pad
   links up to 8 mm on one layer (straight or one 45° bend, class width narrowed only to a narrower pad, ≥ 0.15 mm), GND
   ties between a part's adjacent pins, short gaps to free track ends / vias, and one GND via per island off the L2 plane.
-  Skips PWR_BUS (pours), the vendor copies' own connections and a crystal unless both nets route. No-op when nothing
+  Skips PWR_4.2A (pours), the vendor copies' own connections and a crystal unless both nets route. No-op when nothing
   simple is left.
 - `python3 scripts/pcb/vendor_gaps.py --apply`: routing pass 2 (D-055). The vendor copies' missing tracks restored from the
   references where their ends land (or up to a hop onto a part that moved), the rest of a copy's own open connections
@@ -104,8 +104,7 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/pcb/route_maze.py --apply [--max-length 8]`: routing passes 3 / 4 (D-057, D-058). Each net's islands
   joined closest-first by `maze.py` (F.Cu / B.Cu, ≤ 2 vias, no jogs); `--max-length` = pass 3 (short, vias costly),
   without = pass 4 (by priority: encoders, VBAT_SENSE, DRV8711, SPI, I2C, SWD, supplies); in both, the MCU's +3V3 / VDDA
-  pins within 10 mm of U301 go first (D-059). Skips PWR_BUS and the crystals. Supplies fall back to 0.3 mm, signals to
-  0.15 mm; 3 tries per island gap, in rounds until one routes nothing (several minutes to an hour). GND fills outside
+  pins within 10 mm of U301 go first (D-059). Skips PWR_4.2A and the crystals (CLK). Widths are the classes' (D-062: 0.15 mm below 1 A); 3 tries per island gap, in rounds until one routes nothing (several minutes to an hour). GND fills outside
   TI's bridges and ST's B.Cu strip below z 103 give way (D-058). No-op when nothing routable is left.
 - `scripts/pcb/maze.py`: the grid router (0.05 mm, F.Cu / B.Cu, 45° turns only, layer-direction costs, ≤ 2 vias, every
   segment and via checked exactly) that `vendor_gaps.py` and `route_maze.py` use.
@@ -126,7 +125,7 @@ The `hardware-design` plugin (marketplace `hardware-skills`, registered in
 - `python3 scripts/nfc_reference.py`: ST's MB1163 Gerbers (`reference/mb1163/`, gitignored) -> `scripts/pcb/mb1163_nfc.json`
   and the `MB1163_*` footprints (D-039). `python3 scripts/pcb/nfc_block.py --apply`: paste the NFC corner, as rf_block does.
 - `python3 scripts/drv_reference.py`: TI's BOOST-DRV8711 PcbDoc (`reference/boost-drv8711/`, gitignored) ->
-  `scripts/pcb/boost_drv8711.json` and the `BOOST_*` footprints (D-040). `python3 scripts/pcb/drv_block.py --apply`: paste it.
+  `reference/boost-drv8711/boost_drv8711.json` (gitignored, D-063) and the `BOOST_*` footprints (D-040). `python3 scripts/pcb/drv_block.py --apply`: paste it.
 - `python3 scripts/pcb/place_block.py --apply <block>`: place a block of parts at the owner's spots from `placement.py`, once
   (`--replace` moves a placed block to its changed table): `motor_io` = J601 / J602 at the side edges
   with their encoder chains and supply (D-042, D-044); `imu_memory` = the IMU on the centre line, the flash and the

@@ -6,7 +6,7 @@
     python3 scripts/pcb/improve_placement.py --apply j301 flash ...    move these groups, one translation each
 
 The measure is each net's minimum spanning tree over its pads, in Manhattan distance (mst_manhattan, from the
-pcb-design-rules skill's pcb_rules.py, whose gate reports a route's detour against it). GND and the power bus (PWR_BUS:
+pcb-design-rules skill's pcb_rules.py, whose gate reports a route's detour against it). GND and the power bus (PWR_4.2A:
 its pours, D-056) are left out; so are the crystal nets (at their pins, D-048).
   - --study: the board's total; per part, the best translation within STUDY_REACH mm (STUDY_STEP lattice) and what it
     saves, ignoring collisions; per group, the same for the group as one.
@@ -43,7 +43,7 @@ import route_simple as RS  # noqa: E402
 import silk  # noqa: E402
 
 PLACEMENT = pathlib.Path(__file__).resolve().parent / "placement.py"
-SKIP_CLASSES = {"PWR_BUS", "CRYSTAL"}
+SKIP_CLASSES = {"PWR_4.2A", "CLK"}
 GROUPS = {
     "j301": ("J301",),
     "mcu_tp": ("TP301", "TP304", "TP302"),

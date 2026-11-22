@@ -500,193 +500,231 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.15,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
         "name": "Default",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 2147483647,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
+        "clearance": 0.15
       },
       {
         "bus_width": 12,
-        "clearance": 0.15,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "CRYSTAL",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 8,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.15,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "GATE",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 2,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.3,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.2,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "MOTOR",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 1,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.8,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.15,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "NFC",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 7,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.25,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.2,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "PWR_BUS",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "wire_width": 6,
+        "name": "PWR_4.2A",
         "priority": 0,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 2.2,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
+        "track_width": 2.174,
+        "clearance": 0.15
       },
       {
         "bus_width": 12,
-        "clearance": 0.2,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "RF",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 6,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.6,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3,
-        "wire_width": 6
+        "wire_width": 6,
+        "name": "PWR_2A",
+        "priority": 1,
+        "track_width": 0.781,
+        "clearance": 0.15
       },
       {
         "bus_width": 12,
-        "clearance": 0.15,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "PWR_1A",
+        "priority": 2,
+        "track_width": 0.3,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "PWR_0.6A",
+        "priority": 3,
+        "track_width": 0.15,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "PWR_0.2A",
+        "priority": 4,
+        "track_width": 0.15,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
         "diff_pair_gap": 0.2,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
         "name": "SENSE",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 3,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.15,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "SUPPLY",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 5,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
+        "track_width": 0.15,
+        "clearance": 0.15
       },
       {
         "bus_width": 12,
-        "clearance": 0.15,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "SWITCH",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 4,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3,
-        "wire_width": 6
+        "wire_width": 6,
+        "name": "ANALOG",
+        "priority": 6,
+        "track_width": 0.15,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "RF_50",
+        "priority": 7,
+        "track_width": 0.6,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "CLK",
+        "priority": 8,
+        "track_width": 0.15,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "GND",
+        "priority": 9,
+        "track_width": 0.15,
+        "clearance": 0.15
+      },
+      {
+        "bus_width": 12,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6,
+        "name": "SIGNAL",
+        "priority": 10,
+        "track_width": 0.15,
+        "clearance": 0.15
       }
     ],
     "meta": {
@@ -696,72 +734,92 @@
     "netclass_assignments": null,
     "netclass_patterns": [
       {
-        "netclass": "PWR_BUS",
+        "netclass": "PWR_4.2A",
         "pattern": "VBAT"
       },
       {
-        "netclass": "PWR_BUS",
+        "netclass": "PWR_4.2A",
         "pattern": "*/BAT_P"
       },
       {
-        "netclass": "PWR_BUS",
+        "netclass": "PWR_4.2A",
         "pattern": "*/BAT_F"
       },
       {
-        "netclass": "PWR_BUS",
+        "netclass": "PWR_4.2A",
         "pattern": "*/PP_S"
       },
       {
-        "netclass": "MOTOR",
+        "netclass": "PWR_2A",
         "pattern": "MOT_L_P"
       },
       {
-        "netclass": "MOTOR",
+        "netclass": "PWR_2A",
         "pattern": "MOT_L_N"
       },
       {
-        "netclass": "MOTOR",
+        "netclass": "PWR_2A",
         "pattern": "MOT_R_P"
       },
       {
-        "netclass": "MOTOR",
+        "netclass": "PWR_2A",
         "pattern": "MOT_R_N"
       },
       {
-        "netclass": "MOTOR",
+        "netclass": "PWR_2A",
         "pattern": "*/SENSE_A"
       },
       {
-        "netclass": "MOTOR",
+        "netclass": "PWR_2A",
         "pattern": "*/SENSE_B"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/A?HS"
+        "netclass": "PWR_1A",
+        "pattern": "*/BUCK_SW"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/A?LS"
+        "netclass": "PWR_0.6A",
+        "pattern": "+5V"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/B?HS"
+        "netclass": "PWR_0.2A",
+        "pattern": "+3V3"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/B?LS"
+        "netclass": "PWR_0.2A",
+        "pattern": "VDDA"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/PP_G"
+        "netclass": "PWR_0.2A",
+        "pattern": "*/ENC_SRC"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/DRV_CP1"
+        "netclass": "PWR_0.2A",
+        "pattern": "*/ENC_VCC"
       },
       {
-        "netclass": "GATE",
-        "pattern": "*/DRV_CP2"
+        "netclass": "PWR_0.2A",
+        "pattern": "*/NFC_VCC"
+      },
+      {
+        "netclass": "PWR_0.2A",
+        "pattern": "*/DRV_V5"
+      },
+      {
+        "netclass": "PWR_0.2A",
+        "pattern": "*/DRV_VINT"
+      },
+      {
+        "netclass": "PWR_0.2A",
+        "pattern": "*/DRV_VCP"
+      },
+      {
+        "netclass": "PWR_0.2A",
+        "pattern": "*/SMPS_LX"
+      },
+      {
+        "netclass": "PWR_0.2A",
+        "pattern": "*/SMPS_MID"
       },
       {
         "netclass": "SENSE",
@@ -772,88 +830,360 @@
         "pattern": "*/DRV_?ISENN"
       },
       {
-        "netclass": "SENSE",
+        "netclass": "ANALOG",
         "pattern": "VBAT_SENSE"
       },
       {
-        "netclass": "SWITCH",
-        "pattern": "*/BUCK_SW"
-      },
-      {
-        "netclass": "SWITCH",
-        "pattern": "*/SMPS_LX"
-      },
-      {
-        "netclass": "SWITCH",
-        "pattern": "*/SMPS_MID"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "+5V"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "+3V3"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "VDDA"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "*/ENC_VCC"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "*/DRV_V5"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "*/DRV_VINT"
-      },
-      {
-        "netclass": "SUPPLY",
-        "pattern": "*/DRV_VCP"
-      },
-      {
-        "netclass": "RF",
+        "netclass": "RF_50",
         "pattern": "RF1"
       },
       {
-        "netclass": "RF",
+        "netclass": "RF_50",
         "pattern": "*/RF_50"
       },
       {
-        "netclass": "RF",
+        "netclass": "RF_50",
         "pattern": "*/RF_MATCH"
       },
       {
-        "netclass": "RF",
+        "netclass": "RF_50",
         "pattern": "*/RF_ANT"
       },
       {
-        "netclass": "NFC",
-        "pattern": "*/NFC_AC0"
-      },
-      {
-        "netclass": "NFC",
-        "pattern": "*/NFC_AC1"
-      },
-      {
-        "netclass": "CRYSTAL",
+        "netclass": "CLK",
         "pattern": "*/HSE_IN"
       },
       {
-        "netclass": "CRYSTAL",
+        "netclass": "CLK",
         "pattern": "*/HSE_OUT"
       },
       {
-        "netclass": "CRYSTAL",
+        "netclass": "CLK",
         "pattern": "*/OSC32_IN"
       },
       {
-        "netclass": "CRYSTAL",
+        "netclass": "CLK",
         "pattern": "*/OSC32_OUT"
+      },
+      {
+        "netclass": "GND",
+        "pattern": "GND"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/A?HS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/A?LS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/B?HS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/B?LS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/PP_G"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/DRV_CP1"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/DRV_CP2"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/NFC_AC0"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "*/NFC_AC1"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/1 Battery input and protection/PP_SS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/1 Battery input and protection/SW_ON"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/2 5V0 buck and 3V3 LDO/BUCK_BST"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/2 5V0 buck and 3V3 LDO/BUCK_EN"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/2 5V0 buck and 3V3 LDO/BUCK_FB"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/2 5V0 buck and 3V3 LDO/BUCK_SS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/BOOT0"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/NRST"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/SPI1_SCK"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/SWCLK"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/SWDIO"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/VCP_RX"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/VCP_TX"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/3 MCU, clocks, supplies, debug/VFBSMPS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/5 Motor drive (DRV8711 + external FETs)/DRV_BEMF"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_L_A_F"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_L_A_RAW"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_L_B_F"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_L_B_RAW"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_R_A_F"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_R_A_RAW"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_R_B_F"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/6 Motor connectors and encoder inputs/ENC_R_B_RAW"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/7 IMU and SPI flash/FLASH_HOLD"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/7 IMU and SPI flash/FLASH_WP"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/7 IMU and SPI flash/IMU_REGOUT"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_BUF"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D1"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D10"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D11"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D12"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D2"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D3"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D4"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D5"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D6"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D7"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D8"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_D9"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "/8 User interface, expansion, test points/LED_G_A"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_AIN1"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_AIN2"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_BIN1"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_BIN2"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_NFAULT"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_NSLEEP"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_NSTALL"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_RESET"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "DRV_SCS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "ENC_L_A"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "ENC_L_B"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "ENC_L_Z"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "ENC_R_A"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "ENC_R_B"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "ENC_R_Z"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "FLASH_NCS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "IMU_INT"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "IMU_MISO"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "IMU_MOSI"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "IMU_NCS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "IMU_SCK"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "LED_DATA"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "LED_GREEN"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "NFC_GPO"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "NFC_RF_DIS"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "QWIIC_SCL"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "QWIIC_SDA"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "SPI1_MISO"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "SPI1_MOSI"
+      },
+      {
+        "netclass": "SIGNAL",
+        "pattern": "SPI1_SCK_BUS"
       }
     ]
   },
