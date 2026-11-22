@@ -46,7 +46,8 @@ TOLERANCE = mm(0.06)
 MAX_JOIN = 8.0
 GND = "GND"
 # Re-joined on F.Cu with no via: the crystals (the power map: at the pins, no vias), the switch nodes (small loop) and RF.
-QUIET_CLASSES = {"CRYSTAL", "SWITCH", "RF"}
+QUIET_CLASSES = {"CLK", "RF_50"}
+SWITCH_NODES = ("BUCK_SW", "SMPS_LX", "SMPS_MID")   # quiet too; their classes (PWR_1A, PWR_0.2A) also hold supplies
 
 
 def references(board):
@@ -290,7 +291,7 @@ def joins(board, islands, found):
         if not terms:
             continue
         name = RS.short(terms[0].item.GetNetname())
-        if name == GND or terms[0].item.GetNetClassName() == "PWR_BUS":
+        if name == GND or terms[0].item.GetNetClassName() == "PWR_4.2A":
             continue
         for a, b in itertools.combinations(terms, 2):
             if islands.find(RS.uid(a.item)) == islands.find(RS.uid(b.item)):
@@ -308,8 +309,8 @@ def rejoin(board, world, islands, router):
     widths = vendor_widths(board)
     pairs = joins(board, islands, RS.terminals(board))
     done, failed = [], []
-    crystal = [p for p in pairs if p[2].item.GetNetClassName() == "CRYSTAL"]
-    others = [p for p in pairs if p[2].item.GetNetClassName() != "CRYSTAL"]
+    crystal = [p for p in pairs if p[2].item.GetNetClassName() == "CLK"]
+    others = [p for p in pairs if p[2].item.GetNetClassName() != "CLK"]
     groups = defaultdict(list)
     for p in crystal:
         groups[RS.crystal_of(p[2], p[3])].append(p)
@@ -337,7 +338,7 @@ def rejoin(board, world, islands, router):
             continue
         width = widths.get(net) or RS.link_width(a.item.GetNetClassName(), a, b)
         width = min(width, RS.link_width(a.item.GetNetClassName(), a, b)) if a.kind == "pad" or b.kind == "pad" else width
-        quiet = a.item.GetNetClassName() in QUIET_CLASSES
+        quiet = a.item.GetNetClassName() in QUIET_CLASSES or net.split("/")[-1] in SWITCH_NODES
         result, why = router.route(a, b, max(width, mm(RS.MIN_WIDTH)), allow_vias=not quiet,
                                    layers=(0,) if quiet else (0, 1), margins=(2.0, 4.0))
         if result is None:

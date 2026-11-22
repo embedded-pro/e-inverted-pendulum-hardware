@@ -229,7 +229,7 @@ def rule_clearance(a, b):
     parts = [item.GetParentFootprint().GetReference() if item.GetClass() == "PAD" else "" for item in (a, b)]
     if any("/DRV_" in name for name in names):
         return 0.178
-    if "RF" in classes or any("SMPS" in name or "HSE_" in name for name in names) or "C318" in parts:
+    if "RF_50" in classes or any("SMPS" in name or "HSE_" in name for name in names) or "C318" in parts:
         return 0.1
     return max(CLASS_CLEARANCE.get(c, CLASS_CLEARANCE["Default"]) for c in classes)
 

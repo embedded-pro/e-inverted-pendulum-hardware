@@ -23,7 +23,7 @@ for the left motor and A for the right (D-042: each bridge feeds the connector o
 - **Licence:** TI's design-file terms (the owner confirms publishing is allowed). Everything derived carries "Derived
   from Texas Instruments BOOST-DRV8711 design files (SLVC575B)":
   - the `BOOST_*` footprints;
-  - `scripts/pcb/boost_drv8711.json`.
+  - `reference/boost-drv8711/boost_drv8711.json` (TI-derived, gitignored since D-063; `drv_block.py` says how to get it back).
 - **Tools:**
   - `scripts/drv_reference.py` reads `BOARD/BOOST-DRV8711.PcbDoc` through KiCad 10's Altium importer, as
     `rf_reference.py` does for ST's board.
@@ -92,8 +92,8 @@ pull-up is our R517 2.2 kΩ, sized for our shared SPI bus.
   - L2 stays solid GND under it, never cut: closer to the hot loops than TI's bottom layer.
   - Two of TI's vias moved 0.01 mm, to reach JLCPCB's 0.20 mm hole-to-copper from the net ties' bridges.
 - **Project DRC rules**, scoped by net since D-046:
-  - TI's 0.178 mm clearance on the DRV8711's own nets (DRV_*), except to pours (under our 0.2 mm MOTOR / PWR_BUS class
-    value, above JLCPCB's 0.09);
+  - TI's 0.178 mm clearance on the DRV8711's own nets (DRV_*), except to pours (under the router's 0.2 mm to PWR_4.2A / PWR_2A,
+    above JLCPCB's 0.09);
   - no DRC exclusions: TI's corners are exact 45° bends (D-053), so everything is checked in full.
 - **Routing gate:** `--gate jogs=5 --gate track_junctions=1`.
   - One of the jogs is TI's: 0.19 mm on A2HS.

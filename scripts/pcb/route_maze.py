@@ -12,7 +12,7 @@ mm, or 0.2 / 0.45 mm where that does not fit), every segment and via checked exa
     link_width); a supply that finds no path at 0.5 mm tries 0.3 mm (still above IPC-2221's 0.12 mm for 0.5 A), a
     signal that finds none at 0.2 mm tries 0.15 mm (the board's design minimum).
   - No jogs: a route with a segment under 0.25 mm between parallel runs is refused (pcb-design-rules gate).
-  - Left alone: PWR_BUS (its pours, power_pours.py, D-056), the crystal nets (at the pins, no vias: the power map), and
+  - Left alone: PWR_4.2A (its pours, power_pours.py, D-056), the crystal nets (at the pins, no vias: the power map), and
     GND, except a ground pad still off the plane, which is joined to the nearest grounded copper. The vendor copies'
     own connections are first closed from their references (vendor_gaps.py, D-055); what that leaves (ST's VDD pins,
     which ST joins through its own planes) is routed here like any other.
@@ -41,12 +41,10 @@ import board as B  # noqa: E402
 import maze as M  # noqa: E402
 import route_simple as RS  # noqa: E402
 
-SKIP_CLASSES = {"PWR_BUS", "CRYSTAL"}
-# Supplies that find no path at the class width (0.5 mm) try this: they carry at most 0.6 A (+5V), and IPC-2221 asks
-# 0.12 mm for 0.5 A on 1 oz outer copper (docs/power-map.md).
-# Default-class signals that find no path at 0.2 mm try the board's design minimum, 0.15 mm (JLCPCB's 4-layer floor is
-# 0.09 mm): between the MCU's 0.15 / 0.25 mm fan-out vias (D-048) only 0.15 mm fits.
-NARROW = {"SUPPLY": 0.3, "Default": 0.15}
+SKIP_CLASSES = {"PWR_4.2A", "CLK"}
+# A class whose width finds no path tries this narrower width. Since D-062 every class below 1 A is already at the
+# design minimum, 0.15 mm (the old SUPPLY 0.5 mm fell back to 0.3 mm, Default 0.2 mm to 0.15 mm), so none is needed.
+NARROW = {}
 FINE_PAD = 0.35
 # Between two islands, the closest TRIES_PER_GAP pairs of terminals are tried; if none routes, the gap is left open.
 TRIES_PER_GAP = 3

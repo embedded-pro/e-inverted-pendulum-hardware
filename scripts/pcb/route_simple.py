@@ -9,7 +9,7 @@ first, like a minimum spanning tree, so no loop is ever closed). Every new track
 board and everything routed before it:
   - links: two pads up to MAX_LINK apart, pad centre to pad centre (branches only on pads), straight or with one
     45-degree bend, on a copper layer both pads are on; no via. GND pads of one part side by side (up to GND_TIE apart)
-    are tied the same way. PWR_BUS (VBAT, PP_S, BAT_F, BAT_P) is left to the pours (docs/power-map.md: pours on L1 + L3,
+    are tied the same way. PWR_4.2A (VBAT, PP_S, BAT_F, BAT_P) is left to the pours (docs/power-map.md: pours on L1 + L3,
     no necks below 2.2 mm). A crystal's nets are routed together or not at all (power map: short and symmetric). Pads
     of one part that share a number are joined inside the footprint (AE801's coil, ST's copper) and count as one;
   - gaps: a pad, a free track end or a via joined to a free track end or a via of its net up to MAX_GAP away (the
@@ -25,7 +25,7 @@ parts of one copy, no gap starts at a copy's pad and no ground via goes on a cop
 vendor's reference (CLAUDE.md). A copy's pin may still be linked to one of our parts.
 Widths: the net class width (docs/power-map.md, board.NET_CLASSES). Where a pad is narrower, the track takes the
 narrower pad's width, but never less than MIN_WIDTH (the board's 0.15 mm design value; JLCPCB's 4-layer minimum is
-0.09 mm). MOTOR keeps its 0.8 mm. A gap takes the narrower track's width.
+0.09 mm). PWR_2A keeps its class width. A gap takes the narrower track's width.
 Clearances: respace.rule_clearance to other nets' copper (the class clearances and the ST / TI custom rules); 0.2 mm hole
 to copper (0.28 mm to plated pad holes, 0.5 mm to NPTH, .kicad_dru); 0.2 mm to the edge. Nothing enters another net's
 pour or a rule area that forbids tracks or vias, the board's or a footprint's (U701's no-track area under the IMU, the
@@ -74,8 +74,8 @@ HOLE_TO_HOLE = 0.2
 POUR_GAP = 0.2
 LABEL_GAP = 0.05
 NEAR = 2.0
-SKIP_CLASSES = {"PWR_BUS"}
-FULL_WIDTH = {"MOTOR"}
+SKIP_CLASSES = {"PWR_4.2A"}
+FULL_WIDTH = {"PWR_2A"}
 GND = "GND"
 COS45 = math.cos(math.radians(45)) - 1e-6
 DIRECTIONS = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
@@ -559,7 +559,7 @@ def lay(board, world, net, layer, legs, width):
 
 
 def crystal_of(a, b):
-    """The crystal a CRYSTAL-class pair belongs to (its Y part), so both of its nets are routed or neither."""
+    """The crystal a CLK-class pair belongs to (its Y part), so both of its nets are routed or neither."""
     for t in (a, b):
         if t.kind == "pad" and t.item.GetParentFootprint().GetReference().startswith("Y"):
             return t.item.GetParentFootprint().GetReference()
@@ -572,7 +572,7 @@ def route_pairs(board, world, islands, pairs):
     routed, refused = [], defaultdict(int)
     crystals = defaultdict(list)
     for pair in pairs:
-        if pair[2].item.GetNetClassName() == "CRYSTAL":
+        if pair[2].item.GetNetClassName() == "CLK":
             crystals[crystal_of(pair[2], pair[3])].append(pair)
     for name in sorted(crystals):
         laid, done, nets = [], [], set()
@@ -598,7 +598,7 @@ def route_pairs(board, world, islands, pairs):
             routed.append((kind, short(a.item.GetNetname()), a.name(), b.name(), width / 1e6, length,
                            board.GetLayerName(layer), len(legs)))
     for length, kind, a, b in pairs:
-        if a.item.GetNetClassName() == "CRYSTAL" or islands.find(uid(a.item)) == islands.find(uid(b.item)):
+        if a.item.GetNetClassName() == "CLK" or islands.find(uid(a.item)) == islands.find(uid(b.item)):
             continue
         found, why = find_route(board, world, kind, a, b)
         if found is None:

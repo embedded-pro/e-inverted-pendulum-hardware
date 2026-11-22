@@ -34,7 +34,13 @@ import silk  # noqa: E402
 import placement  # noqa: E402
 import rf_block as RF  # noqa: E402
 
-DATA = json.loads((pathlib.Path(__file__).resolve().parent / "boost_drv8711.json").read_text(encoding="utf-8"))
+# TI-derived, so not committed (D-063): it lives with TI's files in the gitignored reference/boost-drv8711/.
+REFERENCE_JSON = pathlib.Path(__file__).resolve().parents[2] / "reference" / "boost-drv8711" / "boost_drv8711.json"
+if not REFERENCE_JSON.exists():
+    sys.exit(f"{REFERENCE_JSON} is missing (TI-derived, not committed, D-063). Either run scripts/drv_reference.py with "
+             "TI's SLVC575B files in reference/boost-drv8711/, or take the last committed copy: "
+             "git show 51a4bcf:scripts/pcb/boost_drv8711.json > reference/boost-drv8711/boost_drv8711.json")
+DATA = json.loads(REFERENCE_JSON.read_text(encoding="utf-8"))
 GROUP = B.DRIVE_GROUP
 LAYERS = {"Top Layer": "F.Cu", "Bottom Layer": "B.Cu"}
 BOTTOM_Z = placement.STRIP_TOP_Z + 1.0
@@ -49,7 +55,7 @@ EXTRAS = [  # (ref, how its target is found: ("pads", ref, net) = centroid of th
     ("R517", ("pins", "U501", ("17",))), ("R518", ("pins", "U501", ("8",))),
 ]
 SEARCH_MM = 20.0
-EXTRA_CLEARANCE = 0.2  # above TI's 0.178 mm group rule and equal to the MOTOR / PWR_BUS class clearance
+EXTRA_CLEARANCE = 0.2  # above TI's 0.178 mm group rule and the old MOTOR / PWR_BUS class clearance (the router still keeps 0.2 mm to PWR_4.2A / PWR_2A, D-062)
 
 mm = pcbnew.FromMM
 _BOX = DATA["box"]

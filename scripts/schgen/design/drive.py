@@ -1,7 +1,7 @@
 """Sheet 5: DRV8711 driving two brushed motors through four CSD88537ND half-bridges.
 
 The power stage is a copy of TI's BOOST-DRV8711 BoosterPack (SLVC575B design files, D-040): TI's parts, values and
-land patterns, placed by scripts/pcb/drv_block.py from scripts/pcb/boost_drv8711.json. Q502 / Q504 are wired as TI's
+land patterns, placed by scripts/pcb/drv_block.py from reference/boost-drv8711/boost_drv8711.json (D-063). Q502 / Q504 are wired as TI's
 Q2 / Q4 (FET1 low side, FET2 high side), the Kelvin taps are TI's four net ties, and there are no gate or sense series
 resistors. Kept on top of TI's circuit (owner, D-040): the SS34 phase clamps, the per-bridge 10 uF + 100 nF, the 1 nF
 sense caps (not fitted) and the logic pulls. Sources: TI SLVSC40H (pin table, s6.1, s10), BOOST-DRV8711 schematic and

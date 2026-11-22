@@ -7,7 +7,7 @@ plane and L3 holds the planes (D-056).
   - The window covers both terminals plus a margin. Its grid (PITCH) is aligned to a point terminal (a track end or a
     via), so the track ends exactly on it.
   - The board's copper is drawn into the window per layer, sorted three ways. Other nets' copper keeps the class
-    clearance, 0.2 mm for the PWR_BUS / MOTOR / RF classes, other nets' pours and the board edge. A GND fill outside
+    clearance, 0.2 mm for the PWR_4.2A / PWR_2A / RF_50 classes (WIDE_CLASSES, above their 0.15 mm), other nets' pours and the board edge. A GND fill outside
     TI's bridges (TI's drive GND, ST's NFC ground) gives way: it is refilled around the new track (soft_fill). The net's own copper
     that is not a terminal is never touched (that would be a tee). Rule areas that forbid tracks are never entered. NPTH
     holes keep 0.5 mm. A via also stays off every part's body and the test pads' names, out of the via keep-outs and
@@ -50,7 +50,7 @@ MARGINS = (4.0, 12.0)
 SLACKS = (0.4, 0.9)
 ERROR = mm(0.002)
 LAYERS = (pcbnew.F_Cu, pcbnew.B_Cu)
-WIDE_CLASSES = {"PWR_BUS", "MOTOR", "RF"}
+WIDE_CLASSES = {"PWR_4.2A", "PWR_2A", "RF_50"}   # the old PWR_BUS / MOTOR / RF (D-062)
 WIDE_CLEARANCE = 0.2
 EDGE = 0.2
 NPTH_GAP = 0.5
@@ -682,7 +682,7 @@ class Router:
     @staticmethod
     def clearances(probe):
         """The routed net's clearance to other copper by the board's rules (respace.rule_clearance): the class
-        clearance and 0.2 mm to the PWR_BUS / MOTOR / RF classes, unless a custom rule covers the net (ST's 0.1 mm on
+        clearance and 0.2 mm to the PWR_4.2A / PWR_2A / RF_50 classes, unless a custom rule covers the net (ST's 0.1 mm on
         its SMPS, HSE and RF nets, TI's 0.178 mm on the DRV8711's), which then applies to all copper but pours."""
         own = R.rule_clearance(probe, probe)
         default = max(R.CLASS_CLEARANCE.get(probe.GetNetClassName(), 0.15), 0.15)

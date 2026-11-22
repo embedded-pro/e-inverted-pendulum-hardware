@@ -13,7 +13,7 @@ as TI does, each phase leaves its strip downwards, and the two phases of each mo
   - right motor: up beside C507 through the right margin of TI's F.Cu GND (outside the bus hot loop C507 -> FETs ->
     shunts -> C507, power-pcb-layout s3.1; the fill refills round the tracks), then to C607 and J602.
 The pair keeps 1.6 mm centre to centre (0.8 mm gap); its 45-degree corners are cut so the gap stays the same round each
-bend (outer chamfer = inner + 0.586 x spacing). Width 0.8 mm, the MOTOR class (docs/power-map.md: 2 A peak, IPC-2221
+bend (outer chamfer = inner + 0.586 x spacing). Width 0.8 mm, above the PWR_2A class's 0.781 mm (docs/power-map.md: 2 A peak, IPC-2221
 0.78 mm on 1 oz outer at 10 C). The phase that crosses its connector's pin column (MOT_L_N to J601 pin 1, MOT_R_P to J602
 pin 6) drops to B.Cu through two 0.3 / 0.6 mm vias (>= I / 1 A, power map) and runs outside the pins, as before.
 

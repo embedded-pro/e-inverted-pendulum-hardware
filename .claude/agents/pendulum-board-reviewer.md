@@ -131,7 +131,7 @@ Ground every item in the guide and cite its section next to your package evidenc
    - each bridge's hot loop (HF capacitor → HS → LS → Rsense → GND) and the bulk position; target ≤ 5 nH (S2);
    - switch nodes (MOT_*, BUCK_SW, SMPS_LX): only the copper the current needs, nothing under them on any layer;
    - the motor drive as copied from TI's BOOST-DRV8711 (D-040, `docs/drive.md`): TI's Kelvin net ties, gate traces and pours intact; our extras (SS34 clamps, per-bridge caps) beside it, and how far the clamps sit from the phase pads;
-   - high-current paths against `docs/power-map.md` (PWR_BUS widths, ≥ 5 vias per layer change, no necks);
+   - high-current paths against `docs/power-map.md` (PWR_4.2A / PWR_2A widths, ≥ 5 vias per layer change, no necks);
    - the RF line: MB1355's 0.6 / 0.2 mm GCPW over L3 with the L2 cut-out, fence vias and match as copied (no SMA branch, D-038), the MCU decoupling on top at the Nucleo's spots or the nearest free spot (`docs/rf.md`), the antenna tab clear on all four layers;
    - crystals at their pins with short symmetric loops;
    - encoder traces away from MOT_* copper on every layer; ESD at the connectors;
