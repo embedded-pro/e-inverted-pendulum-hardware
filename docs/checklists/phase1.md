@@ -46,7 +46,7 @@ Status legend: ✅ done · ⚠️ open (reason given) · ➖ not applicable.
 | Module vs chip-down decided | ✅ | Chip-down with MLPF-WB55-01E3 IPD (D-007) |
 | Match/filter per vendor; direction | ✅ | DS12804 Table 6: IN (A3) to RF1, OUT (A1) to the antenna; footprint from Fig. 13 |
 | DNP tuning network at the antenna | ✅ | Pi: 2 × DNP shunt, 0 Ω series |
-| Conducted test port | ✅ | U.FL (DNP) through a DNP 0 Ω |
+| Conducted test port | ✅ | None since D-038 (PCB antenna only): a pigtail on R401's RF_50 pad (`docs/rf.md`) |
 | SMPS parts and decoupling per vendor | ✅ | See above |
 | Crystal ppm budget | ⚠️ | ±10 ppm initial, then trimmed by HSETUNE (AN5042). Temperature and ageing figures for CS06654 are not in the catalog page. Trim plan is in bring-up. |
 | Clock harmonics vs used channels | ⚠️ | 32 MHz HSE lands at 2432/2464 MHz (inherent to STM32WB); buck 1.2 MHz FCCM; SMPS 4 MHz. Pre-compliance scan is out of scope (no certification, D-007). |
@@ -72,6 +72,7 @@ Status legend: ✅ done · ⚠️ open (reason given) · ➖ not applicable.
 
 1. Get the Samtec FTSH-107-01-L-DV-K SMT drawing and confirm or replace the STDC14 footprint.
 2. Get ST AN5165, AN2867 and the STM32WB55 errata.
-3. Get TI SWRA117D; check the antenna's reference thickness and ground clearance.
+3. ~~Get TI SWRA117D; check the antenna's reference thickness and ground clearance.~~ Superseded: the antenna is
+   MB1355's meander (ST AN3359 type), copied with ST's tab and clearances (D-037, `docs/rf.md`).
 4. Confirm the motor/encoder cable pinout against the purchased parts (D-016) and re-pin J601–J604 if needed.
-5. Confirm the XT30UPB-F polarity marking and the MLT-8530 pad view (top or bottom) against the physical parts.
+5. Confirm the XT30UPB-F polarity marking against the physical part. (The MLT-8530 buzzer was removed, D-035.)

@@ -1,0 +1,123 @@
+(footprint "MB1355_0402_CAP_NPOL"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "ST land pattern Passive:0402_CAP_NPOL (MB1355 C36). Derived from STMicroelectronics MB1355 rev D-01 (NUCLEO-WB55), Open Platform License www.st.com/opla")
+	(tags "MB1355 NUCLEO-WB55 STM32WB RF")
+	(property "Reference" "REF**"
+		(at 0 -1.154 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "6a5013d9-7e47-48ff-8a25-7752a3df8a6f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MB1355_0402_CAP_NPOL"
+		(at 0 1.154 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "56239d53-6b1d-4266-ba1d-d8a532bf3f99")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "85bb4776-42b8-4790-8754-8b44bc6ff9c3")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7326c330-863a-496c-8f09-e876919a75f4")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(sheetname "RF")
+	(sheetfile "RF.kicad_sch")
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.01647 -0.354)
+		(end 1.01647 -0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "add147a0-a3bf-429d-9adc-42224be82667")
+	)
+	(fp_line
+		(start -1.01647 0.354)
+		(end -1.01647 -0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "e4f44eff-6c63-4802-bc8a-fdfa73fbdd33")
+	)
+	(fp_line
+		(start 1.01647 -0.354)
+		(end 1.01647 0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "74739621-c104-4cd3-8a98-fbed97461fab")
+	)
+	(fp_line
+		(start 1.01647 0.354)
+		(end -1.01647 0.354)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "f37bb077-1eca-41c2-9941-0cf698b9955c")
+	)
+	(pad "1" smd rect
+		(at -0.59897 0)
+		(size 0.635 0.508)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "896d21e9-cfdb-4720-a93b-c093102e49b8")
+	)
+	(pad "2" smd rect
+		(at 0.59897 0)
+		(size 0.635 0.508)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "629b0135-f9b8-466a-a43e-5a0ece82ecad")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_0402_1005Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

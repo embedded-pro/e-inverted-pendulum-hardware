@@ -1,76 +1,85 @@
 #!/usr/bin/env python3
-"""13.56 MHz printed loop antenna for the ST25DV04KC NFC tag (D-030): size it and write its footprint.
+"""ANT14, the printed NFC coil copied from ST's X-NUCLEO-NFC01A1 (MB1163 rev C-01, D-039): inductance and resonance.
 
-Target. The tag resonates its coil with the internal tuning capacitance C_TUN = 28.5 pF (DS13519 Rev 6, RF
-characteristics table). f0 = 1 / (2 pi sqrt(L (C_TUN + C_PAR))). The coil is sized for f0 a little above 13.56 MHz
-(TARGET_F0) so the DNP tuning capacitor across AC0-AC1 can pull it down, and metal nearby (battery, screws) only lowers
-it further.
+The coil comes from scripts/pcb/mb1163_nfc.json (scripts/nfc_reference.py): about 4 turns on F.Cu spiralling in, a
+layer change, and 3.5 turns on B.Cu spiralling out, wound the same way, so the two spirals' fields add.
 
-Inductance, two independent ways (they must agree within 5 %):
-  - Greenhouse: the spiral is split into straight segments; L = sum of segment self-inductances
-    (rectangular bar, 0.002 l [ln(2l/(w+t)) + 0.50049 + (w+t)/(3l)] uH, l in cm) plus the mutual inductance of every
-    pair of parallel segments from the Neumann integral for parallel filaments (Greenhouse, IEEE Trans. PHP-10, 1974).
-  - Modified Wheeler for a square spiral, L = K1 mu0 n^2 d_avg / (1 + K2 rho), K1 2.34, K2 2.75 (Mohan et al., IEEE
-    JSSC 34(10), 1999), applied to the square of equal area. A cross-check only: the coil is rectangular.
+Inductance (Greenhouse, IEEE Trans. Parts, Hybrids and Packaging PHP-10(2), 1974): the coil is walked from pad 1 (AC0)
+to pad 2 (AC1), which gives every segment its current direction. L = sum of segment self-inductances (rectangular bar,
+0.002 l [ln(2l/(w+t)) + 0.50049 + (w+t)/(3l)] uH, l in cm) plus the mutual inductance of every pair of parallel
+segments, B.Cu ones at the copper-to-copper distance, from the Neumann integral for parallel filaments. The short
+diagonal leads only count for their self-inductance.
 
-Footprint (kicad/lib/e-inverted-pendulum.pretty/NFC_Coil_25x21mm.kicad_mod), built like KiCad's SWRA117D antenna:
-  - pad 1 (AC0 end) at the outer start, pad 2 at the inner end (a via) and again outside the coil (a via);
-  - the spiral is footprint copper on F.Cu, the underpass on B.Cu; net_tie_pad_groups "1,2" allows the coil to join
-    pads 1 and 2.
+Method check: the Greenhouse code on a regular 4-turn spiral of ANT14's outline, track and gap, against the modified
+Wheeler formula (Mohan et al., IEEE JSSC 34(10), 1999, K1 2.34, K2 2.75, square of equal area): they must agree within
+5 %. (Wheeler needs a regular spiral; ANT14's own spirals have partial turns and diagonal leads.)
 
-Run: python3 scripts/nfc_coil.py -> footprint, simulation/results/nfc_coil.json
+Resonance: the tag's internal C_TUN (M24SR64-Y, DocID023790 Rev 20: 25 pF typ, 22.5-27.5 pF in SO8) plus ST's C6 and
+C8 (47 pF from AC1 and AC0 to GND, so 23.5 pF across the coil) plus 1 pF of pads and traces (ASSUMPTION).
+f0 = 1 / (2 pi sqrt(L C)). Computed on ST's board (2-layer 1.6 mm) and on ours (JLC04161H-7628, scripts/pcb/board.py).
+
+Run: python3 scripts/nfc_coil.py -> simulation/results/nfc_coil.json
 """
 
 import json
 import math
 import pathlib
-import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "kicad" / "gen"))
-from make_footprints import PRETTY, footprint, hidden, label, uid  # noqa: E402
-from sexpr import Str, Sym, dump  # noqa: E402
+sys.path.insert(0, str(ROOT / "scripts" / "pcb"))
+from board import STACKUP  # noqa: E402
 
 MU0 = 4e-7 * math.pi
-C_TUN = 28.5e-12
+C_TUN = (22.5e-12, 25.0e-12, 27.5e-12)
+C_EXT = 47e-12 / 2
 C_PAR = 1.0e-12
-TARGET_F0 = 13.9e6
 F_CARRIER = 13.56e6
-
-COIL = {"width": 25.0, "height": 21.0, "trace": 0.15, "gap": 0.15, "copper_t": 0.035, "underpass_dz": 1.49}
-NAME = "NFC_Coil_25x21mm"
-LEAD = 1.0
-INNER_STUB = 1.0
-VIA = {"size": 0.6, "drill": 0.3}
+COPPER_T = 0.035
+TOL = 0.05
 
 
-def spiral(turns, width, height, pitch):
-    points = [(0.0, 0.0)]
-    for i in range(turns):
-        left, right, top, bottom = i * pitch, width - i * pitch, i * pitch, height - i * pitch
-        end = (i + 1) * pitch if i + 1 < turns else height / 2
-        points += [(right, top), (right, bottom), (left, bottom), (left, end)]
-    return points
+def copper_distance():
+    """F.Cu to B.Cu, copper centre to copper centre, from our stack-up."""
+    names = [row[0] for row in STACKUP]
+    first, last = names.index("F.Cu"), names.index("B.Cu")
+    rows = STACKUP[first:last + 1]
+    return sum(row[2] for row in rows) - rows[0][2] / 2 - rows[-1][2] / 2
 
 
-def segments(turns):
-    c = COIL
-    pitch = c["trace"] + c["gap"]
-    w, h = c["width"] - c["trace"], c["height"] - c["trace"]
-    pts = spiral(turns, w, h, pitch)
-    last = pts[-1]
-    inner = (last[0] + INNER_STUB, last[1])
-    segs = [((-LEAD, 0.0), (0.0, 0.0), 0.0)]
-    segs += [(pts[i], pts[i + 1], 0.0) for i in range(len(pts) - 1)]
-    segs.append((last, inner, 0.0))
-    segs.append((inner, (-LEAD, inner[1]), c["underpass_dz"]))
-    return segs, pts, inner
+BOARDS = {
+    "MB1163 (2-layer 1.6 mm FR-4)": 1.6 - COPPER_T,
+    "ours (JLC04161H-7628, 4-layer 1.6 mm)": copper_distance(),
+}
 
 
-def self_inductance(length_mm):
-    c = COIL
-    l_cm, wt_cm = length_mm / 10.0, (c["trace"] + c["copper_t"]) / 10.0
+def walk(data):
+    """The coil's segments in current order, AC0 to AC1, each as (start, end, layer, width)."""
+    segments = [{"layer": s[0], "width": s[1], "a": (s[2], s[3]), "b": (s[4], s[5])} for s in data["coil"]["segments"]]
+    changes = [tuple(c["at"]) for c in data["coil"]["layer_changes"]]
+    pads = {p[0]: (p[1], p[2]) for p in data["antenna"]["pads"]}
+    point, layer, used, path, switched = pads["1"], "F.Cu", set(), [], set()
+    while math.dist(point, pads["2"]) > TOL or layer != "F.Cu":
+        nxt = [(i, s) for i, s in enumerate(segments) if i not in used and s["layer"] == layer
+               and min(math.dist(point, s["a"]), math.dist(point, s["b"])) < TOL]
+        if not nxt:
+            change = next((c for c in changes if math.dist(point, c) < TOL and c not in switched), None)
+            if change is None:
+                sys.exit(f"the coil breaks at {point} on {layer}")
+            switched.add(change)
+            layer = "B.Cu" if layer == "F.Cu" else "F.Cu"
+            continue
+        i, s = min(nxt, key=lambda item: min(math.dist(point, item[1]["a"]), math.dist(point, item[1]["b"])))
+        used.add(i)
+        start, end = (s["a"], s["b"]) if math.dist(point, s["a"]) <= math.dist(point, s["b"]) else (s["b"], s["a"])
+        path.append((start, end, layer, s["width"]))
+        point = end
+    spare = [s for i, s in enumerate(segments) if i not in used]
+    return path, spare
+
+
+def self_inductance(length_mm, width_mm):
+    l_cm, wt_cm = length_mm / 10.0, (width_mm + COPPER_T) / 10.0
     return 0.002 * l_cm * (math.log(2 * l_cm / wt_cm) + 0.50049 + wt_cm / (3 * l_cm)) * 1e-6
 
 
@@ -80,9 +89,9 @@ def _g(u, d):
 
 def mutual(seg_a, seg_b):
     (a0, a1, za), (b0, b1, zb) = seg_a, seg_b
-    if a0[1] == a1[1] and b0[1] == b1[1]:
+    if abs(a0[1] - a1[1]) < 1e-9 and abs(b0[1] - b1[1]) < 1e-9:
         axis, fixed = 0, 1
-    elif a0[0] == a1[0] and b0[0] == b1[0]:
+    elif abs(a0[0] - a1[0]) < 1e-9 and abs(b0[0] - b1[0]) < 1e-9:
         axis, fixed = 1, 0
     else:
         return 0.0
@@ -96,101 +105,79 @@ def mutual(seg_a, seg_b):
     return da * db * m
 
 
-def greenhouse(turns):
-    segs, _, _ = segments(turns)
-    total = sum(self_inductance(math.dist(a, b)) for a, b, _ in segs)
+def greenhouse(path, dz):
+    segs = [(a, b, dz if layer == "B.Cu" else 0.0) for a, b, layer, _ in path]
+    total = sum(self_inductance(math.dist(a, b), w) for a, b, _, w in path)
     for i in range(len(segs)):
         for j in range(i + 1, len(segs)):
             total += 2.0 * mutual(segs[i], segs[j])
     return total
 
 
-def wheeler(turns):
-    c = COIL
-    side = math.sqrt(c["width"] * c["height"])
-    d_out = side
-    d_in = side - 2 * (turns * c["trace"] + (turns - 1) * c["gap"])
-    d_avg, rho = (d_out + d_in) / 2, (d_out - d_in) / (d_out + d_in)
+def ideal_spiral(turns, width, height, trace, gap):
+    """A regular rectangular spiral (copper outline width x height), as a current-ordered single-layer path."""
+    pitch, w, h = trace + gap, width - trace, height - trace
+    points = [(0.0, 0.0)]
+    for i in range(turns):
+        left, right, top, bottom = i * pitch, w - i * pitch, i * pitch, h - i * pitch
+        end = (i + 1) * pitch if i + 1 < turns else h / 2
+        points += [(right, top), (right, bottom), (left, bottom), (left, end)]
+    return [(points[i], points[i + 1], "F.Cu", trace) for i in range(len(points) - 1)]
+
+
+def wheeler(turns, width, height, trace, gap):
+    """Modified Wheeler for a regular spiral, applied to the square of equal area."""
+    side = math.sqrt(width * height)
+    d_in = side - 2 * (turns * trace + (turns - 1) * gap)
+    d_avg, rho = (side + d_in) / 2, (side - d_in) / (side + d_in)
     return 2.34 * MU0 * turns ** 2 * d_avg * 1e-3 / (1 + 2.75 * rho)
 
 
-def resonance(inductance, extra_c=0.0):
-    return 1.0 / (2 * math.pi * math.sqrt(inductance * (C_TUN + C_PAR + extra_c)))
-
-
-def write_footprint(turns):
-    segs, pts, inner = segments(turns)
-    c = COIL
-    ox, oy = c["width"] / 2, c["height"] / 2
-
-    def at(point):
-        return round(point[0] - ox + c["trace"] / 2, 4), round(point[1] - oy + c["trace"] / 2, 4)
-
-    items = []
-    for index, (a, b, dz) in enumerate(segs):
-        layer = "B.Cu" if dz else "F.Cu"
-        (x0, y0), (x1, y1) = at(a), at(b)
-        items.append([Sym("fp_line"), [Sym("start"), x0, y0], [Sym("end"), x1, y1],
-                      [Sym("stroke"), [Sym("width"), c["trace"]], [Sym("type"), Sym("solid")]],
-                      [Sym("layer"), Str(layer)], [Sym("uuid"), uid(NAME, "seg", index)]])
-    start = at((-LEAD, 0.0))
-    inner_xy, outer_xy = at(inner), at((-LEAD, inner[1]))
-    pads = [
-        [Sym("pad"), Str("1"), Sym("smd"), Sym("rect"), [Sym("at"), *start], [Sym("size"), 0.5, 0.5],
-         [Sym("layers"), Str("F.Cu"), Str("F.Mask")], [Sym("uuid"), uid(NAME, "pad1")]],
-    ]
-    for tag, xy in (("inner", inner_xy), ("outer", outer_xy)):
-        pads.append([Sym("pad"), Str("2"), Sym("thru_hole"), Sym("circle"), [Sym("at"), *xy],
-                     [Sym("size"), VIA["size"], VIA["size"]], [Sym("drill"), VIA["drill"]],
-                     [Sym("layers"), Str("*.Cu")], [Sym("remove_unused_layers"), Sym("no")],
-                     [Sym("uuid"), uid(NAME, "pad2", tag)]])
-    half_w, half_h = c["width"] / 2, c["height"] / 2
-    node = footprint(
-        NAME,
-        f"13.56 MHz printed loop for ST25DV04KC: {turns} turns, {c['width']} x {c['height']} mm, "
-        f"{c['trace']}/{c['gap']} mm, F.Cu spiral with a B.Cu underpass (scripts/nfc_coil.py, docs/nfc.md)",
-        "smd", (-half_w, -half_h, half_w, half_h), (-half_w - LEAD - 0.6, -half_h - 0.5, half_w + 0.5, half_h + 0.5),
-        pads, items + [label("NFC", 0, 0, "F.Fab", NAME, "label")], silk=False)
-    attr = next(i for i in node if isinstance(i, list) and i and i[0] == Sym("attr"))
-    attr[1:] = [Sym("smd"), Sym("exclude_from_pos_files"), Sym("exclude_from_bom")]
-    node.insert(node.index(attr) + 1, [Sym("net_tie_pad_groups"), Str("1,2")])
-    path = PRETTY / f"{NAME}.kicad_mod"
-    path.write_text(dump(node) + "\n", encoding="utf-8")
-    subprocess.run(["kicad-cli", "fp", "upgrade", "--force", str(PRETTY)], check=True, capture_output=True)
-    return path
+def f0(inductance, c_tun):
+    return 1.0 / (2 * math.pi * math.sqrt(inductance * (c_tun + C_EXT + C_PAR)))
 
 
 def main():
-    candidates = []
-    for turns in range(4, 16):
-        segs, _, _ = segments(turns)
-        inner_x = segs[-1][0][0]
-        if inner_x + VIA["size"] / 2 + 1.0 > COIL["width"] - COIL["trace"] - (turns - 1) * (COIL["trace"] + COIL["gap"]):
-            break
-        l_gh, l_wh = greenhouse(turns), wheeler(turns)
-        candidates.append({"turns": turns, "L_greenhouse_uH": l_gh * 1e6, "L_wheeler_uH": l_wh * 1e6,
-                           "agreement_pct": 100.0 * (l_wh - l_gh) / l_gh, "f0_MHz": resonance(l_gh) / 1e6})
-    best = min(candidates, key=lambda c: abs(c["f0_MHz"] * 1e6 - TARGET_F0))
-    l_best = best["L_greenhouse_uH"] * 1e-6
-    trim = 1.0 / ((2 * math.pi * F_CARRIER) ** 2 * l_best) - C_TUN - C_PAR
-    best["trim_cap_to_13p56_pF"] = trim * 1e12
-    best["f0_with_trim_MHz"] = resonance(l_best, trim) / 1e6
-    print(f"{'turns':>5} {'L GH (uH)':>9} {'L MW (uH)':>9} {'diff %':>7} {'f0 (MHz)':>8}")
-    for c in candidates:
-        print(f"{c['turns']:5d} {c['L_greenhouse_uH']:9.3f} {c['L_wheeler_uH']:9.3f} {c['agreement_pct']:7.1f} {c['f0_MHz']:8.2f}")
-    print(f"chosen {best['turns']} turns: L {best['L_greenhouse_uH']:.2f} uH, f0 {best['f0_MHz']:.2f} MHz with "
-          f"C_TUN {C_TUN * 1e12:.1f} pF + {C_PAR * 1e12:.1f} pF parasitic (ASSUMPTION); "
-          f"trim to 13.56 MHz with {best['trim_cap_to_13p56_pF']:.1f} pF across AC0-AC1")
-    path = write_footprint(best["turns"])
-    result = {"coil": COIL, "target_f0_MHz": TARGET_F0 / 1e6, "c_tun_pF": C_TUN * 1e12, "c_parasitic_pF": C_PAR * 1e12,
-              "candidates": candidates, "chosen": best, "footprint": str(path.relative_to(ROOT)),
-              "sources": {"c_tun": "DS13519 Rev 6, RF characteristics: CTUN 28.5 pF typ at 13.56 MHz",
-                          "c_parasitic": "ASSUMPTION 1 pF coil + pad capacitance",
+    data = json.loads((ROOT / "scripts" / "pcb" / "mb1163_nfc.json").read_text(encoding="utf-8"))
+    path, spare = walk(data)
+    x0, y0, x1, y1 = data["coil"]["bbox"]
+    trace = max(w for _, _, _, w in path)
+    check = (4, x1 - x0, y1 - y0, trace, trace)
+    l_top, l_wheeler = greenhouse(ideal_spiral(*check), 0.0), wheeler(*check)
+    agreement = 100.0 * (l_wheeler - l_top) / l_top
+    results = {}
+    for name, dz in BOARDS.items():
+        inductance = greenhouse(path, dz)
+        results[name] = {"copper_distance_mm": round(dz, 4), "L_uH": round(inductance * 1e6, 4),
+                         "f0_MHz": round(f0(inductance, C_TUN[1]) / 1e6, 3),
+                         "f0_range_MHz": [round(f0(inductance, c) / 1e6, 3) for c in (C_TUN[2], C_TUN[0])]}
+    st, ours = results.values()
+    shift = 100.0 * (ours["f0_MHz"] / st["f0_MHz"] - 1)
+    l_ours = ours["L_uH"] * 1e-6
+    trim = 1.0 / ((2 * math.pi * F_CARRIER) ** 2 * l_ours) - (C_TUN[1] + C_EXT + C_PAR)
+    print(f"ANT14: {len(path)} segments walked AC0 -> AC1 ({len(spare)} overlapping duplicate(s) left out)")
+    print(f"method check, a regular 4-turn {check[1]:.1f} x {check[2]:.1f} mm spiral, {trace} / {trace} mm: Greenhouse "
+          f"{l_top * 1e6:.3f} uH, modified Wheeler {l_wheeler * 1e6:.3f} uH ({agreement:+.1f} %)")
+    for name, r in results.items():
+        print(f"{name}: copper {r['copper_distance_mm']:.3f} mm apart, L {r['L_uH']:.3f} uH, f0 {r['f0_MHz']:.2f} MHz "
+              f"({r['f0_range_MHz'][0]:.2f}-{r['f0_range_MHz'][1]:.2f} over C_TUN 27.5-22.5 pF)")
+    print(f"ours vs ST's: f0 {shift:+.2f} %; C across the coil = C_TUN 25 + C6/C8 in series 23.5 + 1 pF (ASSUMPTION)")
+    print(f"to put f0 on 13.56 MHz: +{trim * 1e12:.1f} pF across the coil (C2 position), or {2 * trim * 1e12:.1f} pF on "
+          f"each of C7 / C9 (both not fitted, as on ST's board): fit only after a measurement")
+    result = {"source": "scripts/pcb/mb1163_nfc.json (MB1163 rev C-01, ANT14)", "boards": results,
+              "f0_shift_pct": round(shift, 3), "trim_to_13p56_pF": {"across_coil_C2": round(trim * 1e12, 2),
+                                                                   "each_of_C7_C9": round(2 * trim * 1e12, 2)}, "c_tun_pF": [c * 1e12 for c in C_TUN], "c_ext_pF": C_EXT * 1e12,
+              "c_parasitic_pF": C_PAR * 1e12, "method_check": {"spiral": "regular, 4 turns, ANT14 outline / track / gap", "L_greenhouse_uH": round(l_top * 1e6, 4),
+                                                               "L_wheeler_uH": round(l_wheeler * 1e6, 4),
+                                                               "agreement_pct": round(agreement, 2)},
+              "sources": {"c_tun": "DocID023790 Rev 20 (M24SR64-Y), CTUN in SO8: 22.5 / 25 / 27.5 pF at 13.56 MHz",
+                          "c_ext": "MB1163 C-01 schematic: C6 / C8 47 pF from AC1 / AC0 to GND",
+                          "c_parasitic": "ASSUMPTION 1 pF pads and traces",
                           "greenhouse": "H. M. Greenhouse, IEEE Trans. Parts, Hybrids, and Packaging PHP-10(2), 1974",
                           "wheeler": "S. S. Mohan et al., IEEE JSSC 34(10), 1999, modified Wheeler K1 2.34, K2 2.75"}}
     (ROOT / "simulation" / "results" / "nfc_coil.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    ok = abs(best["agreement_pct"]) <= 5.0 and abs(best["f0_MHz"] * 1e6 / TARGET_F0 - 1) <= 0.03
-    print("PASS" if ok else "FAIL", f"agreement {best['agreement_pct']:.1f} %, f0 within 3 % of {TARGET_F0 / 1e6} MHz")
+    ok = abs(agreement) <= 5.0 and abs(shift) <= 2.0 and len(spare) <= 1
+    print("PASS" if ok else "FAIL", f"method agreement {agreement:+.1f} % (limit 5 %), stack-up shift {shift:+.2f} % (limit 2 %)")
     return 0 if ok else 1
 
 

@@ -30,11 +30,10 @@ None to existing pins. New signals for the firmware's board target:
 |---|---|---|
 | FLASH_CS | PA15 | W25Q16 on SPI1 (shared with the DRV8711; mode 0 suits both) |
 | VBAT_SENSE | PC1 / ADC1_IN2 | battery voltage, 100 k/27 k divider |
-| BUZZER | PA7 / TIM17_CH1 | buzzer via NPN |
-| LED_FAULT | PB1 | red LED (green stays on PB0) |
-| USER_BUTTON | PD0 / EXTI0 | user button (NUCLEO SW2 pin) |
-| I2C3 SCL/SDA | PB10 / PB11 | Qwiic expansion, M24C64 EEPROM (0x50), ST25DV04KC NFC tag (0x53/0x57) |
-| NFC_GPO | PA2 / EXTI2 | ST25DV04KC GPO, open drain with a 10 k pull-up (D-030) |
+| LED_RGB | PA7 / TIM17_CH1 | 12 × WS2812B-2020-V6 chain through an SN74AHCT1G125 (D-035); green status LED stays on PB0 |
+| I2C3 SCL/SDA | PB10 / PB11 | Qwiic expansion, M24C64 EEPROM (0x50), M24SR64-Y NFC tag (0x56) |
+| NFC_GPO | PA2 / EXTI2 | M24SR64-Y GPO, open drain with a 20 k pull-up (MB1163 R8, D-039) |
+| NFC_RF_DISABLE | PA3 | M24SR64-Y RF disable, output; high = RF off; 30 k pull-down (MB1163 R9, D-039) |
 | DRV_STALLN | PB2 | optional DRV8711 nSTALL input |
 
 ## Consequences
@@ -43,5 +42,8 @@ None to existing pins. New signals for the firmware's board target:
 - **No SWO:** PB3 is SPI1_SCK.
 - **No USB:** PA11 is TIM1_CH4 (D-009).
 - **SWD only:** PA15 (JTDI) is FLASH_CS, so firmware must not enable JTAG.
+- **Bridge inputs (D-042):** PA8/PA9 (`leftInput1/2`, TIM1 CH1/CH2) drive bridge B, which feeds the left motor;
+  PA10/PA11 (`rightInput1/2`, CH3/CH4) drive bridge A, the right motor. Pins and channels are unchanged for the firmware;
+  only the nets (`DRV_BIN1/2`, `DRV_AIN1/2`) and the DRV8711 bridge behind them changed.
 - **Reset-safe bridge:** PA8–PA11 and PB8 get pull-downs so the bridge stays tri-stated and the
   driver asleep while the MCU is in reset (HW-DRV-005).

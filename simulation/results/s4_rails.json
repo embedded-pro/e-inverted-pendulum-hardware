@@ -26,7 +26,7 @@
     "v3_ripple_pp_mV": 0.0013000000000928935,
     "v3_startup_overshoot_mV": 0.28094999999961345,
     "v3_in_regulation_ms": 4.5754075,
-    "v3_dip_on_5v0_dip_mV": 1.5546500000001018,
+    "v3_dip_on_5v0_dip_mV": 6.996150000000423,
     "v3_step_dip_mV": 6.070850000000405,
     "v3_ripple_with_25kHz_line_pp_mV": 0.595499999999749,
     "v5_line_ripple_pp_mV": 52.880599999999944
@@ -42,7 +42,7 @@
   },
   "assumptions": {
     "5v0_line_ripple": "25 kHz, 50 mV p-p (ASSUMPTION)",
-    "5v0_step_dip": "150 mV on the +96 mA buzzer step (ASSUMPTION)",
+    "5v0_step_dip": "675 mV on the +432 mA RGB-chain step (ASSUMPTION, 150 mV / 96 mA scaled)",
     "c_out": {
       "value": 1.3e-05,
       "source": "ASSUMPTION CL21A226MAQNNNE DC-bias ~-40 % at 5 V"

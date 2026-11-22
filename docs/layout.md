@@ -1,64 +1,281 @@
-# PCB layout (Phase 3)
+# PCB layout (Phase 3): placement brief for the owner
 
-Status: **anchor draft v2 for owner gate A** (2026-11-13). It replaces v1, which the owner rejected. Nothing is locked yet.
-When the owner approves or corrects the anchors, they are locked on the board (`fp.SetLocked(True)`) and never moved
-again (power-pcb-layout §1).
+Status: **hand-off (2026-11-13, D-032).** The owner places the components in KiCad. The board starts as a clean
+slate:
+- **on the board:** the outline, the keep-out rule areas, the reference drawings and the WHEELTEC bracket holes;
+- **the MB1355 RF corner (2026-11-15, D-037):** the MCU, RF path, antenna, SMPS, crystals and their copper, pasted at the
+  top-left corner (`scripts/pcb/rf_block.py`, `docs/rf.md`); ungrouped, its pours removed (D-046);
+- **staging area right of the board:** every other part, grouped by schematic sheet (`docs/images/overview.png`).
+
+From now on the `.kicad_pcb` is the source of truth for placement. `scripts/pcb/board.py` never moves, reshapes or deletes
+anything on the board.
 
 **Sources:**
 - `docs/mechanical.md`: coordinates, bracket, battery, mass;
 - `docs/rf.md`: 2.4 GHz antenna and RF path;
 - `docs/nfc.md`: NFC coil;
-- `docs/power-map.md`: net classes;
-- decisions D-025 to D-031;
+- `docs/power-map.md`: net classes and current paths;
+- decisions D-025 to D-032;
 - the `power-pcb-layout`, `pcb-design-rules`, `rf-layout` and `interface-layout` skills.
-
-**Files:**
-- board: `kicad/e-inverted-pendulum.kicad_pcb`;
-- generator: `kicad/gen/board.py` + `kicad/gen/placement.py`;
-- renders: `kicad/renders/` (`scripts/render_board.py`).
 
 ## Board
 
 | Item | Value | Source |
 |---|---|---|
-| Outline | 85 × 130 mm, 1 mm corner radii | D-024 |
-| Coordinates | x ±42.5; z = 0 on the wheel axle at the centre of the 25 mm bracket strip; bottom edge z −12.5, top edge z 117.5; front view | D-026 |
+| Outline | 85 mm wide; 130 mm tall at MB1355's antenna tab (top-left, x −42.5 to −14.0) and right of x +6.1 (MB1163 NFC corner), 122.5 mm between them (top edge z 110.02); 1 mm radii on the other corners | D-024, D-037, D-039 |
+| Coordinates | Grid origin on the wheel axle at the centre line (x = 0, z = 0); the bottom edge is z −12.5, the top edge z 117.5 (KiCad Y = 150 − z) | D-026 |
 | Stack-up | JLC04161H-7628: L1 0.035 / 7628 0.2104 / L2 0.0152 / core 1.065 / L3 0.0152 / 7628 0.2104 / L4 0.035 mm | D-008 |
-| Layers | L1 parts, RF, short power pours · L2 solid GND, never cut · L3 VBAT/5V0/3V3 pours, slow signals · L4 signals + GND fill (none in the bracket strip) | `docs/plan.md`, D-026 |
-| Rules | JLC 4-layer profile (`pcb_rules.py apply --fab jlcpcb --netclasses`), 45° corners only, net classes from the power map | pcb-design-rules |
-| Project rules | RF1 clearance 0.10 mm (DS12804 copy); AE401 shorting-leg ring 0.10 mm (it is a via); NPTH to copper 0.5 mm; **no THT pin under the back-mounted battery**; **no part in the bracket strip** except the bracket holes | `kicad/e-inverted-pendulum.kicad_dru` |
-| Grid origin | the wheel axle on the centreline (x = 0, z = 0) | `docs/mechanical.md` |
-| Aux origin | bottom-left board corner (CPL files) | JLC |
+| Layers | L1 parts, RF, short power pours · L2 solid GND, never cut except MB1355's cut-out under the RF line · L3 VBAT/5V0/3V3 pours, slow signals, GND under the RF strip · L4 signals + GND fill | `docs/plan.md`, D-037 |
+| Net classes | The plugin's standard set (D-062): PWR_4.2A 2.174 mm (a pour), PWR_2A 0.781, PWR_1A 0.30, PWR_0.6A / PWR_0.2A, SENSE, ANALOG, CLK, GND and SIGNAL at 0.15; RF_50 0.6 (MB1355); clearance 0.15 | `docs/power-map.md` |
+| Fab rules | JLCPCB: track / space 0.09, via 0.15 / 0.25, via ring 0.05, PTH ring 0.15, hole-to-hole 0.20 (PTH 0.45), hole-to-copper 0.20 (PTH 0.28), edge 0.20, NPTH ≥ 0.50, silk text ≥ 1.0 / 0.15 mm | D-036, `pcb-design-rules` profiles |
+| Silkscreen | Only the test pads' net names: 1.0 mm text, 0.15 mm line (JLCPCB's minimum), clear of every label, outline, pad, via, body and the edge, 0.5 mm from each other so two names never read as one, next to their pad; every other part's reference is on F.Fab (the assembly drawing), sized inside the part; nothing on a net tie. Outlines at 0.15 mm, pin-1 marks and J101's polarity stay | D-035, D-041, D-052, `scripts/pcb/silk.py` |
+| Assembly spacing | 0.5 mm between neighbouring parts' pads and bodies (IPC-7351B medium density), 2.5 mm from every part's body to the board edge (JLCPCB assembly terms, DFM items 1 and 3); test pads count as pads, antennas, net ties and holes don't | D-052, `place_block.py`, `scripts/pcb/respace.py --check` |
+| Page | A3, so the staging area fits on the sheet | — |
 
-## Zones (front view)
+## What DRC enforces (rule areas and project rules)
 
-```
- x −42.5                                                        +42.5
-   ┌───────────── 2.4 GHz keep-out band, full width, all layers ─────────────┐ z 117.5
-   │                    AE401 IFA, feed above RF1 (x 0)                      │
-   ├─────────────────────────────────────────────────────────────────────────┤ z 111.1
-   │ SW101 (THT)  LEDs   J401  FL401→pi            U803 ┌── AE801 NFC coil ──┐│
-   │ MH1          U701 IMU  [U301 MCU]   Y302      U802 │  25 × 21, all-layer ││
-   │                         U702 flash                 └─── keep-out ───────┘│ z 84.5
-   │             · · · · · battery on the BACK, z 40–75 · · · · ·    MH2       │
-   │  MC3                     SW301 BOOT0         BZ801       MC4   J801 ◄────│ Qwiic
-   │       U201/L201 buck                                     J301 STDC14 ◄───│ mid right edge
-   │  MC1                      SW801 user                     MC2             │
-   │ F101  Q101  D102                                                        │ z 40
-   │ J101 XT30 (THT)    D501 D502      D503 D504                             │
-   │                Q501 Q502 [C507] Q503 Q504                               │
-   │──► J601 PH6  U601 U602   R509 [U501 DRV8711] R512   U604 U603  J602 ◄───│
-   ├──────────────── bracket strip: no parts, no B.Cu copper ────────────────┤ z 12.5
-   │ ∘MB5 ○MB1                     axle z 0                    ○MB2 ∘MB6     │
-   │ ∘MB7 ○MB3        (motors + WHEELTEC bracket behind)       ○MB4 ∘MB8     │
-   └─────────────────────────────────────────────────────────────────────────┘ z −12.5
-```
+These are on the board as rule areas (they can be moved or edited in KiCad) and in `hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_dru`.
 
-## Anchor draft
+**Back with the pours (D-053, `scripts/pcb/pours.py`):** `ANTENNA_TAB`, `NFC_COIL`, `NFC_POUR_GAP`, `BATTERY_BACK` and
+MB1355's L2 cut-out under the RF line, which the owner had deleted until the pours (D-047), are on the board again.
 
-Mechanical coordinates (mm, front view); rotation in degrees, KiCad convention. Generated from `placement.py`.
+| Name | Where | Rule | Why |
+|---|---|---|---|
+| `ANTENNA_TAB` | MB1355's tab, x −42.5 to −14.0, z 109.98 → top edge, all layers | no vias or pour; only the antenna feed (RF_ANT) may cross it (project rule) | Ground-free antenna tab (D-037, `docs/rf.md`) |
+| project rules (D-046) | the MB1355 and BOOST-DRV8711 copies | ST's 0.10 mm on the RF / SMPS / HSE nets and C318, TI's 0.178 mm on DRV_* nets (not to pours); Y301 / Y302 tight placement; the copied 90° corners are DRC exclusions | Vendor geometry kept as copied; anything new is checked in full |
+| `NFC_COIL` | ANT14 + 0.5 mm: x 10.0 → edge, z 76.0 → edge, all layers | no tracks, vias or pour (the coil footprint excepted) | MB1163 copy (D-039, `docs/nfc.md`) |
+| `NFC_POUR_GAP` | ANT14 + ST's 4.4 mm coil-to-pour gap: x 6.1 → edge, z 72.1 → edge, all layers | no vias or pour | ST's pour edge on MB1163; ST's own cluster copper sits in it |
+| `BRACKET_STRIP` | bottom 25 mm, front and back | **no footprints** except the bracket holes MB1–MB8 (project rule) | Chassis attachment (D-026) |
+| `BRACKET_BASE_CONTACT` | bottom 25 mm, B.Cu | no tracks, vias or pour | The steel bracket base sits on the back |
+| `BATTERY_BACK` | x ±38.5, z 39–76, B.Cu | **no through-hole pins** (project rule; NPTH holes allowed), except J601 / J602 / J101 over the cradle's relief | The battery lies on the back (D-025, D-044, D-047) |
+| project rule | RF1 net | 0.104 mm clearance | MB1355's 0.265 mm fan-out from pin 31 between the 0.4 mm-pitch pins |
+| project rule | NPTH holes | 0.5 mm hole-to-copper | Screw threads touch the hole wall |
+| project rule | silkscreen outlines of two parts | may sit closer than 0.15 mm, never overlap; labels keep 0.15 mm to everything (silk checks are errors) | JLCPCB gives no silk-to-silk figure; KiCad applies its silk-to-pad 0.15 mm to both (D-041) |
 
-<!-- BEGIN anchors (kicad/gen/board.py) -->
+## Placement guidance (from the design docs)
+
+- **RF (`docs/rf.md`):** done by the copy (ungrouped, no pours since D-046). It holds:
+  - U301, FL401, the match and AE401 (no SMA branch, D-038);
+  - L301 / L302, Y301 / Y302 and their caps (the shield-clip pads SC401–SC404 were removed by the owner, D-047);
+  - the MCU decoupling on top, at the Nucleo's spots or the nearest free spot to each pin (D-038, `docs/rf.md`);
+  - ST's copper, vias and ground (the owner removed the ground field's 236 vias, D-047; the 54 beside the RF line stay).
+
+  The MCU decoupling the owner parked (D-047) is back on top after the fan-out (D-048, `scripts/pcb/mcu_escape.py
+  --decoupling`, `docs/rf.md`). R301 (SPI1 SCK termination) and C803 of the NFC cluster are placed with the rest
+  (D-051, below).
+
+  Its position on the outline (the tab) is part of the copy. Still yours:
+  - route the decoupling (C301–C313, C317, FB301) to its pins and +3V3;
+  - route the MCU's signals on from the fan-out vias (below);
+  - nothing for the ground: ST's RF-strip pours are back over the 1.2 mm stitching grid and the L2 plane is in (D-053);
+    U301's exposed pad has 33 ground vias on a 0.8 mm lattice in its paste gaps.
+- **MCU fan-out (D-048, `scripts/pcb/mcu_escape.py --fanout`): done.** Each of the 38 U301 pins another part uses
+  has a 0.2 mm stub on F.Cu to a 0.15 / 0.25 mm via, 0.30 or 0.75 mm past the pad (0.40 mm for pins 6 and 16),
+  alternating rows. Route on from the vias on any layer; the via size is in the project's via list. Power, ground and
+  the copy's own nets (crystals, RF1, SMPS) have no fan-out: they stay with their parts on top.
+- **IMU, flash and EEPROM (D-043, D-047, `scripts/pcb/place_block.py imu_memory`): placed by the owner.**
+  - U701 (MPU-6500) on the centre line at (0, 78), rotation 0: its position and axes are published
+    (`docs/firmware-interface.md`). C701 / C702 / C703 at VDD / VDDIO / REGOUT, R701 (nCS pull-up) above it.
+  - U702 (W25Q16JV) left of the MCU at (−26.2, 82.9), turned 180°; U802 (M24C64) above it in the same column at
+    (−26.3, 89.0) (D-047).
+  - Their support parts and test pads are placed with the rest (D-051, below): C704 and R702–R704 at U702's pins, R301
+    (SPI1 SCK 33 Ω) on the SCK route, C802 at U802, the I2C3 pull-ups R808 / R809 at the Qwiic port, TP701–TP706 in one
+    row left of the IMU.
+  - Still yours, routing: SPI2 from the MCU's left pins (46–50) to the IMU, about 30 mm, under the NFC cluster; I2C3 from
+    the MCU's top pins (28 / 29) around its left side and down to the EEPROM, about 50 mm (inside the bus
+    budget's 15 cm, `docs/nfc.md`); SPI1 and FLASH_NCS from the bottom pins. Keep them off the RF
+    strip and the L2 cut-out under the RF line.
+- **NFC (`docs/nfc.md`):** done by the copy (ungrouped, no pours since D-046). It holds AE801 (ANT14), U803 (M24SR64-Y) and
+  ST's cluster (FB801, C803 / C804 / C818–C823, R804–R806, R810) with ST's tracks and vias, turned 90° from ST's
+  board and 8 mm below the corner: the coil at the right edge, the tag to its left, beside the MCU. Still yours (the cluster's GND pour included): route NFC_GPO (PA2), NFC_RF_DIS (PA3),
+  QWIIC_SDA / SCL and +3V3 into the cluster; keep metal (screws, battery cradle) out of `NFC_POUR_GAP`.
+- **Motor drive (`docs/drive.md`):** done by the copy (ungrouped since D-046; TI's 12 pours back since D-053). It holds TI's power stage (U501,
+  Q501–Q504, R509 / R512, the net ties NT501–NT504 on B.Cu, C507–C514) with TI's tracks and vias, turned 180°
+  (FETs nearest the strip; bridge A on the right drives the right motor, B the left, D-042), from z 13.5 to 50.5, centred on x +10.85 since the owner moved it 2.85 mm right (D-047) and D-050 another 8 mm (`scripts/pcb/shift_block.py drive`), and our extras at the nearest free spots (SS34 D501–D504, C501–C506, R515–R518). TI's VM, phase, sense and GND pours
+  carry the bridge current again (D-053). Still yours: the power copper
+  the pours carried (VM, phases, GND_A / GND_B), the phase outputs to J601 / J602, the logic pins to the MCU, the board-wide ground.
+- **Power (D-049, `scripts/pcb/place_block.py power`, `docs/power-map.md`, power-pcb-layout §3): placed** right of the
+  power entry, x −15.5…+3.5, z 51.2–64.1, all on top, to TI's layout guidance (TPS62933 datasheet ZHCSO99D §12.1, Fig.
+  12-2):
+  - U201 (TPS62933F) at (−7.7, 58.0), VIN / GND pins toward the power entry; C203 (100 nF) the closest part to VIN /
+    GND, C202 / C201 (10 µF) beside it, so VBAT arrives from the left and the input loop is the smallest on the block.
+  - C204 (BST) between BST and SW; L201 right of U201, its SW pad facing pin 5; the SW node is about 2 mm of copper,
+    17 mm from the IMU.
+  - C208 / C206 / C207 (output) under L201, +5V pads up; U202 (TLV75533P) beside them, IN / EN toward C209, OUT toward
+    C210.
+  - R201 / R202 (EN), C205 (SS), R204 / R203 (FB) in a row above U201, the FB pair over FB (pin 8), away from SW;
+    TP201 (+5V), TP203 (GND) and TP202 (+3V3) right of L201 (moved there by D-050 so the LED rings leave their labels room).
+  - Still yours, routing: VBAT and GND wide to C201–C203 and U201 with vias to L2; the SW node short and minimal,
+    nothing under it on L3 / L4; the +5V sense to R203 from the output caps, away from L201; +5V on to the encoders and
+    the LEDs, +3V3 on the L3 plane.
+- **Motor connectors and encoder inputs (D-042, D-044, D-047, `scripts/pcb/place_block.py motor_io`): placed, arranged
+  by the owner.**
+  - J601 at the left edge and J602 at the right, plug entering from the side, pins at x ±33.65 (2.05 mm inward for
+    JLCPCB's 2.5 mm body-to-edge, D-052) from z 35.5 to 45.5
+    (raised 20 mm, D-044). The upper four pins of each sit over the battery's edge: the cradle needs a
+    relief there (`docs/mechanical.md`). J601's pin 1 (M−) is at the top, J602's at the bottom.
+  - Inward from each connector: the ESD (U601 / U603) beside pins 2–5, the four row parts (pull-up DNP, 100 Ω, 100 Ω,
+    pull-up DNP) in a column at x ±31.5…32, the 1 nF caps at x ±28.2…28.75, then the SN74LVC3G17 (U602 / U604) at
+    x −27.5 / +27.75 with its bypass; TP601 / TP602 beside U602. C603 / C607 (snubbers, DNP) below the connectors.
+  - The encoder supply (R601 / R602, F601, C601 / C602) sits below the left chain, z 28–32.
+  - TP603 / TP604 (right encoder outputs) beside U604 and TP605 / TP606 (ENC_VCC, GND) below the encoder supply are
+    placed with the rest (D-051).
+  - Still yours, routing:
+    - Both motor pins leave at the bottom of the connector and run about 22 mm down the side to the phase pours that end
+      at z 13.5 on the same side.
+      The top motor pin's trace runs down under the housing, outboard of the pads, so no motor copper passes the
+      encoder rows.
+    - Connector → ESD with no via and no stub, a GND via at the ESD's GND pins (interface-layout §2).
+    - ENC_VCC across to J602; the buffered outputs to PC0 / PC2 (left) and PA0 / PA1 (right).
+- **Power entry and debug (owner, D-047; `place_block.py power_entry`, D-052): placed.** J101 (XT30) at the left edge,
+  pins at x −37.1, z 56.4 / 61.4 (0.9 mm inward for the 2.5 mm edge rule), with F101, Q101, D101 / D102, C101–C103 and
+  R101–R105 beside it (x −37…−18, z 50–63); J301 (STDC14) left of the MCU at (−36.2, 97.2), its body 3.2 mm from the edge.
+- **RGB LEDs and status LED (D-050, `scripts/pcb/place_block.py leds`): placed** in the centre as two square rings,
+  mirrored about the centre line between the power block and the IMU:
+  - each ring has 6 WS2812B-2020 on a 7.0 mm square (corners plus the middle of the top and bottom sides, 3.5 mm pitch),
+    centred at (−9, 70.5) and (+9, 70.5);
+  - the chain runs D802 (bottom middle, left ring) round the left ring to D807, across to D808 and round the right ring
+    to D813;
+  - each LED's 100 nF cap sits inside its ring at the VDD pad (bottom row at 0°, top row at 180°);
+  - U804 (level shifter) with C801, R803, R802 at its output, C805 (bulk) and TP801 are left of the left ring;
+  - D801 (green status) with R801 sits on the centre line between the rings.
+  - Still yours, routing: the data chain in order (U804 → R802 → D802 DIN … D813), +5V and GND to every LED through
+    its cap, LED_DATA from PA7's fan-out via. Keep vias out of the NFC pour gap (x ≥ 6.1, z ≥ 72.1): the right ring's
+    top row sits in it, 1.6 mm below the coil (`docs/nfc.md`).
+- **The rest (D-051, `scripts/pcb/place_block.py rest`): placed.** Edge parts first, then the support parts at their
+  pins, then the test pads in rows per block in the room left. Every spot keeps the existing silkscreen labels where
+  they are and leaves its own label a clean spot. Since D-052 only the test pads' names are on the silkscreen, all of
+  them clean; the edge parts sit 2 mm further in.
+  - SW101 (power switch) at the left edge above the battery, turned 90°: pins at x −36.5, z 79.0 / 83.7 / 88.4, between
+    J801 and J301, lever on top (`docs/mechanical.md`). SW_ON runs about 30 mm down to R102.
+  - J801 (Qwiic) at the left edge between J101 and SW101, the cable entering from the edge, pads at x −35.18, z 68.5–71.5;
+    U801 (its ESD) beside the pads for pass-through routing (interface-layout §2); R808 / R809 (I2C3 pull-ups) right of
+    U801, where the bus enters.
+  - C704 / R702–R704 at U702's VCC, /CS, /WP, /HOLD; C802 at U802's VCC; R301 6 mm down the SCK route from its fan-out
+    via; R302 3.8 mm from the BOOT0 via; C803 on ST's MB1163 land (D-039).
+  - Test pads, 2.4 mm pitch (2.7 mm next to a 1.5 mm pad):
+    - power entry: a column at x −28, z 73.5 → 63.0 (BAT_F, PP_G, VBAT, GND, VBAT_SENSE), BAT_F / PP_G nearest Q101;
+    - Qwiic: a column at x −24, z 72.6 → 67.2 (SDA, GND, SCL);
+    - drive logic: a row at z 53.5, x 9.0 → 28.2 (nFAULT, MISO, SCS, MOSI, SCK, AIN2, AIN1, BIN1, BIN2), above the
+      DRV8711's logic vias, in their order;
+    - drive power: SENSE_B / GND at z 29.0, x −12.2 / −9.5, and GND / SENSE_A at z 28.0, x 27.0 / 29.7. The phases'
+      pads sit on their own tracks (D-060): TP503 / TP504 on the left pair at (−33.97, 20.8) / (−32.42, 23.0), TP505 /
+      TP506 on the right pair at (32.42, 30.0) / (33.97, 27.8);
+    - MCU: a row above J301 at z 104.0, x −37.5 → −32.7 (NRST, VFBSMPS, BOOT0); TP303 (VDDA) beside the VDDA caps at
+      (−6.0, 98.5), 2.1 mm from C311's pad (D-052);
+    - IMU and flash: a row left of the IMU at z 80.9, x −16.9 → −4.9 (FLASH_NCS, IMU_NCS, SCK, MOSI, MISO, INT);
+    - encoders: TP603 / TP604 beside U604 at (23.45, 44.5) / (23.45, 36.0), in the right chain's table since D-052;
+      ENC_VCC / GND at z 26.0 below F601.
+  - Still yours, routing: SW_ON to R102; I2C3 J801 → U801 → R808 / R809 → U802 → MCU and on to U803; each test pad's
+    stub to the copper it probes, short and on top.
+- **Pours and DRC (D-053, `scripts/pcb/pours.py`, `scripts/pcb/tidy_copper.py`): done.**
+  - L2_GND: one solid GND pour on In1.Cu over the whole board, cut only by ST's RF cut-out and the NFC / antenna keep-outs;
+    every GND via reaches it.
+  - ST's RF-strip pours (F.Cu ground beside the coplanar line, the RF_50 patch at FL401, In2.Cu ground under the line,
+    B.Cu ground), ST's NFC B.Cu ground and TI's 12 drive pours, at their copies' positions and settings.
+  - The copied routing's diagonals are exactly 45° (they were 1–500 nm off and DRC flagged them), the ENC_L_A_RAW and
+    ENC_R_B_RAW branches start on their pads, ST's NFC ground tee is a 0.45 / 0.20 mm via, and the GND via beside RF_50
+    moved 0.11 mm to JLCPCB's 0.20 mm hole-to-copper. No DRC exclusions are left.
+  - DRC: no errors; 51 warnings, every one a signal fan-out via that connects when you route its net.
+- **Routing pass 1 (D-054, `scripts/pcb/route_simple.py`): done.** The simple connections, closest first, each on one
+  layer with no via:
+  - 90 pad-to-pad links up to 8 mm (median 2 mm), straight or with one 45° bend, centre to centre, at the class width
+    (narrowed only to a narrower pad, never below 0.15 mm): decoupling to its pins, the regulators' local nets, the LED
+    chain's data and +5V hops, pull-ups, the encoder chains, the motor connectors' caps;
+  - 3 GND ties between one part's side-by-side ground pins, and NRST from C317 to its fan-out via;
+  - 83 GND vias, one per ground island off the plane, just outside its pad (0.3 / 0.6 mm; 3 at 0.2 / 0.45 mm).
+  - Left for pass 2 and for you (204 unrouted): 89 connections longer than 8 mm (the buses: SPI1 / SPI2, I2C3, SWD / VCP,
+    the DRV8711 control lines, the encoders to the MCU, +3V3 / +5V distribution), 69 short ones blocked by other pads
+    (they need a bend around a part or a via), PWR_BUS for the pours (D-053's TI pours plus L1 / L3 copper, power map),
+    the vendor copies' own gaps (HSE, SMPS_LX, ST's NFC VCC / RF_DIS, +3V3 at U301) from ST's and TI's references, and 5
+    ground pads with no via spot (C317, D810, D811, U701 pins 11 / 20) plus the copies' ground pads.
+  - Run `python3 scripts/pcb/route_simple.py --apply` again after you move parts: it routes what has become simple and
+    does nothing otherwise.
+- **Routing pass 2 (D-055, `scripts/pcb/vendor_gaps.py`): done.** The vendor copies' open ends, closed from ST's and TI's
+  references: ST's HSE_OUT and SMPS_LX as drawn; HSE_IN, the OSC32 load caps, the SMPS loop, +3V3 on U301 pins 44–45 /
+  1–68, NFC_VCC and NFC_RF_DIS re-joined by the grid router (`scripts/pcb/maze.py`) at the vendor's width; TI's 2 vias
+  that fit; one GND via at each of the copies' open ground pads. Unrouted 204 → 185.
+- **Power bus (D-056, `scripts/pcb/power_pours.py`): done.** L3 is a VBAT corridor (power entry → buck input → drive,
+  ≥ 11.3 mm) and GND elsewhere; the buck's switch node has nothing under it on L3 / L4 (`BUCK_SW_QUIET`). L1 pours carry
+  BAT_P, BAT_F, PP_S and VBAT at Q101 and at the buck input (outlines in `placement.L1_POWER`, editable), with 5 vias to
+  L3 at Q101 and 2 at the buck. If you move a power part, edit the outline and refill (`B` in KiCad). Unrouted 185 → 164.
+- **Routing pass 3 (D-057, `scripts/pcb/route_maze.py --max-length 8`): done.** 46 short connections around parts,
+  29 vias; supplies at 0.3 mm where 0.5 mm found no path. Unrouted 164 → 118. Still open among the short ones: U301's
+  VDD pins (walled in by the MCU fan-out and the SMPS parts), the IMU's GND pins inside U701's no-track area, VDDA from
+  FB301 to its caps, the motor phases to TI's pours.
+- **Routing pass 4 (D-058, `scripts/pcb/route_maze.py`): done.** 60 long runs by priority (encoders, VBAT_SENSE, the
+  DRV8711's control lines, SPI1 / IMU / flash, I2C3, SWD / VCP, supplies), 76 vias, F.Cu horizontal / B.Cu vertical.
+  Unrouted 118 → 60.
+- **Placement study and the MCU's supply pins (D-059): done.** `scripts/pcb/improve_placement.py --study` ranks the
+  parts by how much ratsnest (per-net Manhattan MST) a move would save; the moves you chose (drive and MCU / IMU test
+  pads, J301, the flash) were tried on a copy with `scripts/pcb/ripup.py` and a full re-route, and made it worse (64
+  open against 63, 197 mm more track), so the placement is unchanged. The MCU's +3V3 hops now try ST's 0.2 mm stub and,
+  up to 4 mm, F.Cu through ST's strip ground 0.5 mm from RF1: pin 33, C307, C308 and C318 joined. Unrouted 60 → 57.
+  **Yours to finish (57):**
+  - +3V3 (7): pin 33's island (C307 / C308) to the rest of +3V3; pin 30 to C301 (no top path keeps 0.5 mm from RF1: ST
+    uses a 0.64 mm stub to a 0.3 / 0.2 mm via at (−19.12, 101.76) beside RF1, then the bottom side); pin 55 to C305;
+    R515 at the drive;
+  - GND (8): the IMU's pin 11 (U701's no-track area), Y301 pad 2, J801's shell, TI's drive GND fill islands;
+  - the motor phases and sense nodes (MOT_*, SENSE_A / B) to TI's pours, 0.8 mm;
+  - single MCU lines into the crowded fan-out: SPI1_MOSI / SCK, IMU_MISO / INT / SCK / MOSI, DRV_BIN1 / BIN2 / AIN2 /
+    SCS / NSLEEP / NFAULT, SWCLK, VCP_RX / TX, BOOT0, NRST, QWIIC_SDA / SCL;
+  - NFC_AC1 / GPO / RF_DIS, LED_DATA, LED_GREEN, SW_ON, VDDA.
+  After any change, `route_maze.py --apply` routes what has become routable and does nothing otherwise. After moving
+  parts, `ripup.py --apply` takes up passes 1, 3 and 4 so `route_simple.py` and `route_maze.py` (`--max-length 8`, then
+  without) re-route around the new spots.
+- **Motor phases (D-060, `scripts/pcb/route_phases.py`): done.**
+  - The four phases run from TI's strips to J601 / J602, each motor's pair on F.Cu across the top of the bracket strip,
+    as described in `docs/drive.md`.
+  - The SS34 clamps and C502 are re-placed beside their own copper; C603 is turned 180° so the left pair meets it in
+    order; the phase test pads sit on their tracks.
+  - Unrouted 57 → 48: the 9 phase and clamp connections, with D504's old GND stub and C502's old stubs taken up.
+  - Still open in the drive: SENSE_A / SENSE_B to TP501 / TP502, and the DRV8711 logic lines listed above.
+- **Ground fills (D-061, `scripts/pcb/gnd_fills.py`): done.** L1 and L4 carry GND fills over the board, outside the
+  vendor copies' areas and the keep-outs. They are stitched to L2 by 95 vias on a 5 mm lattice; none goes in the RF
+  strip, the NFC area or L3's VBAT corridor. Unrouted 48 → 46. Refill in KiCad (`B`) after any change.
+- **Through-hole parts:** J101 XT30, SW101 switch, J601/J602 PH 6-pin. They must stay outside `BATTERY_BACK`, except
+  J601 / J602 and J101, whose pins sit over the cradle's relief (D-044, D-047, project rule). SW101's pins are above the
+  battery (z ≥ 79).
+- **Assembly spacing (D-052):** `python3 scripts/pcb/respace.py --check` lists any two parts closer than 0.5 mm and any
+  body within 2.5 mm of the edge; `--apply` moves the parts no table holds by the smallest step, keeping their tracks at
+  their angles. It moved 24 parts, among them the vendors' Y301, C309, C314–C316, C318, L301, L401, C401 (ST) and C510,
+  C511, C514 (TI) by 0.05–0.35 mm, and our MCU caps C302, C303, C307, C308 by 0.45–2.0 mm (their nearest pad now
+  1.9–3.6 mm from the pin). D504 and C503 left TI's copper they sat on: route them. Run `--check` after moving parts.
+- **Holes for you to place (staged under "Mechanical", the only parts still off the board, D-051):** battery cradle
+  MC1–MC4 and bumpers MH1/MH2. Footprints
+  `MountingHole_M3_NPTH_KeepOut7mm` and `..._M2_..._KeepOut5.5mm` are in the project library for more.
+
+## After placing
+
+1. Save in KiCad, then lock the parts you consider fixed (they become the anchors for routing; power-pcb-layout §1).
+   The scripts lock nothing (D-045), and the three copies are no longer groups (D-046): every part, track and via selects
+   on its own.
+2. Re-sync and check. This keeps every position:
+
+   ```bash
+   python3 scripts/pcb/board.py --rules <path to pcb_rules.py>
+   ```
+
+   It ends by laying the silkscreen labels out (`scripts/pcb/silk.py`, D-041, D-052): the test pads' names that are clean
+   stay put, the others move next to their pad; references go to F.Fab. `python3 scripts/pcb/silk.py --check` reports
+   without changing anything; `--relayout` lays every name out afresh. `python3 scripts/pcb/respace.py --check` checks
+   JLCPCB's assembly spacing.
+
+   ```bash
+   kicad-cli pcb drc --schematic-parity --severity-all hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb
+   ```
+
+   ```bash
+   python3 scripts/pcb/render.py
+   ```
+
+3. Phase 3 steps 4–8 follow: support placement around your anchors, power copper, critical routes, the rest of the
+   routing, fills, DRC and fab outputs.
+
+## Previous generated draft (gate A v2, not applied; superseded by the MB1355 RF corner, D-037)
+
+For reference only; the owner rejected it. Mechanical coordinates (mm, front view), rotation in degrees.
+
 | Ref | x | z | Rot | Why |
 |---|---|---|---|---|
 | AE401 | +0.00 | +111.35 | 0 | SWRA117D IFA at the top edge, above RF1 (D-029, docs/rf.md) |
@@ -117,54 +334,12 @@ Mechanical coordinates (mm, front view); rotation in degrees, KiCad convention. 
 | MC4 | +30.00 | +72.00 | 0 | battery cradle (MountingHole_M3_NPTH_KeepOut7mm) |
 | MH1 | -38.00 | +92.00 | 0 | bumper (MountingHole_M3_NPTH_KeepOut7mm) |
 | MH2 | +39.50 | +80.50 | 0 | bumper (nylon) (MountingHole_M3_NPTH_KeepOut7mm) |
-<!-- END anchors -->
-
-### Why these positions
-
-The owner's floorplan (2026-11-13, D-029) fixes the MCU at the top centre, the antenna at the top, the battery on the
-back, an empty bottom strip for the chassis, motor connectors on both side edges, the STDC14 mid-edge and the IMU near
-the MCU. Within that:
-
-- **RF.**
-  - The STM32WB55 is rotated 180°, so RF1 (pin 31) is on its top edge.
-  - FL401 IN is 1.5 mm from the RF1 pad edge (DS12804 Fig. 13). OUT, the pi network and the feed lie on x = 0.
-  - The IFA keep-out is a full-width band, like SWRA117D's own board.
-  - HSE at pins 34/35; U.FL test port beside the RF_50 line.
-- **IMU (U701)** sits left of the MCU, next to its SPI2 pins (PB12–PB15, PC6 face left after the rotation). It is about
-  94 mm above the axle, so the firmware compensates for the tangential acceleration (`docs/firmware-interface.md`).
-- **NFC.** The coil is in the top-right corner, 5 mm below the 2.4 GHz band and 10 mm above the battery outline on the
-  back. The ST25DV is at the coil's terminals, rotated so AC0/AC1 face the coil and SDA/SCL/GPO face the MCU (I2C3 and
-  PA2 are on the MCU's right and top edges). The EEPROM shares I2C3 below it.
-- **Flash** below the MCU: SPI1 (PB3–PB5, PA15) is on the MCU's bottom edge after rotation.
-- **Over the battery (front, SMD only):** buck, buttons, buzzer, Qwiic, STDC14 at the middle of the right edge, and the
-  battery-cradle holes MC1–MC4 (inside the battery outline, so the cradle is a tray under the battery).
-- **Lower band (THT allowed):**
-  - XT30 on the left edge;
-  - MG310 sockets on both edges, entry from the side, just above the strip;
-  - encoder ESD and buffers inboard of each socket;
-  - DRV8711 at the centre (rotated 90°, gate-drive pins up), with the four FETs above it, the bulk cap between the
-    bridges and the SS34 clamps above the FETs;
-  - power path XT30 → F101 → Q101 → D102 into the bridge.
-- **Bracket strip (z −12.5…12.5):**
-  - only the bracket holes: 4 × M3 (64 × 17) and 4 × Ø2.4 (77 × 14), from the drawing;
-  - no parts on either face, and no copper on B.Cu, where the steel base sits;
-  - L2 GND runs through it (inner layers keep 0.5 mm from the holes).
-
-## Gate A v2: what the owner decides
-
-1. **Anchors:** approve, or move any of them. Approved anchors get locked.
-2. **Bracket screws:** which hole pattern carries the screws: M3 on 64 × 17, Ø2.4 on 77 × 14, or both (both are drilled
-   now). Confirm the 18 mm axis-to-base dimension (sets the axle and the S0 lean).
-3. **Battery cradle:** 4 × M3 at x ±30, z 50/72, inside the battery outline. Confirm, or give the cradle's hole pattern.
-4. **Bumpers:** MH1 top-left and MH2 on the right edge below the NFC coil (nylon, near the coil). Confirm the positions,
-   or say if bumpers should be a printed top cap instead (the top edge is the antenna).
-5. **STDC14** at the middle of the right edge (the left edge has the XT30 and the power path). Confirm the side.
 
 ## Open items
 
 1. STDC14 (J301) uses KiCad's generic `PinHeader_2x07_P1.27mm_Vertical_SMD`. The LCSC datasheet for C5307809 is Samtec's
    through-hole catalogue page, with no SMD land pattern. Check against Samtec's FTSH-1xx-01-xxx-DV-K footprint drawing.
-2. MG310 cable: confirm that its pin 1 (M−) lands on the board socket's pin 1 (PH cables are straight-through).
-3. NFC coil tuning and read-range check on the assembled robot (`docs/nfc.md`).
-4. 3D models are not installed in this environment, so the 3D render shows pads only.
-5. Phase 3 steps 4–8 (support placement, power copper, critical routes, routing, finish) start after gate A.
+2. MG310 cable: confirm that its pin 1 (M−) lands on the board socket's pin 1.
+3. Bracket: which hole pattern carries the screws (both are drilled), and the 18 mm axis-to-base dimension.
+4. NFC coil tuning and read-range check on the assembled robot (`docs/nfc.md`).
+5. 3D models are not installed in this environment, so the 3D render shows pads only.

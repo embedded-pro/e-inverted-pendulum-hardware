@@ -1,0 +1,123 @@
+(footprint "MB1355_NX2012_2P"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "ST land pattern Xtal:NX2012_2P (MB1355 X2). Derived from STMicroelectronics MB1355 rev D-01 (NUCLEO-WB55), Open Platform License www.st.com/opla")
+	(tags "MB1355 NUCLEO-WB55 STM32WB RF")
+	(property "Reference" "REF**"
+		(at 0 -1.525 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "7b31e494-4e19-4916-b912-1f1900f3f3cd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MB1355_NX2012_2P"
+		(at 0 1.525 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "5382fb62-8404-468c-8077-f465a8386e24")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at -0.75 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d184ef67-2177-412a-b50a-c8539f9e3b92")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at -0.75 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "dab53961-23cb-4e86-a614-8b428886a7fa")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(sheetname "MCU")
+	(sheetfile "MCU.kicad_sch")
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.35 -0.725)
+		(end 1.35 -0.725)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "61b11da5-fb6b-438d-abd3-6aa26fddac11")
+	)
+	(fp_line
+		(start -1.35 0.725)
+		(end -1.35 -0.725)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "3118f632-2e45-4b45-a4e5-f9c0d0583d5f")
+	)
+	(fp_line
+		(start 1.35 -0.725)
+		(end 1.35 0.725)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "18eae5ac-b3f6-429b-bd44-d8b3b591006a")
+	)
+	(fp_line
+		(start 1.35 0.725)
+		(end -1.35 0.725)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "2e1a7b6f-c6fa-4591-87be-02678353510d")
+	)
+	(pad "1" smd rect
+		(at -0.75 0)
+		(size 1 1.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "3d5d2b06-fac1-4644-b3af-aa997d123ea3")
+	)
+	(pad "2" smd rect
+		(at 0.75 0)
+		(size 1 1.25)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "f3357274-aee0-4cdb-b624-dee4704efc01")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Crystal.3dshapes/Crystal_SMD_3215-2Pin_3.2x1.5mm.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 0.625 0.8 0.667)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

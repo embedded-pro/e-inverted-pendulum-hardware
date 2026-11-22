@@ -16,7 +16,7 @@ Verification methods:
 | HW-PWR-001 | The board shall run from a 3S LiPo over 9.0–12.6 V and survive 13.5 V (a pack charged with a mis-set charger) without damage. | D-003 | R, S1 |
 | HW-PWR-002 | The motor bus (VM) shall stay ≥ 8.0 V, the DRV8711 VM minimum (TI SLVSC40), at the lowest battery voltage under peak motor current. | D-003 | S1, S3 |
 | HW-PWR-003 | Reverse battery connection shall neither damage the board nor apply more than 1 mA to any load. | `mcu-circuit-design` §11 | S1, B |
-| HW-PWR-004 | When the board is switched off while the wheels turn, regenerated energy shall not raise VM above 24 V. The TVS clamp must stay under the lowest absolute maximum on the bus: 30 V (TPS62933 VIN). | D-011 | S1 |
+| HW-PWR-004 | When the board is switched off while the wheels turn, regenerated energy shall not raise VM above 24 V. The TVS clamp must stay under the lowest absolute maximum on the bus: 30 V (AO4805 V_DS); the TPS62933 VIN is 32 V abs max, 30 V recommended (SLUSEA4 s8.1, s8.3). | D-011 | S1 |
 | HW-PWR-005 | 3V3 ripple at VDDRF shall stay within ST AN5165 limits. | `rf-layout` §5 | S4, B |
 | HW-PWR-006 | Battery voltage shall be measurable by the MCU ADC with ±50 mV/cell accuracy (3σ). This closes the open undervoltage item in the firmware's `safety-supervisor.md`. | firmware `safety-supervisor.md` "Open items" | S5, B |
 | HW-PWR-007 | A single switch shall disconnect every load from the battery. Off-state drain ≤ 10 µA. | D-011 | R, B |
@@ -25,7 +25,7 @@ Verification methods:
 
 | ID | Requirement | Source | Verify |
 |---|---|---|---|
-| HW-DRV-001 | One DRV8711 shall drive two brushed DC motors, bridge A = left and bridge B = right, through its xIN inputs with the indexer bypassed. | REQ-DRIVE-002, `motion-actuation.md` Part A | R |
+| HW-DRV-001 | One DRV8711 shall drive two brushed DC motors, bridge B = left and bridge A = right (D-042), through its xIN inputs with the indexer bypassed. | REQ-DRIVE-002, `motion-actuation.md` Part A | R |
 | HW-DRV-002 | The four bridge inputs AIN1/AIN2/BIN1/BIN2 shall connect to PA8/PA9/PA10/PA11 (TIM1 CH1–CH4). | `MotorDriverStm.cpp:19-28` | R (`check_pinmap.py`) |
 | HW-DRV-003 | DRV8711 nFAULT shall connect to both PA6 (TIM1_BKIN) and PC4 (EXTI4), so a fault tri-states all four inputs in hardware. | REQ-DRIVE-004, REQ-SAFE-006, `MotorDriverStm.hpp:34-35` | R, B |
 | HW-DRV-004 | The DRV8711 shall be configurable and readable over SPI1 (PB3/PB4/PB5, CS PA4 active-high). SLEEPn = PB8, RESET = PB9. | REQ-DRIVE-001, REQ-SYS-003 | R, B |
@@ -40,7 +40,7 @@ Verification methods:
 | ID | Requirement | Source | Verify |
 |---|---|---|---|
 | HW-SNS-001 | The IMU (MPU-6500) shall be on SPI2 (PB13/PB14/PB15, CS PB12), with data-ready on PC6 (EXTI6). | REQ-IMU-001, `InertialSensorStm.hpp:31-38` | R |
-| HW-SNS-002 | The IMU shall be mounted rigidly on the plate, axes aligned to the body frame (x forward, y left, z up), beside the MCU (D-029). Its position from the axle (about 90 mm) and the mounting-to-body axis map are published for the firmware. | REQ-IMU-007, `imu-sensing.md`, D-029 | R |
+| HW-SNS-002 | The IMU shall be mounted rigidly on the plate, on the centre line about 78 mm above the axle (D-043). Its position and the mounting-to-body axis map (body x, y, z = chip Z, X, Y for forward = the component side) are published for the firmware in `docs/firmware-interface.md`. | REQ-IMU-007, `imu-sensing.md`, D-029 | R |
 | HW-SNS-003 | Left encoder A/B = PC0 (LPTIM1_IN1) / PC2 (LPTIM1_IN2). Right encoder A/B = PA0 (TIM2_CH1) / PA1 (TIM2_CH2). The index pins PC5 / PC3 stay wired to the buffer and read low: the MG310 has no index (D-028). | REQ-ODOM-001, REQ-ODOM-005, `WheelEncodersStm.hpp:23-29`, D-028 | R (`check_pinmap.py`) |
 | HW-SNS-004 | Encoder inputs shall carry clean edges up to the maximum edge rate from S0 with ≥ 2× margin. They shall not back-power the MCU while 3V3 is off. | REQ-ODOM-001, D-012 | S5, B |
 | HW-SNS-005 | The index (Z) lines shall reach EXTI-capable pins with unique EXTI line numbers. With the MG310 they carry no signal (D-028); REQ-ODOM-005 is reported to the firmware as unsupported by this motor. | REQ-ODOM-005, `imu-sensing.md` (EXTI uniqueness), D-028 | R (`check_pinmap.py`) |
@@ -54,9 +54,9 @@ Verification methods:
 | HW-MEM-001 | Non-volatile storage for parameters and bonds: W25Q16 on SPI1 with CS on PA15. | REQ-TUNE-007, D-005 | R, B |
 | HW-MEM-002 | An I2C EEPROM (M24C64, 64 Kbit) on I2C3 at address 0x50 for calibration and configuration. | D-031 | R, B |
 | HW-IF-001 | USART1 (PB6 TX / PB7 RX) console, SWD and NRST on an STDC14 connector. | `PlatformImpl.hpp:61-65`, D-009 | R, B |
-| HW-IF-002 | A user button, two LEDs and a buzzer for local status. | firmware has none; added by D-009 review | R |
+| HW-IF-002 | Local status for a robot that doubles as a toy: a chain of 12 addressable RGB LEDs on PA7 (TIM17_CH1 + DMA, 5 V through a level shifter), the green status LED on PB0, and test pads on the rails and key signals. No buttons, no buzzer, no power LED. | firmware statusLed (PB0); D-035 (supersedes the D-009 review addition) | R |
 | HW-IF-003 | Every off-board signal shall have ESD protection at its connector. | `mcu-circuit-design` §6, `interface-layout` §2 | R |
-| HW-IF-004 | An NFC Forum Type 5 tag (ST25DV04KC) on I2C3 (0x53/0x57), with its GPO interrupt on PA2 (EXTI2) and a PCB coil readable by a phone at the top-right corner of the front. | D-030 | R, B (phone read) |
+| HW-IF-004 | An NFC Forum Type 4 tag (M24SR64-Y) on I2C3 (0x56), with its GPO interrupt on PA2 (EXTI2), RF disable from PA3, and ST's ANT14 PCB coil (X-NUCLEO-NFC01A1 copy) readable by a phone at the top-right corner of the front. | D-030, D-039 | R, B (phone read) |
 
 ## Mechanical
 

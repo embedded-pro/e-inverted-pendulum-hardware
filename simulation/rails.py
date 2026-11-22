@@ -8,7 +8,8 @@ TI's model (SBVM831), fed by a 5V0 source that carries:
   - the buck switching ripple from the equations below;
   - the 25 kHz motor-bus ripple from S3, attenuated to an ASSUMED 50 mV p-p at 5V0 (about -12 dB, pessimistic
     for a current-mode buck below its crossover);
-  - an ASSUMED 150 mV dip when the buzzer (+96 mA) starts.
+  - a dip when the 12-LED RGB chain steps from off to full white (+432 mA, D-035): the earlier ASSUMED 150 mV for
+    the +96 mA buzzer step, scaled linearly to 675 mV (ASSUMPTION, pessimistic: the buck loop recovers faster).
 Run `python3 fetch_models.py` first.
 """
 
@@ -23,6 +24,7 @@ from kicad_values import get
 A = common.ASSUMPTIONS
 TI = spice.MODELS / "ti"
 FSW = 1.2e6
+LED_STEP_DIP_V = 0.150 * 0.432 / 0.096
 
 
 def buck_equations(vin):
@@ -44,7 +46,7 @@ def ldo_netlist(v5, ripple_mv):
 V5DC V5A 0 PWL(0 0 {6.8e-3} {v5})
 VSW V5B V5A PULSE({-ripple_mv / 2000} {ripple_mv / 2000} 0 {0.5 / FSW} {0.5 / FSW} 1n {1 / FSW})
 VLINE V5C V5B SIN(0 0.025 25k 12m)
-VDIP V5 V5C PWL(0 0 9m 0 9.001m -0.15 9.2m 0)
+VDIP V5 V5C PWL(0 0 9m 0 9.001m {-LED_STEP_DIP_V} 9.2m 0)
 C209 V5 0 {get('C209')}
 X2 V5 0 V5 V3 NC TLV75533P_TRANS
 C210 V3 0 1.8u
@@ -86,7 +88,7 @@ def main():
     }
     common.save("s4_rails", {"buck_equations": buck, "ldo_simulation": ldo, "checks": checks,
                               "assumptions": {"5v0_line_ripple": "25 kHz, 50 mV p-p (ASSUMPTION)",
-                                              "5v0_step_dip": "150 mV on the +96 mA buzzer step (ASSUMPTION)",
+                                              "5v0_step_dip": f"{LED_STEP_DIP_V * 1e3:.0f} mV on the +432 mA RGB-chain step (ASSUMPTION, 150 mV / 96 mA scaled)",
                                               "c_out": A["mlcc_22u_25v_at_5v"]}})
     fig, axes = common.figure(2, "S4: 5V0 source (soft start, 1.2 MHz ripple, dip at 9 ms, 25 kHz from 12 ms) and 3V3")
     axes[0].plot(t * 1e3, v5)

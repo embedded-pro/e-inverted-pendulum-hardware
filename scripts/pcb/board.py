@@ -1,0 +1,717 @@
+#!/usr/bin/env python3
+"""Create or update hardware/e-inverted-pendulum/e-inverted-pendulum.kicad_pcb from the schematic: a scripted "Update PCB from Schematic".
+
+Placement belongs to the owner (D-032): the .kicad_pcb is the source of truth for where parts are and for the
+board geometry. This script never moves or reshapes anything that already exists on the board. It:
+  - creates what is missing: the outline (85 mm wide, MB1355's antenna tab at the top-left corner, D-037, the top
+    edge back at 117.5 right of the MB1163 NFC step, D-039), the rule
+    areas and reference drawings from placement.py, and the bracket holes (placement.MECHANICAL), each only if absent;
+  - syncs the schematic: one footprint per symbol with its fields, sheet path, DNP/BOM flags and pad nets; a footprint
+    whose library entry changed is swapped in place (position, rotation and lock kept), and one whose library 3D
+    bodies changed gets the new bodies in place (nothing moves or leaves its group); new parts go to the first
+    free spot in the staging area right of the board; parts removed from the schematic are deleted (board-only
+    footprints are never deleted);
+  - shows only the test pads' net names on the silkscreen, every other part's reference on the fab layer (the assembly
+    drawing), nothing on a net tie (label_fields, D-035, D-052); then lays them out with silk.py: the names at
+    JLCPCB's minimum text, clear of other labels, outlines, pads, vias, bodies and the edge, next to their pad (D-041);
+  - writes the JLC04161H-7628 stack-up, the net classes (NET_CLASSES, from docs/power-map.md) and the fab rules, the
+    JLCPCB's (pcb-design-rules skill, pcb_rules.py, D-036), plus the project rules below.
+
+--stage-all (one-shot) moves every unlocked footprint except the bracket holes off the board into the staging area,
+one column per schematic sheet, packed by courtyard so nothing overlaps, with the sheet name on Cmts.User.
+
+Coordinates in placement.py are mechanical (docs/mechanical.md): x across the plate, z up from the wheel axle,
+both in mm, viewed from the front (component side).
+
+Run: python3 scripts/pcb/board.py [--rules path/to/pcb_rules.py] [--stage-all]
+"""
+
+import argparse
+import fnmatch
+import json
+import math
+import os
+import pathlib
+import subprocess
+import sys
+import tempfile
+
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "schgen"))
+if "--pcbnew-stage" in sys.argv:
+    import pcbnew  # noqa: E402
+import placement  # noqa: E402
+from sexpr import Str, Sym, dump, parse  # noqa: E402
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+KICAD = ROOT / "hardware" / "e-inverted-pendulum"
+SCHEMATIC = KICAD / "e-inverted-pendulum.kicad_sch"
+BOARD = KICAD / "e-inverted-pendulum.kicad_pcb"
+PROJECT = KICAD / "e-inverted-pendulum.kicad_pro"
+RULES = KICAD / "e-inverted-pendulum.kicad_dru"
+SYSTEM_FOOTPRINTS = pathlib.Path(os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints"))
+PROJECT_LIBRARY = "e-inverted-pendulum"
+
+ORIGIN = (100.0, 150.0)
+CORNER_RADIUS = 1.0
+
+STACKUP = [
+    ("F.SilkS", "Top Silk Screen", None, None, None),
+    ("F.Paste", "Top Solder Paste", None, None, None),
+    ("F.Mask", "Top Solder Mask", 0.01, None, None),
+    ("F.Cu", "copper", 0.035, None, None),
+    ("dielectric 1", "prepreg", 0.2104, "7628", 4.4),
+    ("In1.Cu", "copper", 0.0152, None, None),
+    ("dielectric 2", "core", 1.065, "FR4", 4.6),
+    ("In2.Cu", "copper", 0.0152, None, None),
+    ("dielectric 3", "prepreg", 0.2104, "7628", 4.4),
+    ("B.Cu", "copper", 0.035, None, None),
+    ("B.Mask", "Bottom Solder Mask", 0.01, None, None),
+    ("B.Paste", "Bottom Solder Paste", None, None, None),
+    ("B.SilkS", "Bottom Silk Screen", None, None, None),
+]
+
+# The hardware-design plugin's standard net classes (pcb-copper skill, netclasses.py; D-062). The name says what sizes
+# the class: PWR_<I>A from the current in docs/power-map.md (IPC-2221 chart fit, dT 10 °C, on this stack-up's copper),
+# the rest the fab's design values; RF_50 is an impedance class, set by hand from docs/rf.md. Widths and clearances
+# below are what `netclasses.py apply` writes for them (it runs after this, with --rules). Lower priority number wins.
+NET_CLASSES = {
+    "PWR_4.2A": {"track_width": 2.174, "clearance": 0.15,                     # 4.2 A peak bus: a pour (D-056)
+                 "patterns": ["VBAT", "*/BAT_P", "*/BAT_F", "*/PP_S"]},
+    "PWR_2A": {"track_width": 0.781, "clearance": 0.15,                       # 2 A peak per bridge (D-027)
+               "patterns": ["MOT_L_P", "MOT_L_N", "MOT_R_P", "MOT_R_N", "*/SENSE_A", "*/SENSE_B"]},
+    "PWR_1A": {"track_width": 0.3, "clearance": 0.15,                         # BUCK_SW 1 A peak
+               "patterns": ["*/BUCK_SW"]},
+    "PWR_0.6A": {"track_width": 0.15, "clearance": 0.15,                      # +5V 0.6 A peak
+                 "patterns": ["+5V"]},
+    "PWR_0.2A": {"track_width": 0.15, "clearance": 0.15,                      # supplies and the MCU SMPS, <= 0.2 A
+                 "patterns": ["+3V3", "VDDA", "*/ENC_SRC", "*/ENC_VCC", "*/NFC_VCC", "*/DRV_V5", "*/DRV_VINT",
+                              "*/DRV_VCP", "*/SMPS_LX", "*/SMPS_MID"]},       # MCU SMPS 50 mA
+    "SENSE": {"track_width": 0.15, "clearance": 0.15, "diff_pair_width": 0.2, "diff_pair_gap": 0.2,  # Kelvin taps
+              "patterns": ["*/DRV_?ISENP", "*/DRV_?ISENN"]},
+    "ANALOG": {"track_width": 0.15, "clearance": 0.15,
+               "patterns": ["VBAT_SENSE"]},
+    "RF_50": {"track_width": 0.6, "clearance": 0.15,                          # MB1355's 0.6 mm line (docs/rf.md); the L1 fill keeps 0.2 mm
+              "patterns": ["RF1", "*/RF_50", "*/RF_MATCH", "*/RF_ANT"]},
+    "CLK": {"track_width": 0.15, "clearance": 0.15,                           # the two crystals
+            "patterns": ["*/HSE_IN", "*/HSE_OUT", "*/OSC32_IN", "*/OSC32_OUT"]},
+    "GND": {"track_width": 0.15, "clearance": 0.15,
+            "patterns": ["GND"]},
+    # Every other net with two or more pads: the gate drive (TI's traces, D-040), the charge pump, the NFC coil and the
+    # signals. write_net_classes() adds an exact pattern for each net the classes above don't cover, so no net is left
+    # in Default (a catch-all '*' would make KiCad composite classes, which the scripts' class tests don't expect).
+    "SIGNAL": {"track_width": 0.15, "clearance": 0.15,
+               "patterns": ["*/A?HS", "*/A?LS", "*/B?HS", "*/B?LS", "*/PP_G", "*/DRV_CP1", "*/DRV_CP2",
+                            "*/NFC_AC0", "*/NFC_AC1"]},
+}
+DEFAULT_CLASS = {"track_width": 0.2, "clearance": 0.15}
+
+FABS = "jlcpcb"
+CUSTOM_RULES = """
+# Project rules (scripts/pcb/board.py). They follow the pcb_rules block, so they win where both match.
+
+(rule "RF1: MB1355's 0.265 mm fan-out from pin 31 to FL401 between the 0.4 mm-pitch pins (D-037, docs/rf.md)"
+  (condition "A.NetName == 'RF1'")
+  (constraint clearance (min 0.104mm)))
+
+(rule "MB1355 copy: ST's 0.1 mm on the RF, SMPS and HSE nets and C318, except to pours (they keep the RF class's 0.2 mm GCPW gap) (D-037, D-046)"
+  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetClass == 'RF_50' || B.NetClass == 'RF_50' || A.NetName == '*SMPS*' || B.NetName == '*SMPS*' || A.NetName == '*HSE_*' || B.NetName == '*HSE_*' || A.memberOfFootprint('C318') || B.memberOfFootprint('C318'))")
+  (constraint clearance (min 0.1mm)))
+
+(rule "MB1355 copy: ST's own placement, crystals packed against the MCU and a shield clip (D-037, D-046)"
+  (severity ignore)
+  (condition "(A.Reference == 'Y301' && B.Reference == 'U301') || (A.Reference == 'U301' && B.Reference == 'Y301') || (A.Reference == 'Y302' && B.Reference == 'SC403') || (A.Reference == 'SC403' && B.Reference == 'Y302')")
+  (constraint courtyard_clearance (min 0mm)))
+
+(rule "BOOST-DRV8711 copy: TI's 0.178 mm on the DRV8711's own nets, except to pours (D-040, D-046)"
+  (condition "A.Type != 'Zone' && B.Type != 'Zone' && (A.NetName == '*/DRV_*' || B.NetName == '*/DRV_*')")
+  (constraint clearance (min 0.178mm)))
+
+(rule "Silkscreen: two parts' outlines may sit closer than 0.15 mm but never overlap; labels keep 0.15 mm (D-041)"
+  (layer "?.Silkscreen")
+  (condition "A.Type == 'Graphic' && B.Type == 'Graphic'")
+  (constraint silk_clearance (min 0mm)))
+
+(rule "Antenna tab: only the antenna feed may cross it (MB1355 ground-free tab, D-037)"
+  (condition "A.Type == 'Track' && A.intersectsArea('ANTENNA_TAB') && A.NetName != '/4 2.4 GHz RF path and antenna/RF_ANT'")
+  (constraint disallow track))
+"""
+
+CUSTOM_RULES += """
+(rule "Battery on the back: no through-hole pins under it (D-025); plated holes <= 0.4 mm (thermal vias) are vias; J601 / J602 (D-044) and J101 (D-047) sit over the cradle's relief"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.Hole_Size_X > 0.4mm && A.insideArea('BATTERY_BACK') && !A.memberOfFootprint('J601') && !A.memberOfFootprint('J602') && !A.memberOfFootprint('J101')")
+  (constraint disallow pad))
+
+(rule "Bracket strip: no parts except the bracket holes (D-026)"
+  (condition "A.Type == 'Footprint' && A.insideArea('BRACKET_STRIP') && A.Reference != 'MB*'")
+  (constraint disallow footprint))
+"""
+
+CUSTOM_RULES += """
+(rule "NPTH to copper: screw threads touch the hole wall; washers and brackets are kept off by the footprint keep-out"
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'NPTH, mechanical'")
+  (constraint hole_clearance (min 0.5mm)))
+"""
+
+MASK_BRIDGES_ALLOWED = {}
+
+
+def to_board(x, z):
+    return pcbnew.VECTOR2I(pcbnew.FromMM(ORIGIN[0] + x), pcbnew.FromMM(ORIGIN[1] - z))
+
+
+def child(node, key):
+    return [c for c in node[1:] if isinstance(c, list) and c and c[0] == key]
+
+
+def value_of(node, key, default=None):
+    found = child(node, key)
+    return str(found[0][1]) if found and len(found[0]) > 1 else default
+
+
+def read_netlist():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = pathlib.Path(tmp) / "board.net"
+        subprocess.run(["kicad-cli", "sch", "export", "netlist", "--format", "kicadsexpr", "-o", str(path),
+                        str(SCHEMATIC)], check=True, capture_output=True)
+        tree = parse(path.read_text(encoding="utf-8"))
+    components = {}
+    for comp in child(child(tree, "components")[0], "comp"):
+        ref = value_of(comp, "ref")
+        properties = {value_of(p, "name"): value_of(p, "value", "") for p in child(comp, "property")}
+        fields = {value_of(f, "name"): (str(f[2]) if len(f) > 2 else "") for f in child(child(comp, "fields")[0], "field")}
+        sheet = child(comp, "sheetpath")[0]
+        components[ref] = {
+            "value": value_of(comp, "value"), "footprint": value_of(comp, "footprint"),
+            "fields": {k: v for k, v in fields.items() if k not in ("Footprint", "Datasheet", "Description")},
+            "datasheet": fields.get("Datasheet", ""), "description": fields.get("Description", ""),
+            "path": value_of(sheet, "tstamps") + value_of(comp, "tstamps"),
+            "sheetname": properties.get("Sheetname", ""), "sheetfile": properties.get("Sheetfile", ""),
+            "dnp": "dnp" in properties, "exclude_from_bom": "exclude_from_bom" in properties,
+            "exclude_from_board": "exclude_from_board" in properties,
+        }
+    pins = {}
+    nets = []
+    for net in child(child(tree, "nets")[0], "net"):
+        name = value_of(net, "name")
+        nets.append(name)
+        for node in child(net, "node"):
+            pins[(value_of(node, "ref"), value_of(node, "pin"))] = name
+    return components, nets, pins
+
+
+def library_path(nickname):
+    if nickname == PROJECT_LIBRARY:
+        return KICAD / f"{PROJECT_LIBRARY}.pretty"
+    return SYSTEM_FOOTPRINTS / f"{nickname}.pretty"
+
+
+def load_footprint(board, lib_id):
+    nickname, name = lib_id.split(":", 1)
+    fp = pcbnew.FootprintLoad(str(library_path(nickname)), name)
+    if fp is None:
+        raise SystemExit(f"footprint {lib_id} not found in {library_path(nickname)}")
+    fp.SetFPID(pcbnew.LIB_ID(nickname, name))
+    fp.SetParent(board)
+    return fp
+
+
+def outline_shapes():
+    """85 mm wide plate; the top-left corner is MB1355's antenna tab and step (D-037); right of NFC_STEP_X the top
+    edge is back at TOP_Z for the MB1163 NFC corner (D-039); the other corners r 1 mm."""
+    w, top, bottom, r = placement.WIDTH / 2.0, placement.TOP_Z, placement.BOTTOM_Z, CORNER_RADIUS
+    tab, step, foot = placement.TAB_OUTLINE, placement.NFC_STEP_X, placement.TOP_RIGHT_Z
+    shapes = [
+        ("line", tab[-1], (step, foot)), ("line", (step, foot), (step, top)), ("line", (step, top), (w - r, top)),
+        ("line", (w, top - r), (w, bottom + r)),
+        ("line", (w - r, bottom), (-w + r, bottom)), ("line", (-w, bottom + r), tab[0]),
+        ("arc", (w - r, top - r), (w, top - r), 90),
+        ("arc", (-w + r, bottom + r), (-w, bottom + r), 90), ("arc", (w - r, bottom + r), (w - r, bottom), 90),
+    ]
+    shapes += [("line", tab[i], tab[i + 1]) for i in range(len(tab) - 1)]
+    for slot in placement.STRAP_SLOTS:
+        x, z, half, rr = slot["x"], slot["z"], (slot["length"] - slot["width"]) / 2.0, slot["width"] / 2.0
+        shapes += [("line", (x - half, z + rr), (x + half, z + rr)), ("line", (x + half, z - rr), (x - half, z - rr)),
+                   ("arc", (x + half, z), (x + half, z - rr), 180), ("arc", (x - half, z), (x - half, z + rr), 180)]
+    return shapes
+
+
+def rotate(centre, point, degrees):
+    a = math.radians(degrees)
+    dx, dz = point[0] - centre[0], point[1] - centre[1]
+    return (round(centre[0] + dx * math.cos(a) - dz * math.sin(a), 6),
+            round(centre[1] + dx * math.sin(a) + dz * math.cos(a), 6))
+
+
+def shape_points(shape):
+    if shape[0] == "line":
+        return [to_board(*shape[1]), to_board(*shape[2])]
+    _, centre, start, sweep = shape
+    return [to_board(*start), to_board(*rotate(centre, start, sweep / 2.0)), to_board(*rotate(centre, start, sweep))]
+
+
+def ensure_outline(board):
+    if any(item.GetLayer() == pcbnew.Edge_Cuts for item in board.GetDrawings()):
+        return
+    for shape in outline_shapes():
+        points = shape_points(shape)
+        item = pcbnew.PCB_SHAPE(board, pcbnew.SHAPE_T_SEGMENT if shape[0] == "line" else pcbnew.SHAPE_T_ARC)
+        if shape[0] == "line":
+            item.SetStart(points[0])
+            item.SetEnd(points[1])
+        else:
+            item.SetArcGeometry(points[0], points[1], points[2])
+        item.SetLayer(pcbnew.Edge_Cuts)
+        item.SetWidth(pcbnew.FromMM(0.1))
+        board.Add(item)
+
+
+def ensure_drawings(board):
+    layer = pcbnew.Dwgs_User
+    if any(d.GetLayer() == layer for d in board.GetDrawings()):
+        return
+    for item in placement.DRAWINGS:
+        if item[0] == "rect":
+            (x0, z0), (x1, z1) = item[1], item[2]
+            shapes = [((x0, z0), (x1, z0)), ((x1, z0), (x1, z1)), ((x1, z1), (x0, z1)), ((x0, z1), (x0, z0))]
+        else:
+            shapes = [(item[1], item[2])]
+        for start, end in shapes:
+            line = pcbnew.PCB_SHAPE(board, pcbnew.SHAPE_T_SEGMENT)
+            line.SetStart(to_board(*start))
+            line.SetEnd(to_board(*end))
+            line.SetLayer(layer)
+            line.SetWidth(pcbnew.FromMM(0.15))
+            board.Add(line)
+        if len(item) > 3 and item[3]:
+            add_label(board, item[3], to_board((item[1][0] + item[2][0]) / 2.0, max(item[1][1], item[2][1]) - 1.5), layer)
+
+
+def add_label(board, text, position, layer, size=1.2):
+    label = pcbnew.PCB_TEXT(board)
+    label.SetText(text)
+    label.SetPosition(position)
+    label.SetLayer(layer)
+    label.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(size), pcbnew.FromMM(size)))
+    label.SetTextThickness(pcbnew.FromMM(0.15))
+    board.Add(label)
+    return label
+
+
+def ensure_rule_areas(board):
+    present = {zone.GetZoneName() for zone in board.Zones() if zone.GetIsRuleArea()}
+    for area in placement.RULE_AREAS:
+        if area["name"] in present:
+            continue
+        layers = pcbnew.LSET()
+        for layer in area["layers"]:
+            layers.AddLayer(board.GetLayerID(layer))
+        zone = pcbnew.ZONE(board)
+        zone.SetIsRuleArea(True)
+        zone.SetZoneName(area["name"])
+        zone.SetLayerSet(layers)
+        outline = zone.Outline()
+        outline.NewOutline()
+        for x, z in area["polygon"]:
+            outline.Append(to_board(x, z))
+        zone.SetDoNotAllowTracks("tracks" in area["deny"])
+        zone.SetDoNotAllowVias("vias" in area["deny"])
+        zone.SetDoNotAllowPads("pads" in area["deny"])
+        zone.SetDoNotAllowZoneFills("pour" in area["deny"])
+        zone.SetDoNotAllowFootprints("footprints" in area["deny"])
+        board.Add(zone)
+
+
+def fingerprint(fp):
+    """What a footprint looks like in its own library frame: a footprint on the bottom (e.g. TI's net ties, D-040) is
+    compared as a top-side copy, so its side alone never counts as a library change."""
+    if fp.IsFlipped():
+        fp = pcbnew.FOOTPRINT(fp)
+        fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+    pads = sorted((p.GetNumber(), p.GetSize(pcbnew.F_Cu).x, p.GetSize(pcbnew.F_Cu).y, p.GetDrillSize().x,
+                   p.GetDrillSize().y, int(p.GetAttribute()), p.GetLayerSet().Seq().size(),
+                   p.GetFPRelativePosition().x, p.GetFPRelativePosition().y) for p in fp.Pads())
+    zones = sorted(z.GetLayerSet().Seq().size() for z in fp.Zones())
+    angle = fp.GetOrientationDegrees()
+    fp.SetOrientationDegrees(0)
+    fp.BuildCourtyardCaches()
+    box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    courtyard = (round(box.GetWidth(), -4), round(box.GetHeight(), -4))
+    fp.SetOrientationDegrees(angle)
+    return fp.GetLibDescription(), tuple(pads), tuple(zones), courtyard
+
+
+_LIBRARY_CACHE = {}
+
+
+def library_fingerprint(board, lib_id):
+    if lib_id not in _LIBRARY_CACHE:
+        _LIBRARY_CACHE[lib_id] = fingerprint(load_footprint(board, lib_id))
+    return _LIBRARY_CACHE[lib_id]
+
+
+def model_key(models):
+    return tuple((m.m_Filename, m.m_Scale.x, m.m_Scale.y, m.m_Scale.z, m.m_Rotation.x, m.m_Rotation.y, m.m_Rotation.z,
+                  m.m_Offset.x, m.m_Offset.y, m.m_Offset.z) for m in models)
+
+
+_MODEL_CACHE = {}
+
+
+def sync_models(board, fp, lib_id):
+    """Give a placed footprint its library 3D bodies, in place: renders only, nothing moves or leaves its group."""
+    if lib_id not in _MODEL_CACHE:
+        _MODEL_CACHE[lib_id] = load_footprint(board, lib_id)
+    library = _MODEL_CACHE[lib_id].Models()
+    if model_key(fp.Models()) != model_key(library):
+        models = fp.Models()
+        models.clear()
+        for model in library:
+            models.push_back(model)
+
+
+def replace_footprint(board, fp, lib_id):
+    position, orientation, locked = fp.GetPosition(), fp.GetOrientationDegrees(), fp.IsLocked()
+    flipped = fp.IsFlipped()
+    board.Delete(fp)
+    fresh = load_footprint(board, lib_id)
+    if flipped:
+        fresh.Flip(fresh.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+    fresh.SetPosition(position)
+    fresh.SetOrientationDegrees(orientation)
+    fresh.SetLocked(locked)
+    board.Add(fresh)
+    return fresh
+
+
+SILK_TEXT_MIN = (1.0, 0.15)
+SILK_CHECKS = ("silk_overlap", "silk_over_copper", "silk_edge_clearance", "text_height", "text_thickness")
+RF_CORNER_GROUP = "MB1355 RF corner"
+NFC_CORNER_GROUP = "MB1163 NFC corner"
+DRIVE_GROUP = "BOOST-DRV8711 drive"
+COPIED_GROUPS = {RF_CORNER_GROUP, NFC_CORNER_GROUP, DRIVE_GROUP}
+
+
+def is_net_tie(fp):
+    lib_id = fp.GetFPIDAsString()
+    return lib_id.startswith("NetTie:") or "Net-Tie" in lib_id
+
+
+def silk_label(fp):
+    """The field a part shows on the silkscreen: a test pad's net name, nothing else (D-035, D-052). Every other part's
+    reference is on the fab layer, the assembly drawing (fab_label)."""
+    return fp.Value() if fp.GetFPIDAsString().startswith("TestPoint:") else None
+
+
+def fab_label(fp):
+    """The field a part shows on the assembly drawing (F.Fab, D-052): its reference; none on a test pad (its net name is
+    on the silkscreen) or a net tie (copper only, nothing to assemble). ANT14 also ties its pads, through the coil, but
+    it is a part: it keeps its reference."""
+    if is_net_tie(fp) or silk_label(fp) is not None:
+        return None
+    return fp.Reference()
+
+
+def label_fields(fp):
+    """A test pad shows only its net name on the silkscreen; every other part only its reference, on the fab layer;
+    silk.py places and sizes both (D-041, D-052). The footprint's other silkscreen (outlines, pin-1 marks, polarity) is
+    raised to JLCPCB's minimum and never lowered: text 1.0 mm high, lines and strokes 0.15 mm (KiCad's library draws
+    outlines at 0.12 mm)."""
+    silk, fab = silk_label(fp), fab_label(fp)
+    fab_layer = pcbnew.B_Fab if fp.IsFlipped() else pcbnew.F_Fab
+    for field in (fp.Reference(), fp.Value()):
+        shown = silk if silk is not None else fab
+        field.SetVisible(shown is not None and field.GetName() == shown.GetName())
+    if fab is not None:
+        fab.SetLayer(fab_layer)
+    height, thickness = (pcbnew.FromMM(v) for v in SILK_TEXT_MIN)
+    for item in fp.GraphicalItems():
+        if item.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS):
+            continue
+        if item.GetClass() == "PCB_TEXT":
+            size = item.GetTextSize()
+            item.SetTextSize(pcbnew.VECTOR2I(max(size.x, height), max(size.y, height)))
+            item.SetTextThickness(max(item.GetTextThickness(), thickness))
+        elif item.GetClass() == "PCB_SHAPE" and 0 < item.GetWidth() < thickness:
+            item.SetWidth(thickness)
+
+
+def ensure_mechanical(board, existing):
+    for item in placement.MECHANICAL:
+        fp = existing.get(item["ref"])
+        lib_id = f"{PROJECT_LIBRARY}:{item['footprint']}"
+        if fp is not None and fingerprint(fp) != library_fingerprint(board, lib_id):
+            fp = replace_footprint(board, fp, lib_id)
+            fp.SetReference(item["ref"])
+            fp.SetValue(item["value"])
+            existing[item["ref"]] = fp
+        if fp is None:
+            fp = load_footprint(board, f"{PROJECT_LIBRARY}:{item['footprint']}")
+            fp.SetReference(item["ref"])
+            fp.SetValue(item["value"])
+            fp.SetPosition(to_board(item["x"], item["z"]))
+            fp.SetOrientationDegrees(item.get("rot", 0.0))
+            board.Add(fp)
+            existing[item["ref"]] = fp
+        fp.SetBoardOnly(True)
+        fp.SetExcludedFromBOM(True)
+        fp.SetExcludedFromPosFiles(True)
+
+
+def sync_footprints(board, components, nets, pins):
+    netinfo = {}
+    for name in [""] + nets:
+        found = board.FindNet(name)
+        if found is None:
+            found = pcbnew.NETINFO_ITEM(board, name)
+            board.Add(found)
+        netinfo[name] = found
+    existing = {fp.GetReference(): fp for fp in board.GetFootprints()}
+    for ref, fp in list(existing.items()):
+        if ref not in components and not fp.IsBoardOnly():
+            board.Delete(fp)
+            del existing[ref]
+    staged = 0
+    for ref in sorted(components, key=lambda r: (components[r]["sheetfile"], r)):
+        comp = components[ref]
+        if comp["exclude_from_board"] or not comp["footprint"]:
+            continue
+        fp = existing.get(ref)
+        if fp is not None and (fp.GetFPIDAsString() != comp["footprint"]
+                               or fingerprint(fp) != library_fingerprint(board, comp["footprint"])):
+            fp = replace_footprint(board, fp, comp["footprint"])
+        elif fp is not None:
+            sync_models(board, fp, comp["footprint"])
+        else:
+            fp = load_footprint(board, comp["footprint"])
+            place_in_free_spot(board, fp)
+            board.Add(fp)
+            staged += 1
+        fp.SetReference(ref)
+        fp.SetValue(comp["value"])
+        for name, value in comp["fields"].items():
+            fp.SetField(name, value)
+            field = fp.GetField(name)
+            field.SetVisible(False)
+            field.SetLayer(pcbnew.F_Fab)
+            field.SetPosition(fp.GetPosition())
+        fp.SetPath(pcbnew.KIID_PATH(comp["path"]))
+        fp.SetSheetname(comp["sheetname"])
+        fp.SetSheetfile(comp["sheetfile"])
+        fp.SetDNP(comp["dnp"])
+        fp.SetExcludedFromBOM(comp["exclude_from_bom"])
+        fp.SetExcludedFromPosFiles(comp["dnp"])
+        fp.SetAllowSolderMaskBridges(ref in MASK_BRIDGES_ALLOWED)
+        for pad in fp.Pads():
+            net = pins.get((ref, pad.GetNumber()))
+            pad.SetNet(netinfo[net] if net else netinfo[""])
+        existing[ref] = fp
+    return existing
+
+
+def write_stackup():
+    text = BOARD.read_text(encoding="utf-8")
+    tree = parse(text)
+    setup = child(tree, Sym("setup"))[0]
+    setup[1:] = [c for c in setup[1:] if not (isinstance(c, list) and c and c[0] == "stackup")]
+    stack = [Sym("stackup")]
+    for name, kind, thickness, material, epsilon in STACKUP:
+        layer = [Sym("layer"), Str(name), [Sym("type"), Str(kind)]]
+        if thickness is not None:
+            layer.append([Sym("thickness"), thickness])
+        if material is not None:
+            layer += [[Sym("material"), Str(material)], [Sym("epsilon_r"), epsilon], [Sym("loss_tangent"), 0.02]]
+        stack.append(layer)
+    stack += [[Sym("copper_finish"), Str("HAL lead-free")], [Sym("dielectric_constraints"), Sym("no")]]
+    setup.insert(1, stack)
+    general = child(tree, Sym("general"))[0]
+    for item in child(general, Sym("thickness")):
+        item[1] = 1.6
+    for item in child(tree, Sym("paper")):
+        item[1:] = [Str("A3")]
+    BOARD.write_text(dump(tree) + "\n", encoding="utf-8")
+
+
+def unclassed_nets(patterns):
+    """The board's nets with two or more pads that no pattern covers (they would fall into Default)."""
+    pads = {}
+    for footprint in child(parse(BOARD.read_text(encoding="utf-8")), Sym("footprint")):
+        for pad in child(footprint, Sym("pad")):
+            for net in child(pad, Sym("net")):
+                name = str(net[-1])
+                pads[name] = pads.get(name, 0) + 1
+    return sorted(n for n, k in pads.items() if k >= 2 and n and not n.startswith("unconnected-")
+                  and not any(fnmatch.fnmatchcase(n, p["pattern"]) for p in patterns))
+
+
+def write_net_classes():
+    project = json.loads(PROJECT.read_text(encoding="utf-8")) if PROJECT.exists() else {}
+    template = {"bus_width": 12, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "diff_pair_width": 0.2,
+                "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1, "pcb_color": "rgba(0, 0, 0, 0.000)",
+                "schematic_color": "rgba(0, 0, 0, 0.000)", "tuning_profile": "", "via_diameter": 0.6, "via_drill": 0.3,
+                "wire_width": 6}
+    classes = [dict(template, name="Default", priority=2147483647, **DEFAULT_CLASS)]
+    patterns = []
+    for priority, (name, spec) in enumerate(NET_CLASSES.items()):
+        values = {k: v for k, v in spec.items() if k != "patterns"}
+        classes.append(dict(template, name=name, priority=priority, **values))
+        patterns += [{"netclass": name, "pattern": pattern} for pattern in spec["patterns"]]
+    patterns += [{"netclass": "SIGNAL", "pattern": net} for net in unclassed_nets(patterns)]
+    design = project.setdefault("board", {}).setdefault("design_settings", {})
+    design.setdefault("rule_severities", {}).update({check: "error" for check in SILK_CHECKS})
+    design.setdefault("defaults", {}).update({"silk_text_size_h": SILK_TEXT_MIN[0], "silk_text_size_v": SILK_TEXT_MIN[0],
+                                              "silk_text_thickness": SILK_TEXT_MIN[1], "silk_line_width": SILK_TEXT_MIN[1]})
+    settings = project.setdefault("net_settings", {})
+    settings.update({"classes": classes, "meta": {"version": 5}, "net_colors": None,
+                     "netclass_assignments": None, "netclass_patterns": patterns})
+    PROJECT.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+
+
+def apply_rules(script):
+    subprocess.run([sys.executable, str(script), "apply", str(PROJECT), "--fab", FABS, "--netclasses"], check=True)
+    text = RULES.read_text(encoding="utf-8")
+    marker = "# Project rules ("
+    if marker in text:
+        text = text[:text.index(marker)].rstrip() + "\n"
+    RULES.write_text(text + CUSTOM_RULES, encoding="utf-8")
+
+
+def footprint_box(fp):
+    fp.BuildCourtyardCaches()
+    box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+    return box if box.GetWidth() else fp.GetBoundingBox(False)
+
+
+def place_in_free_spot(board, fp):
+    """Put a new part in the staging area at the first spot clear of every footprint already on the board.
+
+    Rows are scanned top-down from the board's top edge, 1 mm apart; along a row the scan jumps past each footprint
+    whose box overlaps the band, so new parts never land on staged or placed ones (D-032).
+    """
+    box = footprint_box(fp)
+    w, h, gap = box.GetWidth(), box.GetHeight(), pcbnew.FromMM(STAGE_GAP)
+    boxes = []
+    for other in board.GetFootprints():
+        b = footprint_box(other)
+        boxes.append((b.GetLeft() - gap, b.GetTop() - gap, b.GetRight() + gap, b.GetBottom() + gap))
+    right = to_board(placement.WIDTH / 2.0, 0.0).x
+    x_start, x_limit = right + pcbnew.FromMM(10.0), right + pcbnew.FromMM(STAGE_ROW_WIDTH)
+    y = to_board(0.0, placement.TOP_Z).y + pcbnew.FromMM(4.0)
+    while True:
+        x = x_start
+        for b in sorted((b for b in boxes if b[1] < y + h and b[3] > y), key=lambda b: b[0]):
+            if b[2] <= x:
+                continue
+            if x + w <= b[0]:
+                break
+            x = b[2]
+        if x + w <= x_limit:
+            fp.SetPosition(pcbnew.VECTOR2I(x, y) + (fp.GetPosition() - box.GetPosition()))
+            return
+        y += pcbnew.FromMM(1.0)
+
+
+STAGE_LABEL = "STAGING: "
+STAGE_COLUMN_WIDTH = 46.0
+STAGE_GAP = 1.0
+STAGE_ROW_WIDTH = 210.0
+
+
+def stage_all(board):
+    keep = {item["ref"] for item in placement.MECHANICAL}
+    for item in [d for d in board.GetDrawings() if d.GetClass() == "PCB_TEXT" and d.GetText().startswith(STAGE_LABEL)]:
+        board.Delete(item)
+    groups = {}
+    for fp in board.GetFootprints():
+        if fp.IsLocked() or fp.GetReference() in keep:
+            continue
+        group = fp.GetSheetname() or "Mechanical (owner to place)"
+        groups.setdefault(group, []).append(fp)
+    right = to_board(placement.WIDTH / 2.0, 0.0).x
+    top = to_board(0.0, placement.TOP_Z).y
+    gap, width = pcbnew.FromMM(STAGE_GAP), pcbnew.FromMM(STAGE_COLUMN_WIDTH)
+    first_x, limit = right + pcbnew.FromMM(10.0), right + pcbnew.FromMM(STAGE_ROW_WIDTH)
+    column_x, row_y, row_height = first_x, top + pcbnew.FromMM(4.0), 0
+    moved = 0
+    for group in sorted(groups):
+        if column_x > first_x and column_x + width > limit:
+            column_x, row_y, row_height = first_x, row_y + row_height + pcbnew.FromMM(10.0), 0
+        parts = sorted(groups[group], key=lambda f: (f.GetFPIDAsString(), f.GetReference()))
+        label = add_label(board, STAGE_LABEL + group, pcbnew.VECTOR2I(column_x, row_y - pcbnew.FromMM(3.0)),
+                          pcbnew.Cmts_User, size=1.2)
+        label.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_LEFT)
+        x, y, shelf = column_x, row_y, 0
+        widest = 0
+        for fp in parts:
+            fp.SetOrientationDegrees(0)
+            fp.BuildCourtyardCaches()
+            box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+            if box.GetWidth() == 0:
+                box = fp.GetBoundingBox(False)
+            w, h = box.GetWidth(), box.GetHeight()
+            if x > column_x and x + w > column_x + width:
+                x, y, shelf = column_x, y + shelf + gap, 0
+            offset = fp.GetPosition() - box.GetPosition()
+            fp.SetPosition(pcbnew.VECTOR2I(x, y) + offset)
+            x += w + gap
+            shelf = max(shelf, h)
+            widest = max(widest, x - column_x)
+            moved += 1
+        row_height = max(row_height, y + shelf - row_y)
+        column_x += max(width, widest) + pcbnew.FromMM(8.0)
+    return moved
+
+
+def build_board(stage=False):
+    components, nets, pins = read_netlist()
+    board = pcbnew.LoadBoard(str(BOARD)) if BOARD.exists() else pcbnew.NewBoard(str(BOARD))
+    board.SetCopperLayerCount(4)
+    block = board.GetTitleBlock()
+    block.SetTitle("e-inverted-pendulum: chassis PCB")
+    block.SetCompany("embedded-pro")
+    block.SetRevision("A (draft)")
+    block.SetComment(0, "4 layers, 1.6 mm, 1 oz outer / 0.5 oz inner: JLC04161H-7628 (D-008, D-036)")
+    block.SetComment(1, "Outline 85 x 130 mm, MB1355 antenna tab and MB1163 NFC corner (D-024, D-037, D-039); docs/mechanical.md")
+
+    ensure_outline(board)
+    footprints = sync_footprints(board, components, nets, pins)
+    ensure_mechanical(board, footprints)
+    for fp in board.GetFootprints():
+        label_fields(fp)
+    ensure_rule_areas(board)
+    ensure_drawings(board)
+    staged = stage_all(board) if stage else 0
+    import silk
+    silk.report(*silk.layout(board, check=False), check=False)
+    board.GetDesignSettings().SetGridOrigin(to_board(0.0, 0.0))
+    board.GetDesignSettings().SetAuxOrigin(to_board(-placement.WIDTH / 2.0, placement.BOTTOM_Z))
+    pcbnew.SaveBoard(str(BOARD), board)
+    print(f"{BOARD.name}: {len(components)} schematic parts, {len(nets)} nets, "
+          f"{len(placement.MECHANICAL)} bracket holes" + (f", {staged} footprints staged" if stage else ""))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--rules", type=pathlib.Path, help="pcb_rules.py from the pcb-design-rules skill")
+    parser.add_argument("--stage-all", action="store_true",
+                        help="move every unlocked footprint except the bracket holes into the staging area (one-shot)")
+    parser.add_argument("--pcbnew-stage", action="store_true", help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    if args.pcbnew_stage:
+        build_board(stage=args.stage_all)
+        return
+    # pcbnew rewrites the .kicad_pro when its process exits (power-pcb-layout s6.2), so the board is built in a
+    # child process and the project, stack-up and rules are written after it has gone.
+    subprocess.run([sys.executable, __file__, "--pcbnew-stage"] + (["--stage-all"] if args.stage_all else []), check=True)
+    write_stackup()
+    write_net_classes()
+    if args.rules:
+        apply_rules(args.rules)
+    project = PROJECT.read_bytes()
+    subprocess.run(["kicad-cli", "pcb", "upgrade", "--force", str(BOARD)], check=True, capture_output=True)
+    PROJECT.write_bytes(project)
+
+
+if __name__ == "__main__":
+    main()

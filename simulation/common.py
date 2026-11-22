@@ -21,7 +21,7 @@ ASSUMPTIONS = {
     "motor_r": {"value": 3.7, "source": "S0: 7.4 V / 2.0 A stall (MG310, D-027; stall current ASSUMPTION)"},
     "motor_l": {"value": 1.0e-3, "source": "ASSUMPTION 1 mH (S0); measure at bring-up"},
     "motor_ke": {"value": 0.00609, "source": "S0 motor constant (MG310)"},
-    "logic_power": {"value": 1.56, "source": "docs/architecture.md: 5 V x 0.265 A / 0.85"},
+    "logic_power": {"value": 3.34, "source": "docs/architecture.md: 5 V x 0.567 A / 0.85 (12 RGB LEDs at full white, D-035)"},
 }
 
 

@@ -1,0 +1,104 @@
+(footprint "BOOST_Net-Tie_10mil"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "TI's 10 mil Kelvin net tie, pads 0.254 mm, 0.508 mm apart. Derived from Texas Instruments BOOST-DRV8711 design files (SLVC575B)")
+	(property "Reference" "REF**"
+		(at 0 -1.377 0)
+		(layer "F.SilkS")
+		(uuid "006eca26-37ec-5908-b47b-bab663ff1955")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "BOOST_Net-Tie_10mil"
+		(at 0 1.377 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "3def205c-db97-5029-a798-7a9d12bd6cf6")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2a5c7349-36c0-5a49-a4a7-2cea702dc35a")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9d40d6e6-7d89-5f75-bee7-3acd41772dc2")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd exclude_from_pos_files exclude_from_bom)
+	(net_tie_pad_groups "1,2")
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -0.254 0)
+		(end 0.254 0)
+		(stroke
+			(width 0.254)
+			(type solid)
+		)
+		(layer "F.Cu")
+		(uuid "7f65fa8b-3cf7-5710-b7a0-fb005d032313")
+	)
+	(fp_rect
+		(start -0.631 -0.377)
+		(end 0.631 0.377)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "efe5254b-37e2-5574-bc0d-1cf0836ee0ab")
+	)
+	(fp_rect
+		(start -0.381 -0.127)
+		(end 0.381 0.127)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "fdb5ebf7-4c3d-5969-8811-d44afe1d6d19")
+	)
+	(pad "1" smd circle
+		(at -0.254 0)
+		(size 0.254 0.254)
+		(layers "F.Cu")
+		(uuid "72504f92-9699-5aee-bb48-85538bd5fb84")
+	)
+	(pad "2" smd circle
+		(at 0.254 0)
+		(size 0.254 0.254)
+		(layers "F.Cu")
+		(uuid "34c5de60-748c-51ec-ac65-afe88c50d5e0")
+	)
+	(embedded_fonts no)
+)
