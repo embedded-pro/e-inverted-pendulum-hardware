@@ -139,10 +139,11 @@ def power_path():
 
 
 def drive():
-    record("DRV8711", "VM", "10 nF 50 V + 220 uF 35 V bulk; per bridge 10 uF 25 V 0805 + 100 nF 50 V at the half-bridges",
-           "SLVSC40 Critical Components p.4; power-pcb-layout s3.1 hot loop")
-    record("DRV8711", "VCP / CP1-CP2", "1 uF 50 V X5R VCP-to-VM / 100 nF 50 V X7R (>= VM + 12 V = 25.5 V)",
-           "SLVSC40 p.3-4")
+    record("DRV8711", "VM", "10 nF 100 V + 1 uF 100 V + 220 uF 35 V bulk (TI's C2 / C8 / C1 values, D-040); per bridge "
+           "10 uF 25 V 0805 + 100 nF 50 V at the half-bridges",
+           "SLVSC40 Critical Components p.4; BOOST-DRV8711 SLVC575B BOM (D-040); power-pcb-layout s3.1 hot loop")
+    record("DRV8711", "VCP / CP1-CP2", "1 uF 50 V X7R VCP-to-VM / 100 nF 100 V X7R (TI's C4 / C3 values, D-040; "
+           ">= VM + 12 V = 25.5 V)", "SLVSC40 p.3-4; BOOST-DRV8711 SLVC575B BOM (D-040)")
     record("DRV8711", "V5 / VINT / BEMF", "100 nF / 1 uF / 1 nF C0G to GND", "SLVSC40 p.3-4")
     record("DRV8711", "pull-ups", "nFAULT, nSTALL 10k; SDATO (open-drain, shared MISO) 2.2k -> tau ~66 ns with 30 pF",
            "SLVSC40 p.3; SPI <= 4 MHz (p.8)")
@@ -152,8 +153,9 @@ def drive():
            "-0.73 V body diode", "S2; DRV8711 phase pins abs max -0.6 V (SLVSC40 Abs Max)")
     record("DRV8711", "Rsense", "50 mOhm 2512 3 W 50 ppm/C (CRA2512, BOOST-DRV8711 R1 / R2, D-040); 2.0 A trip -> 0.2 W; ISGAIN 20, TORQUE 186",
            "D-027; S0 (simulation/REPORT.md); Eq. 1 p.11")
-    record("DRV8711", "ISENSE filter", "0 Ohm fitted in each leg, 1 nF DNP across (fit 27-33 Ohm + 1 nF if noisy: RC 50-60 ns)",
-           "SLVSC40 p.16 Fig. 6 (symmetric, <= 500 Ohm, matched 1 %)")
+    record("DRV8711", "ISENSE filter", "Kelvin taps by TI's net ties NT501-NT504 (no series resistors, D-040); 1 nF C0G "
+           "across xISENP / xISENN, not fitted (C501 / C504; with it the RC is set by the trace and pin resistance)",
+           "SLVSC40 p.16 Fig. 6 (symmetric, <= 500 Ohm, matched 1 %); BOOST-DRV8711 SLVC575B (D-040)")
     record("DRV8711", "firmware", "IDRIVE 00 (50/100 mA, default); TBLANK >= 1.2 us (sense amp settling); "
            "SCLK <= 4 MHz; SCS active-high GPIO",
            "SLVSC40 p.7-8")
